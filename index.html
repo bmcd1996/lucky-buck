@@ -14,13 +14,13 @@
 .hero-price{text-align:right}.hero-price .ticket-cost{font-size:46px}.hero-price span{font-size:11px}
 .add-ticket{font-size:25px;width:42px;height:42px;display:grid;place-items:center;border-radius:12px;padding:0}
 .modifier-list{display:grid;gap:10px}
-.momentum-details{display:grid;gap:7px;padding:11px 13px;background:#102b22;border:1px solid #426750;border-radius:12px}
-.momentum-details-header{font-size:13px;color:#f2e5af}
-.momentum-details-summary{font-size:12px;color:var(--muted);line-height:1.4}
-#momentumDetailsRates{display:grid;gap:8px}
-.momentum-details-line{display:flex;align-items:baseline;justify-content:space-between;gap:12px;font-size:12px}
-.momentum-details-line strong{color:#a1efab;white-space:nowrap}
-.momentum-details-note{font-size:11px;color:var(--muted);line-height:1.4;display:block}
+.modifier-details{display:grid;gap:7px;padding:11px 13px;background:#102b22;border:1px solid #426750;border-radius:12px}
+.modifier-details-header{font-size:13px;color:#f2e5af}
+.modifier-details-summary{font-size:12px;color:var(--muted);line-height:1.4}
+.modifier-details-rates{display:grid;gap:8px}
+.modifier-details-line{display:flex;align-items:baseline;justify-content:space-between;gap:12px;font-size:12px}
+.modifier-details-line strong{color:#a1efab;white-space:nowrap}
+.modifier-details-note{font-size:11px;color:var(--muted);line-height:1.4;display:block}
 .modifier-row{display:flex;align-items:center;gap:12px;background:#193729;border:1px solid #345a47;border-radius:12px;padding:10px 12px}
 .modifier-emoji{display:grid;place-items:center;width:42px;height:42px;flex:none;background:#244e37;border-radius:10px;font-size:25px}
 .modifier-label{flex:1;min-width:0}.modifier-label strong{display:block;font-size:15px}.modifier-label small{display:block;color:var(--muted);line-height:1.3}
@@ -121,7 +121,7 @@
 <div class="wrap">
 <header class="header">
 <div class="brand"><div class="brand-mark">$</div><div><small>QUILL PRODUCTIONS</small><h1>Cardboard to Cash</h1></div></div>
-<div class="header-right"><span class="tag">Version 2.3 · Offline</span><span class="save" id="saveStatus">Loading…</span></div>
+<div class="header-right"><span class="tag">Version 2.4 · Offline</span><span class="save" id="saveStatus">Loading…</span></div>
 </header>
 <section class="hero">
 <div><div class="eyebrow">SCRATCH-OFF SAGA · SIMULATOR</div><h2 id="heroTicketName">Lucky Buck</h2><p>Build the odds, equip your luck, test the economy.</p></div>
@@ -143,18 +143,38 @@
 <section class="card">
 <div class="card-top"><h3>Equipped modifiers</h3><span class="muted tiny">Default presets · Levels 0–3</span></div>
 <div class="modifier-list">
-<div class="modifier-row"><span aria-hidden="true" class="modifier-emoji">＄</span><div class="modifier-label"><strong>Double Down</strong><small id="doubleDescription">When you win the highest cash prize, you have a chance to double your winnings.</small></div><select aria-label="Double Down level" id="doubleLevel"></select><select class="rate-mode" aria-label="Double Down rate mode" id="doubleRateMode"><option value="default">Default</option><option value="edit">Edit</option></select></div><div class="rate-editor hidden" id="doubleEdit"><strong>Double Down custom rates (%)</strong><div class="rates-grid"><span>Level</span><span>Double chance</span><label>1/3</label><input data-rate="1" data-level="1" data-column="0" type="number" step="0.01" min="0" max="100" aria-label="Double Down level 1 rate"><label>2/3</label><input data-rate="1" data-level="2" data-column="0" type="number" step="0.01" min="0" max="100" aria-label="Double Down level 2 rate"><label>3/3</label><input data-rate="1" data-level="3" data-column="0" type="number" step="0.01" min="0" max="100" aria-label="Double Down level 3 rate"></div></div>
-<div class="modifier-row"><span aria-hidden="true" class="modifier-emoji">🍀</span><div class="modifier-label"><strong>Momentum</strong><small id="momentumDescription">Winning the highest cash prize increases your chance of hitting it again on the next ticket. Win twice in a row for an even bigger boost! Any other result breaks your streak.</small></div><select aria-label="Momentum level" id="momentumLevel"></select><select class="rate-mode" aria-label="Momentum rate mode" id="momentumRateMode"><option value="default">Default</option><option value="edit">Edit</option></select></div><div class="momentum-details" aria-live="polite">
-  <strong class="momentum-details-header" id="momentumDetailsHeader">🍀 Momentum — Level 0</strong>
-  <div class="momentum-details-summary" id="momentumDetailsSummary">Select a Momentum level to see your streak bonuses.</div>
-  <div id="momentumDetailsRates" class="hidden">
-    <div class="momentum-details-line"><span>After 1 top-prize win</span><strong id="momentumFirstChance">—</strong></div>
-    <div class="momentum-details-line"><span>After 2 consecutive top-prize wins</span><strong id="momentumSecondChance">—</strong></div>
-    <small class="momentum-details-note">Your streak resets after any other result or a third consecutive top-prize win. These are minimum total chances, not bonuses added on top.</small>
+<div class="modifier-row"><span aria-hidden="true" class="modifier-emoji">＄</span><div class="modifier-label"><strong>Double Down</strong><small id="doubleDescription">When you win the highest cash prize, you have a chance to double your winnings.</small></div><select aria-label="Double Down level" id="doubleLevel"></select><select class="rate-mode" aria-label="Double Down rate mode" id="doubleRateMode"><option value="default">Default</option><option value="edit">Edit</option></select></div><div class="modifier-details" aria-live="polite">
+  <strong class="modifier-details-header" id="doubleDetailsHeader">💰 Double Down — Level 0</strong>
+  <div class="modifier-details-summary" id="doubleDetailsSummary">Select a level to see your double-prize chance.</div>
+  <div id="doubleDetailsRates" class="modifier-details-rates hidden">
+    <div class="modifier-details-line"><span>Chance to double a top-prize win</span><strong id="doubleChance">—</strong></div>
+    <div class="modifier-details-line"><span>Top-prize payout if doubled</span><strong id="doublePayout">—</strong></div>
+    <small class="modifier-details-note">Only eligible highest-cash-prize wins can double. This modifier does not increase your chance of winning.</small>
+  </div>
+</div>
+<div class="rate-editor hidden" id="doubleEdit"><strong>Double Down custom rates (%)</strong><div class="rates-grid"><span>Level</span><span>Double chance</span><label>1/3</label><input data-rate="1" data-level="1" data-column="0" type="number" step="0.01" min="0" max="100" aria-label="Double Down level 1 rate"><label>2/3</label><input data-rate="1" data-level="2" data-column="0" type="number" step="0.01" min="0" max="100" aria-label="Double Down level 2 rate"><label>3/3</label><input data-rate="1" data-level="3" data-column="0" type="number" step="0.01" min="0" max="100" aria-label="Double Down level 3 rate"></div></div>
+<div class="modifier-row"><span aria-hidden="true" class="modifier-emoji">🍀</span><div class="modifier-label"><strong>Momentum</strong><small id="momentumDescription">Winning the highest cash prize increases your chance of hitting it again on the next ticket. Win twice in a row for an even bigger boost! Any other result breaks your streak.</small></div><select aria-label="Momentum level" id="momentumLevel"></select><select class="rate-mode" aria-label="Momentum rate mode" id="momentumRateMode"><option value="default">Default</option><option value="edit">Edit</option></select></div><div class="modifier-details" aria-live="polite">
+  <strong class="modifier-details-header" id="momentumDetailsHeader">🍀 Momentum — Level 0</strong>
+  <div class="modifier-details-summary" id="momentumDetailsSummary">Select a Momentum level to see your streak bonuses.</div>
+  <div id="momentumDetailsRates" class="modifier-details-rates hidden">
+    <div class="modifier-details-line"><span>After 1 top-prize win</span><strong id="momentumFirstChance">—</strong></div>
+    <div class="modifier-details-line"><span>After 2 consecutive top-prize wins</span><strong id="momentumSecondChance">—</strong></div>
+    <small class="modifier-details-note">Your streak resets after any other result or a third consecutive top-prize win. These are minimum total chances, not bonuses added on top.</small>
   </div>
 </div>
 <div class="rate-editor hidden" id="momentumEdit"><strong>Momentum custom rates (%)</strong><div class="rates-grid rates-grid-3"><span>Level</span><span>After 1 win (%)</span><span>After 2 wins (%)</span><label>1/3</label><input data-rate="1" data-level="1" data-column="0" type="number" step="0.01" min="0" max="100" aria-label="Momentum 1 first chance"><input data-rate="1" data-level="1" data-column="1" type="number" step="0.01" min="0" max="100" aria-label="Momentum 1 second chance"><label>2/3</label><input data-rate="1" data-level="2" data-column="0" type="number" step="0.01" min="0" max="100" aria-label="Momentum 2 first chance"><input data-rate="1" data-level="2" data-column="1" type="number" step="0.01" min="0" max="100" aria-label="Momentum 2 second chance"><label>3/3</label><input data-rate="1" data-level="3" data-column="0" type="number" step="0.01" min="0" max="100" aria-label="Momentum 3 first chance"><input data-rate="1" data-level="3" data-column="1" type="number" step="0.01" min="0" max="100" aria-label="Momentum 3 second chance"></div></div>
-<div class="modifier-row"><span aria-hidden="true" class="modifier-emoji">🐇</span><div class="modifier-label"><strong>Luck</strong><small id="luckDescription">Improves your chances of winning by taking probability away from losing tickets and adding it to cash prizes. Higher levels provide bigger bonuses.</small></div><select aria-label="Luck level" id="luckLevel"></select><select class="rate-mode" aria-label="Luck rate mode" id="luckRateMode"><option value="default">Default</option><option value="edit">Edit</option></select></div><div class="rate-editor hidden" id="luckEdit"><strong>Luck custom rates (%)</strong><div class="rates-grid rates-grid-5"><span>Level</span><span>Lose</span><span>$1</span><span>$5</span><span>$25</span><label>1/3</label><input data-rate="1" data-level="1" data-column="0" type="number" step="any" min="0" max="100" aria-label="Luck 1 lose percent"><input data-rate="1" data-level="1" data-column="1" type="number" step="any" min="0" max="100" aria-label="Luck 1 one percent"><input data-rate="1" data-level="1" data-column="2" type="number" step="any" min="0" max="100" aria-label="Luck 1 five percent"><input data-rate="1" data-level="1" data-column="3" type="number" step="any" min="0" max="100" aria-label="Luck 1 twentyfive percent"><label>2/3</label><input data-rate="1" data-level="2" data-column="0" type="number" step="any" min="0" max="100" aria-label="Luck 2 lose percent"><input data-rate="1" data-level="2" data-column="1" type="number" step="any" min="0" max="100" aria-label="Luck 2 one percent"><input data-rate="1" data-level="2" data-column="2" type="number" step="any" min="0" max="100" aria-label="Luck 2 five percent"><input data-rate="1" data-level="2" data-column="3" type="number" step="any" min="0" max="100" aria-label="Luck 2 twentyfive percent"><label>3/3</label><input data-rate="1" data-level="3" data-column="0" type="number" step="any" min="0" max="100" aria-label="Luck 3 lose percent"><input data-rate="1" data-level="3" data-column="1" type="number" step="any" min="0" max="100" aria-label="Luck 3 one percent"><input data-rate="1" data-level="3" data-column="2" type="number" step="any" min="0" max="100" aria-label="Luck 3 five percent"><input data-rate="1" data-level="3" data-column="3" type="number" step="any" min="0" max="100" aria-label="Luck 3 twentyfive percent"></div><small>Each level must add up to 100%.</small></div>
+<div class="modifier-row"><span aria-hidden="true" class="modifier-emoji">🐇</span><div class="modifier-label"><strong>Luck</strong><small id="luckDescription">Improves your chances of winning by taking probability away from losing tickets and adding it to cash prizes. Higher levels provide bigger bonuses.</small></div><select aria-label="Luck level" id="luckLevel"></select><select class="rate-mode" aria-label="Luck rate mode" id="luckRateMode"><option value="default">Default</option><option value="edit">Edit</option></select></div><div class="modifier-details" aria-live="polite">
+  <strong class="modifier-details-header" id="luckDetailsHeader">🐇 Luck — Level 0</strong>
+  <div class="modifier-details-summary" id="luckDetailsSummary">Select a level to see how the prize odds change.</div>
+  <div id="luckDetailsRates" class="modifier-details-rates hidden">
+    <div class="modifier-details-line"><span>Lose</span><strong id="luckLoseOdds">—</strong></div>
+    <div class="modifier-details-line"><span>$1 prize</span><strong id="luckOneOdds">—</strong></div>
+    <div class="modifier-details-line"><span>$5 prize</span><strong id="luckFiveOdds">—</strong></div>
+    <div class="modifier-details-line"><span>$25 prize</span><strong id="luckTwentyFiveOdds">—</strong></div>
+    <small class="modifier-details-note">Each line shows the chance before → after Luck. These odds exclude Momentum and shot-accuracy effects; all prize chances still total 100%.</small>
+  </div>
+</div>
+<div class="rate-editor hidden" id="luckEdit"><strong>Luck custom rates (%)</strong><div class="rates-grid rates-grid-5"><span>Level</span><span>Lose</span><span>$1</span><span>$5</span><span>$25</span><label>1/3</label><input data-rate="1" data-level="1" data-column="0" type="number" step="any" min="0" max="100" aria-label="Luck 1 lose percent"><input data-rate="1" data-level="1" data-column="1" type="number" step="any" min="0" max="100" aria-label="Luck 1 one percent"><input data-rate="1" data-level="1" data-column="2" type="number" step="any" min="0" max="100" aria-label="Luck 1 five percent"><input data-rate="1" data-level="1" data-column="3" type="number" step="any" min="0" max="100" aria-label="Luck 1 twentyfive percent"><label>2/3</label><input data-rate="1" data-level="2" data-column="0" type="number" step="any" min="0" max="100" aria-label="Luck 2 lose percent"><input data-rate="1" data-level="2" data-column="1" type="number" step="any" min="0" max="100" aria-label="Luck 2 one percent"><input data-rate="1" data-level="2" data-column="2" type="number" step="any" min="0" max="100" aria-label="Luck 2 five percent"><input data-rate="1" data-level="2" data-column="3" type="number" step="any" min="0" max="100" aria-label="Luck 2 twentyfive percent"><label>3/3</label><input data-rate="1" data-level="3" data-column="0" type="number" step="any" min="0" max="100" aria-label="Luck 3 lose percent"><input data-rate="1" data-level="3" data-column="1" type="number" step="any" min="0" max="100" aria-label="Luck 3 one percent"><input data-rate="1" data-level="3" data-column="2" type="number" step="any" min="0" max="100" aria-label="Luck 3 five percent"><input data-rate="1" data-level="3" data-column="3" type="number" step="any" min="0" max="100" aria-label="Luck 3 twentyfive percent"></div><small>Each level must add up to 100%.</small></div>
 </div>
 <div class="subtle-notice" id="stageNotice">Momentum applies to the next ticket, never as a guaranteed outcome.</div>
 </section>
@@ -492,6 +512,17 @@ function renderModifiers(){
  $('doubleDescription').textContent='When you win the highest cash prize, you have a chance to double your winnings.';
  $('momentumDescription').textContent='Winning the highest cash prize increases your chance of hitting it again on the next ticket. Win twice in a row for an even bigger boost! Any other result breaks your streak.';
  $('luckDescription').textContent='Improves your chances of winning by taking probability away from losing tickets and adding it to cash prizes. Higher levels provide bigger bonuses.'+(isLuckyCurve(t)?'':' (Only available with the standard Lucky Buck prize odds.)');
+
+ // All three modifiers use the same live-updating information panel.
+ $('doubleDetailsHeader').textContent='💰 Double Down — Level '+t.doubleDown;
+ $('doubleDetailsSummary').textContent=t.doubleDown?'Each eligible top-prize win has a chance to pay double.':'Double Down is off. Select level 1–3 to see the bonus.';
+ $('doubleDetailsRates').classList.toggle('hidden',t.doubleDown===0);
+ if(t.doubleDown>0){
+  const topCash=Math.max(0,...t.rows.filter(r=>r.kind===CASH).map(r=>Number(r.amount)||0));
+  $('doubleChance').textContent=pct(doubleRate(t));
+  $('doublePayout').textContent=topCash>0?usd(topCash)+' → '+usd(topCash*2):'No cash prize';
+ }
+
  $('momentumDetailsHeader').textContent='🍀 Momentum — Level '+t.momentum;
  $('momentumDetailsSummary').textContent=t.momentum?'Build a winning streak to improve your odds of hitting the top prize again.':'Momentum is off. Select level 1–3 to see your streak bonuses.';
  $('momentumDetailsRates').classList.toggle('hidden',t.momentum===0);
@@ -500,6 +531,26 @@ function renderModifiers(){
   $('momentumFirstChance').textContent='At least '+pct(rates[0]);
   $('momentumSecondChance').textContent='At least '+pct(rates[1]);
  }
+
+ $('luckDetailsHeader').textContent='🐇 Luck — Level '+t.luck;
+ const supportsLuck=isLuckyCurve(t);
+ const luckOdds=t.luck>0&&supportsLuck?normalOdds({...t,momentum:0,stage:0},0):null;
+ $('luckDetailsRates').classList.toggle('hidden',!(luckOdds&&luckOdds.valid));
+ $('luckDetailsSummary').textContent=t.luck===0?'Luck is off. Select level 1–3 to see the prize-odds changes.':
+ !supportsLuck?'This ticket needs the standard Lose / $1 / $5 / $25 prize setup for Luck to work.':
+ !luckOdds.valid?'The current prize odds need adjustment: '+luckOdds.error:
+ 'See how this level moves probability from losing tickets to cash prizes.';
+ if(luckOdds&&luckOdds.valid){
+  const changeFor=(kind,amount)=>{
+   const row=luckOdds.rows.find(r=>r.kind===kind&&(kind===LOSE||r.amount===amount));
+   return row?pct(row.base)+' → '+pct(row.final):'—';
+  };
+  $('luckLoseOdds').textContent=changeFor(LOSE,0);
+  $('luckOneOdds').textContent=changeFor(CASH,1);
+  $('luckFiveOdds').textContent=changeFor(CASH,5);
+  $('luckTwentyFiveOdds').textContent=changeFor(CASH,25);
+ }
+
  $('ticketLuck').textContent=`Luck ${t.luck}/3`;renderRateSettings(t);
  $('stageNotice').textContent=t.momentum===0?'Momentum is off. Choose a level to boost repeat top-prize wins.':
  t.stage===0?'No top-prize streak yet. Win the highest cash prize to boost your next ticket.':
