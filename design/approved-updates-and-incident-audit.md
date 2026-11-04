@@ -34,3 +34,12 @@
 - Owner requests a **notes-only GitHub backup after each ten game-related user messages**. Ask ahead of checkpoint (around ninth message); if the user is away or doesn't respond, the user's standing permission allows saving the notes at the tenth unless they've explicitly vetoed it. Don't imply background monitoring or real-time tracking across separate chats.
 - Canonical instruction: [Project Quill BACKUP_PROTOCOL.md](https://github.com/bmcd1996/project-quill/blob/main/BACKUP_PROTOCOL.md).
 - When a checkpoint concerns Lucky Buck, append updates to this ledger. Preserve full creative ideas for Scratch-Off Saga separately in the private project's CREATIVE_ARCHIVE.md. Keep changes notes-only; do not deploy new calculator features merely to back up discussions.
+
+
+## v2.8.2 — Prominent persistent scratch results (November 4, 2026)
+- **User feedback:** Winning/losing result was hard to find. Popped numbers were faint and seemed to vanish too soon.
+- **Root cause:** Global disabled button CSS set opacity to 40%, affecting popped balloons. Win/loss result was limited to a small text message.
+- **Implemented:** Bold **WIN / NO WIN / ITEM JACKPOT** panel next to ticket art on wide displays, directly below on phones; payout plus all three final numbers. Revealed balloon numbers have full opacity and high contrast, with no fade.
+- Last completed result (including numbers) is persisted **per ticket**, shown after refresh or ticket switching. During a new scratch, the older result is clearly labeled as previous and never spoils the new ticket. "Clear display" hides it temporarily but does not delete saved data; resetting results removes it.
+- **Tests passed:** 26 in-memory JS/localStorage behavioral checks including win, loss, jackpot, three-number visibility, new ticket, clearing, refresh, and old save support. Syntax and duplicate-ID checks passed. **Actual iPhone visual test remains needed.**
+- Released source commit: `8381f56dae6b91797bed88b729d8186c2e7b4f56`. Recovery branch: `backup/pre-outcome-readability-v2-8-1-2026-11-04`. Odds and underlying ticket mechanics unchanged.
