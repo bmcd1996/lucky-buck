@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Lucky Buck — Scratch-Off Saga Simulator</title>
+<style>
+:root{--bg:#0a1714;--panel:#122721;--panel2:#17312a;--border:#305044;--text:#eef7ee;--muted:#9eb8aa;--green:#6ee2a1;--gold:#ffd481;--red:#ff8383;--shadow:0 20px 60px #0005}
+*{box-sizing:border-box}body{margin:0;color:var(--text);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(ellipse at 12% -10%,#265b3d55,transparent 49%),radial-gradient(ellipse at 100% 50%,#2c59403d,transparent 52%),var(--bg);min-height:100vh}button,input,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.4;cursor:not-allowed}a{color:var(--green)}.wrap{max-width:1250px;margin:0 auto;padding:24px 24px 70px}.header{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:20px}.brand{display:flex;align-items:center;gap:14px}.brand-mark{width:48px;height:48px;border-radius:14px;background:linear-gradient(145deg,#ffe4a1,#b68030);display:grid;place-items:center;color:#183622;font-weight:900;font-size:27px;box-shadow:0 0 0 2px #ffd48144}.brand small{display:block;font-weight:800;font-size:10px;letter-spacing:2px;color:var(--gold)}.brand h1{font-size:28px;line-height:1.1;margin:2px 0;font-weight:850;letter-spacing:-.9px}.header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}.tag{border:1px solid #436654;background:#193d30;padding:5px 10px;border-radius:99px;font-size:12px;color:#c9ead4;font-weight:650}.save{font-size:12px;color:var(--muted)}.hero{border:1px solid #3e634b;box-shadow:var(--shadow);border-radius:22px;background:linear-gradient(112deg,#143c2a,#183125 70%,#253823);padding:22px 26px;margin-bottom:18px;display:flex;justify-content:space-between;gap:22px;align-items:center;overflow:hidden;position:relative}.hero:after{content:"✦";position:absolute;font-size:190px;color:#ffffff09;right:14%;top:-100px;pointer-events:none}.hero h2{font-size:27px;margin:1px 0 4px;line-height:1.2;letter-spacing:-.6px}.hero p{margin:0;color:#c2d8c8;font-size:14px}.hero .eyebrow{font-size:11px;letter-spacing:2px;color:var(--gold);font-weight:800}.hero-price{font-size:46px;line-height:1;font-weight:900;color:var(--gold);white-space:nowrap}.hero-price span{display:block;font-size:11px;color:#d4e0d4;text-align:right;letter-spacing:1px;font-weight:600;margin-top:6px}.layout{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(330px,.85fr);gap:18px;align-items:start}.stack{display:grid;gap:18px}.card{background:linear-gradient(140deg,#142b24,#11241f);border:1px solid var(--border);border-radius:18px;padding:20px;box-shadow:0 6px 22px #0002}.card-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}.card h3{font-size:18px;line-height:1.2;margin:0;font-weight:780;letter-spacing:-.3px}.muted{color:var(--muted)}.tiny{font-size:12px}.green{color:var(--green)}.gold{color:var(--gold)}.red{color:var(--red)}.stat-value{font-weight:850;font-variant-numeric:tabular-nums;font-size:22px;letter-spacing:-.6px}.luck-line{display:flex;align-items:center;gap:14px}.luck-symbol{width:54px;height:54px;border-radius:14px;background:#244e37;display:grid;place-items:center;font-size:29px;border:1px solid #4b8660}.luck-main{flex:1}.luck-label{color:var(--gold);font-size:12px;font-weight:750;letter-spacing:1px}.luck-row{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}.luck-row strong{font-size:22px;color:var(--green)}select,input{min-width:0;width:100%;border:1px solid #456a57;border-radius:10px;background:#0b1c16;color:#f3fbf4;padding:10px 12px;outline:none}select:focus,input:focus{border-color:var(--gold);box-shadow:0 0 0 3px #ffd4811c}select{background:#18352a}input[type=number]{font-variant-numeric:tabular-nums;-moz-appearance:textfield}input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}.luck-control{display:grid;grid-template-columns:minmax(0,1fr) minmax(145px,.9fr);gap:14px;margin-top:14px}.luck-control label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}.luck-hint{font-size:12px;color:var(--muted);align-self:center}.luck-hint strong{color:var(--green)}.slider-control{display:flex;align-items:center}.slider-control input{padding:0;accent-color:#65d993;cursor:pointer}.subline{font-size:12px;color:var(--muted);margin-top:12px}.pill{color:var(--green);background:#17442d;border-radius:7px;font-size:12px;font-weight:750;padding:4px 7px}.table-wrap{overflow-x:auto}.odds-table{width:100%;border-collapse:separate;border-spacing:0 8px;table-layout:fixed}.odds-table th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:750;padding:0 5px 5px;white-space:nowrap}.odds-table td{padding:2px 4px;font-variant-numeric:tabular-nums}.odds-table td input{padding:10px 7px;text-align:center}.odds-table th:nth-child(1){width:24%}.odds-table th:nth-child(2){width:25%}.odds-table th:nth-child(3){width:27%}.odds-table th:nth-child(4){width:24%}.odds-cell{background:#1c392d;border:1px solid #375d49;border-radius:9px;padding:9px 5px;min-height:42px;text-align:center;white-space:nowrap;font-size:13px}.mods .pos{display:block;color:var(--green);font-weight:780}.mods .neg{display:block;color:var(--red);font-size:11px}.odds-cell.final{color:#f7e5ba;font-weight:800}.odds-table tfoot td{border-top:1px solid #3f614c;padding-top:13px}.odds-table tfoot .total{font-size:19px;font-weight:850;color:var(--green);text-align:center}.delete-row{background:#663b3938;border:1px solid #824e48;color:#edb4a9;border-radius:8px;font-size:11px;padding:6px 8px;margin-top:6px;width:100%}.tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.btn{border:1px solid #476956;background:#234434;color:#eafbeb;padding:10px 14px;border-radius:10px;font-weight:760;transition:filter .12s,transform .12s}.btn:hover:not(:disabled){filter:brightness(1.16)}.btn:active:not(:disabled){transform:translateY(1px)}.btn.primary{background:linear-gradient(105deg,#e5ae4c,#fbd787);color:#193225;border-color:#eac16c}.btn.ghost{background:transparent;color:#d9e5db}.btn.mini{padding:8px 10px;font-size:12px}.btn.full{width:100%}.warning{background:#51332c;border:1px solid #925648;border-radius:10px;padding:11px 13px;color:#ffb6ab;font-size:13px;margin-top:13px;display:none}.explain{border:1px solid #40614d;border-radius:10px;padding:11px 13px;background:#173729;font-size:12px;color:#b9cfbe;margin-top:12px}.kv{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:10px 0;border-bottom:1px solid #2b493c}.kv:last-child{border-bottom:none}.kv strong{white-space:nowrap;font-variant-numeric:tabular-nums}.big-ev{background:#1b3d2b;border:1px solid #447354;border-radius:13px;padding:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px}.big-ev .value{font-size:30px;font-weight:900;color:var(--green);letter-spacing:-.8px}.scratch{background:repeating-linear-gradient(150deg,#28533a,#28533a 11px,#2d5b3f 11px,#2d5b3f 22px);border:2px dashed #91b86e;border-radius:15px;min-height:214px;padding:20px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;box-shadow:inset 0 1px 20px #0002}.scratch .eyebrow{letter-spacing:2.8px;color:#eed598;font-weight:850;font-size:11px}.scratch .question{font-size:55px;font-weight:900;color:#f8d98b;letter-spacing:4px;line-height:1.15}.scratch .win{font-size:48px;font-weight:900;color:#ffe39a;line-height:1.2}.scratch .secondary{color:#d8ebdf;font-weight:550}.scratch .sticker{font-size:34px}.action-row{display:grid;grid-template-columns:1fr 116px;gap:8px;margin-top:12px}.batch-row{display:grid;grid-template-columns:1fr 116px;gap:8px;margin-top:10px}.result-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.result-box{background:#1a362a;border:1px solid #355845;border-radius:12px;padding:14px;min-height:92px}.result-box .label{color:#a9bfaf;font-size:12px;line-height:1.25;min-height:27px}.result-box .number{margin-top:8px;font-weight:850;font-size:23px;letter-spacing:-.6px;font-variant-numeric:tabular-nums;word-break:break-word}.result-box.feature{grid-column:1/-1;min-height:100px;display:flex;align-items:center;justify-content:space-between;gap:10px;background:#1a412d;border-color:#3f8159}.result-box.feature .label{font-size:14px;min-height:0;color:#e3f4e4;font-weight:780}.result-box.feature .number{color:var(--gold);font-size:31px;white-space:nowrap}.footnote{font-size:12px;color:var(--muted);margin:13px 0 0}.history-list{display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto}.history-item{border:1px solid #30503e;border-radius:11px;padding:11px 12px;display:flex;justify-content:space-between;gap:10px;align-items:center}.history-item .sub{color:#9bb2a3;font-size:11px}.history-item strong{font-size:15px}.empty{color:var(--muted);font-size:13px;padding:8px 0}.app-footer{margin-top:22px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;color:var(--muted);font-size:12px}.divider{height:1px;background:#2c4f3d;margin:8px 0}.toast{position:fixed;bottom:22px;right:20px;background:#265e3d;border:1px solid #539269;padding:10px 16px;border-radius:11px;z-index:100;font-weight:700;box-shadow:var(--shadow);display:none}.toast.show{display:block}.grid-tools{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.soft{font-weight:600;color:#cae3d2}.hidden{display:none!important}input[type=file]{display:none}
+@media(max-width:980px){.layout{grid-template-columns:1fr}.wrap{max-width:710px}.hero h2{font-size:23px}}
+@media(max-width:560px){.wrap{padding:14px 12px 48px}.brand h1{font-size:22px}.brand-mark{width:40px;height:40px;font-size:24px}.brand{gap:9px}.header{align-items:flex-start}.header-right .tag{display:none}.header-right{gap:5px}.card{padding:15px}.hero{padding:18px}.hero h2{font-size:20px}.hero-price{font-size:35px}.odds-table td{padding:2px}.odds-table th{font-size:10px;padding:0 2px}.odds-cell{padding:8px 3px;font-size:12px}.odds-table td input{padding:9px 3px;font-size:13px}.luck-control{grid-template-columns:1fr}.result-box .number{font-size:21px}.result-box.feature .number{font-size:27px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="header">
+    <div class="brand"><div class="brand-mark">$</div><div><small>QUILL PRODUCTIONS</small><h1>Lucky Buck</h1></div></div>
+    <div class="header-right"><span class="tag">Version 1.1 · Offline</span><span id="saveStatus" class="save">Loading…</span></div>
+  </header>
+  <section class="hero">
+    <div><div class="eyebrow">SCRATCH-OFF SAGA · SIMULATOR</div><h2>One dollar. One dream.</h2><p>Build the odds, equip your luck, test the economy.</p></div>
+    <div class="hero-price">$1<span>PER TICKET</span></div>
+  </section>
+  <main class="layout">
+    <div class="stack">
+      <section class="card">
+        <div class="card-top"><h3>🍀 Luck modifier</h3><strong class="pill" id="luckBadge">+5 Luck</strong></div>
+        <div class="luck-line"><div class="luck-symbol">🐇</div><div class="luck-main"><div class="luck-label" id="itemName">LUCKY RABBIT'S FOOT</div><div class="muted tiny" id="itemDescription">+5 percentage points per paying prize.</div></div></div>
+        <div class="luck-control">
+          <div><label for="luckInput">Custom Luck (decimals allowed)</label><input id="luckInput" type="number" min="0" step="any" inputmode="decimal" value="5" placeholder="e.g. 12.8392" aria-describedby="luckHelp"></div>
+          <div class="luck-hint" id="luckHelp">Try <strong>12.8392</strong> or any non-negative number. No maximum in the simulator.</div>
+        </div>
+        <div class="subline">Each +1 Luck adds <strong class="green">(+1 percentage point)</strong> to <em>every</em> paying prize. The extra chance is removed from $0; if $0 reaches zero, it is funded from the smallest prizes first.</div>
+      </section>
+      <section class="card">
+        <div class="card-top"><h3>Prize odds editor</h3><span class="muted tiny">Edit any white-field value</span></div>
+        <div class="table-wrap">
+          <table class="odds-table">
+            <thead><tr><th>Prize ($)</th><th>Base chance</th><th>Modifier</th><th>Final chance</th></tr></thead>
+            <tbody id="oddsRows"></tbody>
+            <tfoot><tr><td><strong>TOTAL</strong></td><td id="baseTotal" class="total">100%</td><td style="text-align:center;color:var(--muted)">→</td><td id="effectiveTotal" class="total">100%</td></tr></tfoot>
+          </table>
+        </div>
+        <div id="warning" class="warning" role="alert"></div>
+        <div id="overflowNote" class="explain hidden"></div>
+        <div class="tools"><button class="btn mini" id="addPrize">＋ Add prize</button><button class="btn mini ghost" id="restoreOdds">↺ Restore original odds</button></div>
+      </section>
+      <section class="card">
+        <div class="card-top"><h3>Live calculations</h3><span class="tag" id="chanceTag">100% allocated</span></div>
+        <div class="kv"><span class="muted">Chance of winning money</span><strong id="winningChance">—</strong></div>
+        <div class="kv"><span class="muted">Chance of a profitable ticket</span><strong id="profitChance">—</strong></div>
+        <div class="kv"><span class="muted">Chance of $0</span><strong id="losingChance">—</strong></div>
+        <div class="kv"><span class="muted">Base payout / ticket</span><strong id="baseEV">—</strong></div>
+        <div class="kv"><span class="muted">Luck payout bonus</span><strong class="green" id="luckEV">—</strong></div>
+        <div class="big-ev"><div><strong>Expected payout per $1</strong><div class="tiny muted">Mathematical average, not a guarantee</div></div><div class="value" id="finalEV">—</div></div>
+      </section>
+    </div>
+    <div class="stack">
+      <section class="card">
+        <div class="card-top"><h3>🎟️ Scratch a ticket</h3><span class="tag" id="ticketLuck">Luck +5</span></div>
+        <div class="scratch" aria-live="polite"><div class="eyebrow">LUCKY BUCK • INSTANT WIN</div><div id="scratchIcon" class="sticker">✦</div><div id="scratchNumber" class="question">? ? ?</div><div id="scratchMessage" class="secondary">Your prize is waiting.</div><button id="revealBtn" class="btn primary hidden">Reveal your prize</button></div>
+        <div class="action-row"><button id="buyOne" class="btn primary">Buy one ticket · $1</button><button id="resetTicket" class="btn ghost">Clear display</button></div>
+        <div class="divider"></div>
+        <label for="batchSize" class="muted tiny">Run multiple tickets at once</label>
+        <div class="batch-row"><select id="batchSize"><option value="100">100 tickets</option><option value="1000" selected>1,000 tickets</option><option value="10000">10,000 tickets</option><option value="100000">100,000 tickets</option></select><button class="btn" id="runBatch">Simulate</button></div>
+        <div class="subline">All simulations use the <strong>effective probabilities</strong> above. A $0 ticket is a loss; a $1 prize breaks even.</div>
+      </section>
+      <section class="card">
+        <div class="card-top"><h3>Simulation totals</h3><button class="btn mini ghost" id="resetStats">Reset results</button></div>
+        <div class="result-grid">
+          <div class="result-box"><div class="label">Tickets purchased</div><div id="count" class="number">0</div></div>
+          <div class="result-box"><div class="label">Total spent</div><div id="spent" class="number">$0.00</div></div>
+          <div class="result-box"><div class="label">Total winnings</div><div id="won" class="number">$0.00</div></div>
+          <div class="result-box"><div class="label">Net profit / loss</div><div id="net" class="number">$0.00</div></div>
+          <div class="result-box feature"><div><div id="lastLabel" class="label">Last ticket / batch average</div><div class="tiny muted" id="lastDetail">No tickets played yet</div></div><div id="lastAverage" class="number">—</div></div>
+        </div>
+        <p id="resultSummary" class="footnote">0 paying tickets · Highest prize $0.00</p>
+        <p class="footnote">Totals are preserved across Luck/odds changes and include every run. The last box shows only the most recent ticket or batch (including $0 tickets in its average).</p>
+      </section>
+      <section class="card">
+        <div class="card-top"><h3>Recent simulations</h3><span class="muted tiny">Most recent first</span></div>
+        <div id="history" class="history-list"><div class="empty">Your runs will show here.</div></div>
+      </section>
+      <section class="card">
+        <div class="card-top"><h3>Save & transfer</h3><span class="tag">No account needed</span></div>
+        <p class="muted tiny" style="margin-top:0">Settings and results are stored in your browser when supported. Export a backup before replacing the HTML file or changing browsers.</p>
+        <div class="grid-tools"><button class="btn mini" id="exportBtn">↓ Backup as JSON</button><button class="btn mini ghost" id="importBtn">↑ Restore backup</button></div>
+        <input id="importFile" type="file" accept=".json,application/json">
+      </section>
+    </div>
+  </main>
+  <footer class="app-footer"><span>Made for Scratch-Off Saga · Quill Productions</span><span>Runs entirely on your computer · No server · No internet required</span></footer>
+</div>
+<div id="toast" class="toast" role="status"></div>
+<script>
+(()=>{'use strict';
+const KEY='quill-lucky-buck-v1';
+const DEFAULT_TIERS=[{id:1,amount:'1',chance:'50'},{id:2,amount:'2',chance:'12'},{id:3,amount:'5',chance:'2'},{id:4,amount:'10',chance:'0.50'},{id:5,amount:'20',chance:'0.45'},{id:6,amount:'100',chance:'0.05'}];
+const defaults=()=>({version:1,tiers:structuredClone(DEFAULT_TIERS),luck:5,batch:1000,stats:{count:0,spent:0,won:0,wins:0,best:0},history:[],last:null,pending:null});
+const $=id=>document.getElementById(id);
+const fmt=(n,max=4)=>Number(n.toFixed(max)).toLocaleString('en-US',{maximumFractionDigits:max});
+const pct=n=>fmt(n,6)+'%';
+const usd=(n,decimals=2)=>(n<0?'−$':'$')+Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:decimals,maximumFractionDigits:decimals});
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function validateRestore(obj){
+ if(!obj||typeof obj!=='object'||!Array.isArray(obj.tiers)||obj.tiers.length<1||obj.tiers.length>100)throw new Error('Backup does not contain valid prize tiers.');
+ const ids=new Set();
+ const tiers=obj.tiers.map((t,i)=>{const a=String(t.amount),p=String(t.chance); if(!Number.isFinite(Number(a))||Number(a)<=0||Number(a)>1e12||!Number.isFinite(Number(p))||Number(p)<0||Number(p)>100)throw new Error('A prize in this backup is invalid.');let id=Number(t.id);if(!Number.isSafeInteger(id)||id<1||ids.has(id))id=i+1;ids.add(id);return {id,amount:a,chance:p}});
+ const luck=Number(obj.luck);if(!Number.isFinite(luck)||luck<0)throw new Error('Luck must be a non-negative number.');
+ const stats=obj.stats||{};
+ for(const k of ['count','spent','won','wins','best'])if(!Number.isFinite(Number(stats[k]))||Number(stats[k])<0)throw new Error('Backup totals are invalid.');
+ const clean={version:1,tiers,luck,batch:[100,1000,10000,100000].includes(Number(obj.batch))?Number(obj.batch):1000,stats:{count:Number(stats.count),spent:Number(stats.spent),won:Number(stats.won),wins:Number(stats.wins),best:Number(stats.best)},history:[],last:null,pending:null};
+ if(Array.isArray(obj.history))clean.history=obj.history.slice(0,24).filter(h=>h&&Number.isFinite(Number(h.n))&&Number(h.n)>0&&Number.isFinite(Number(h.won))&&Number(h.won)>=0).map(h=>({n:Number(h.n),won:Number(h.won),wins:Number(h.wins)||0,best:Number(h.best)||0,luck:Number.isFinite(Number(h.luck))?Math.max(0,Number(h.luck)):0,at:String(h.at||'')}));
+ if(obj.last&&Number.isFinite(Number(obj.last.n))&&Number(obj.last.n)>0&&Number.isFinite(Number(obj.last.won)))clean.last={n:Number(obj.last.n),won:Number(obj.last.won),wins:Number(obj.last.wins)||0,best:Number(obj.last.best)||0,prize:Number(obj.last.prize)||0,luck:Number(obj.last.luck)||0};
+ if(obj.pending&&Number.isFinite(Number(obj.pending.prize))&&Number(obj.pending.prize)>=0)clean.pending={prize:Number(obj.pending.prize),luck:Number.isFinite(Number(obj.pending.luck))?Math.max(0,Number(obj.pending.luck)):0};
+ return clean;
+}
+let storageWorks=true;
+let state=defaults();try{const saved=localStorage.getItem(KEY);if(saved)state=validateRestore(JSON.parse(saved))}catch(e){storageWorks=false;state=defaults()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state));storageWorks=true;$('saveStatus').textContent='● Saved locally'}catch(e){storageWorks=false;$('saveStatus').textContent='⚠ Use JSON backup'}}
+function toast(msg){const el=$('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove('show'),3000)}
+// Every +1 Luck adds one *percentage point* to each paying tier.
+// All additions first come from $0, then (if needed) from lowest prizes upward.
+function calculate(){
+ const rows=state.tiers.map(t=>({id:t.id,amount:Number(t.amount),base:Number(t.chance),bonus:state.luck,cut:0,final:0}));
+ if(rows.length===0||rows.some(r=>!Number.isFinite(r.amount)||r.amount<=0||!Number.isFinite(r.base)||r.base<0||r.base>100))return {valid:false,error:'Enter a valid positive prize and a chance between 0% and 100% for every row.'};
+ const baseWin=rows.reduce((s,r)=>s+r.base,0),baseLose=100-baseWin;
+ if(baseLose< -1e-7)return {valid:false,error:'Base prize chances are over 100%. Lower one or more values.',rows,baseWin,baseLose};
+ const luckAdded=rows.length*state.luck;
+ let overflow=Math.max(0,luckAdded-Math.max(0,baseLose));
+ const zeroChance=Math.max(0,baseLose-luckAdded);
+ for(const r of rows)r.final=r.base+r.bonus;
+ for(const r of [...rows].sort((a,b)=>a.amount-b.amount||a.id-b.id)){
+   const cut=Math.min(overflow,Math.max(0,r.final));r.cut=cut;r.final=Math.max(0,r.final-cut);overflow-=cut;
+ }
+ const effectiveWin=rows.reduce((s,r)=>s+r.final,0),baseEV=rows.reduce((s,r)=>s+r.base*r.amount/100,0),finalEV=rows.reduce((s,r)=>s+r.final*r.amount/100,0);
+ const profitable=rows.reduce((s,r)=>s+(r.amount>1?r.final:0),0);
+ return {valid:true,rows,baseWin,baseLose,zeroChance,effectiveWin,baseEV,finalEV,profitable,luckAdded,overflow:Math.max(0,luckAdded-baseLose),sum:zeroChance+effectiveWin};
+}
+function renderRows(){
+ const body=$('oddsRows');body.innerHTML='<tr><td><div class="odds-cell">$0</div></td><td><div class="odds-cell" id="zeroBase">35%</div></td><td><div class="odds-cell mods"><span class="neg" id="zeroModifier">(−30%)</span></div></td><td><div class="odds-cell final" id="zeroFinal">5%</div></td></tr>'+state.tiers.map(t=>`<tr data-id="${t.id}"><td><input type="number" min="0.01" step="any" aria-label="Prize amount" data-key="amount" value="${esc(t.amount)}"><button type="button" class="delete-row" data-delete="${t.id}" title="Remove this prize">Remove</button></td><td><input type="number" min="0" max="100" step="any" aria-label="Base probability" data-key="chance" value="${esc(t.chance)}"></td><td><div class="odds-cell mods" id="mod-${t.id}"></div></td><td><div class="odds-cell final" id="final-${t.id}"></div></td></tr>`).join('');
+ body.querySelectorAll('input').forEach(input=>input.addEventListener('input',()=>{const tr=input.closest('tr');const tier=state.tiers.find(t=>t.id===Number(tr.dataset.id));tier[input.dataset.key]=input.value;save();refreshOdds()}));
+ body.querySelectorAll('[data-delete]').forEach(btn=>btn.addEventListener('click',()=>{if(state.tiers.length===1){toast('At least one paying prize is required.');return}state.tiers=state.tiers.filter(t=>t.id!==Number(btn.dataset.delete));save();renderRows();refreshOdds()}));
+}
+function refreshOdds(){
+ const c=calculate();if(document.activeElement!==$('luckInput'))$('luckInput').value=String(state.luck);$('luckBadge').textContent='+'+state.luck+' Luck';$('ticketLuck').textContent='Luck +'+state.luck;
+ $('itemName').textContent=state.luck===5?'LUCKY RABBIT\'S FOOT':state.luck===10?'ENDGAME LUCK':state.luck===0?'NO EQUIPPED LUCK':'LUCK STAT';
+ $('itemDescription').textContent=state.luck===0?'No boost active.':`+${state.luck} percentage points per paying prize.`;
+ const zero=c.valid?c.baseLose:100-(c.baseWin||0);$('zeroBase').textContent=pct(zero);$('zeroModifier').textContent='(−'+pct(c.valid?Math.min(Math.max(0,c.baseLose),c.luckAdded):0)+')';$('zeroFinal').textContent=c.valid?pct(c.zeroChance):'—';
+ for(const tier of state.tiers){const r=c.rows?.find(x=>x.id===tier.id);const mod=$('mod-'+tier.id),final=$('final-'+tier.id);if(mod)mod.innerHTML=c.valid?`<span class="pos">(+${pct(r.bonus)})</span>${r.cut>0.000001?`<span class="neg">(−${pct(r.cut)})</span>`:''}`:'—';if(final)final.textContent=c.valid?pct(r.final):'—'}
+ $('baseTotal').textContent=c.valid?pct(c.baseLose+c.baseWin):'—';$('effectiveTotal').textContent=c.valid?pct(c.sum):'—';$('effectiveTotal').style.color=c.valid?'var(--green)':'var(--red)';
+ $('warning').style.display=c.valid?'none':'block';$('warning').textContent=c.error||'';
+ $('overflowNote').classList.toggle('hidden',!c.valid||c.overflow<1e-7);if(c.valid&&c.overflow>1e-7)$('overflowNote').textContent=`Luck overflow: $0 losses have reached 0%. The extra ${pct(c.overflow)} is funded by reducing the lowest-paying prize chances first. Green shows the requested Luck bonus; red shows probability redistributed.`;
+ $('chanceTag').textContent=c.valid?pct(c.sum)+' allocated':'Invalid odds';
+ $('winningChance').innerHTML=c.valid?pct(c.effectiveWin)+(state.luck>0?` <span class="green tiny">(+${pct(c.effectiveWin-c.baseWin)})</span>`:''):'—';
+ $('profitChance').textContent=c.valid?pct(c.profitable):'—';$('losingChance').textContent=c.valid?pct(c.zeroChance):'—';
+ $('baseEV').textContent=c.valid?usd(c.baseEV):'—';$('luckEV').textContent=c.valid?'(+'+usd(Math.max(0,c.finalEV-c.baseEV))+')':'—';$('finalEV').textContent=c.valid?usd(c.finalEV):'—';
+ $('buyOne').disabled=!c.valid||Boolean(state.pending);$('runBatch').disabled=!c.valid||Boolean(state.pending);$('revealBtn').classList.toggle('hidden',!state.pending);
+ return c;
+}
+function draw(c){let n=Math.random()*100;if(n<c.zeroChance)return 0;n-=c.zeroChance;for(const r of c.rows){if(n<r.final)return r.amount;n-=r.final}return c.rows.at(-1).amount}
+function commitRun(result){
+ state.stats.count+=result.n;state.stats.spent+=result.n;state.stats.won+=result.won;state.stats.wins+=result.wins;state.stats.best=Math.max(state.stats.best,result.best);
+ state.last=result;state.history.unshift({n:result.n,won:result.won,wins:result.wins,best:result.best,luck:result.luck,at:new Date().toLocaleString()});state.history=state.history.slice(0,24);save();renderStats();
+}
+function setScratch(mode,value=0){
+ $('revealBtn').classList.add('hidden');const icon=$('scratchIcon'),num=$('scratchNumber'),msg=$('scratchMessage');
+ if(mode==='pending'){icon.textContent='✦';num.textContent='? ? ?';num.className='question';msg.textContent='A ticket has been purchased. Reveal it!';$('revealBtn').classList.remove('hidden')}
+ else if(mode==='single'){icon.textContent=value>1?'🏆':value===1?'✨':'✕';num.textContent=value>0?usd(value):'NO WIN';num.className='win';msg.textContent=value>1?'WINNER! Net '+usd(value-1):value===1?'Money back!':'Better luck next time.'}
+ else if(mode==='batch'){icon.textContent='🎟️';num.textContent=usd(value.won);num.className='win';msg.textContent=`${fmt(value.wins,0)} paying tickets of ${fmt(value.n,0)} · Net ${usd(value.won-value.n)}`}
+ else{icon.textContent='✦';num.textContent='? ? ?';num.className='question';msg.textContent='Your prize is waiting.'}
+}
+function buyOne(){const c=calculate();if(!c.valid||state.pending)return;state.pending={prize:draw(c),luck:state.luck};save();setScratch('pending');refreshOdds()}
+function reveal(){if(!state.pending)return;const p=state.pending;state.pending=null;const r={n:1,won:p.prize,wins:p.prize>0?1:0,best:p.prize,prize:p.prize,luck:p.luck};commitRun(r);setScratch('single',p.prize);refreshOdds()}
+function simulate(n){const c=calculate();if(!c.valid||state.pending)return;let won=0,wins=0,best=0;for(let i=0;i<n;i++){const prize=draw(c);won+=prize;if(prize>0)wins++;best=Math.max(best,prize)}const r={n,won,wins,best,prize:0,luck:state.luck};commitRun(r);setScratch('batch',r)}
+function renderStats(){const s=state.stats;$('count').textContent=fmt(s.count,0);$('spent').textContent=usd(s.spent);$('won').textContent=usd(s.won);$('net').textContent=usd(s.won-s.spent);$('net').style.color=s.won>=s.spent?'var(--green)':'var(--red)';
+ $('resultSummary').textContent=`${fmt(s.wins,0)} paying tickets · Highest prize ${usd(s.best)}`;
+ const last=state.last;$('lastLabel').textContent=last?.n===1?'Last ticket winnings':'Average winnings per ticket';$('lastDetail').textContent=!last?'No tickets played yet':last.n===1?'Your most recent individual ticket':`Most recent batch · ${fmt(last.n,0)} tickets, including $0 losses`;$('lastAverage').textContent=!last?'—':last.n===1?usd(last.prize):usd(last.won/last.n,4);
+ $('history').innerHTML=state.history.length?state.history.map(h=>`<div class="history-item"><div><strong>${fmt(h.n,0)} ${h.n===1?'ticket':'tickets'}</strong><div class="sub">Luck +${h.luck} · ${esc(h.at)}</div></div><div style="text-align:right"><strong>${usd(h.won)} won</strong><div class="sub">${usd(h.won-h.n)} net · ${usd(h.won/h.n,4)}/card</div></div></div>`).join(''):'<div class="empty">Your runs will show here.</div>';
+}
+function download(filename,data,type){const blob=new Blob([data],{type});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000)}
+function init(){
+ // Keep the input's raw text while typing (so '12.' doesn't turn into '12' mid-entry).
+ $('luckInput').addEventListener('input',e=>{const raw=e.target.value.trim();if(raw==='')return;const next=Number(raw);if(!Number.isFinite(next)||next<0)return;state.luck=next;save();refreshOdds()});
+ $('luckInput').addEventListener('change',e=>{const next=Number(e.target.value);if(e.target.value.trim()===''||!Number.isFinite(next)||next<0){toast('Enter a non-negative Luck value.');e.target.value=String(state.luck);return;}state.luck=next;save();refreshOdds()});
+ $('luckInput').addEventListener('blur',e=>{e.target.value=String(state.luck)});
+ $('batchSize').value=String(state.batch);$('batchSize').addEventListener('change',e=>{state.batch=Number(e.target.value);save()});
+ $('addPrize').addEventListener('click',()=>{state.tiers.push({id:Math.max(...state.tiers.map(t=>t.id))+1,amount:'50',chance:'0'});save();renderRows();refreshOdds()});
+ $('restoreOdds').addEventListener('click',()=>{if(!confirm('Restore the original prize odds? Your simulation history will remain.'))return;state.tiers=structuredClone(DEFAULT_TIERS);save();renderRows();refreshOdds()});
+ $('buyOne').addEventListener('click',buyOne);$('revealBtn').addEventListener('click',reveal);$('runBatch').addEventListener('click',()=>simulate(Number(state.batch)));
+ $('resetTicket').addEventListener('click',()=>{if(state.pending){if(!confirm('Discard this unopened ticket? Its $1 cost has not yet been recorded.'))return;state.pending=null;save();refreshOdds()}setScratch('empty')});
+ $('resetStats').addEventListener('click',()=>{if(!confirm('Erase the simulation results and run history? This will NOT change your odds or Luck.'))return;state.stats={count:0,spent:0,won:0,wins:0,best:0};state.history=[];state.last=null;save();renderStats();if(!state.pending)setScratch('empty');toast('Simulation results reset')});
+ $('exportBtn').addEventListener('click',()=>{download('Lucky_Buck_Backup.json',JSON.stringify(state,null,2),'application/json');toast('Backup downloaded')});
+ $('importBtn').addEventListener('click',()=>$('importFile').click());
+ $('importFile').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;try{const next=validateRestore(JSON.parse(await f.text()));if(!confirm('Restore this backup? This replaces your current odds, Luck, results, and history.'))return;state=next;save();renderRows();refreshOdds();renderStats();setScratch(state.pending?'pending':'empty');$('batchSize').value=String(state.batch);toast('Backup restored')}catch(err){alert('Could not restore backup: '+err.message)}finally{e.target.value=''}});
+ renderRows();refreshOdds();renderStats();setScratch(state.pending?'pending':'empty');save();
+ if(location.search.includes('selftest=1')){const c=calculate();const pass=Math.abs(c.baseEV-1.03)<1e-9&&Math.abs(c.finalEV-7.93)<1e-9&&Math.abs(c.zeroChance-5)<1e-9&&Math.abs(c.sum-100)<1e-9;document.body.setAttribute('data-selftest',pass?'PASS':'FAIL');console.log('Selftest',pass,c)}
+}
+init();
+})();
+</script>
+</body>
+</html>
