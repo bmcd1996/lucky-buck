@@ -205,13 +205,69 @@
   .showcase-center .ticket-layout{display:flex;flex-direction:column;align-items:stretch}
   .showcase-center .shot-calculator{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
 }
+
+/* v2.8.2: winning outcome belongs directly beside the scratch ticket. */
+.showcase-center .ticket-layout{
+ display:grid;
+ grid-template-columns:minmax(0,1fr) minmax(182px,.65fr);
+ grid-template-rows:auto 1fr;
+ align-items:start;
+ gap:10px;
+}
+.showcase-center #pixelTicket{grid-column:1;grid-row:1/span 2}
+.showcase-center .ticket-result{grid-column:2;grid-row:1}
+.showcase-center .shot-calculator{grid-column:2;grid-row:2}
+.ticket-result{
+ min-width:0;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;
+ justify-content:center;gap:7px;padding:15px 10px;border-radius:13px;
+ border:2px solid #629c78;background:#12291e;color:#fff;
+ text-align:center;box-shadow:inset 0 0 22px #0003;
+}
+.outcome-eyebrow{color:#d3ead8;font-size:10px;font-weight:900;letter-spacing:1.3px}
+.outcome-headline{font-size:clamp(22px,2.7vw,32px);font-weight:950;line-height:1.03;
+ letter-spacing:-.7px;overflow-wrap:anywhere;color:#fff5cf;text-shadow:0 2px 5px #0008}
+.outcome-numbers{width:100%;border-radius:9px;background:#081b16;border:1px solid #67866c;
+ padding:8px 3px;color:#fffaf0;font-variant-numeric:tabular-nums;
+ font-size:clamp(20px,2.4vw,29px);font-weight:950;line-height:1.15;letter-spacing:.3px}
+.outcome-explanation{margin:0;font-size:12px;line-height:1.4;color:#e0eedd;font-weight:650;overflow-wrap:anywhere}
+.last-outcome-summary{margin:4px 0 0;padding-top:8px;border-top:1px solid #71927788;
+ width:100%;color:#cfe9d6;font-size:11px;line-height:1.35;font-weight:650}
+.ticket-result.state-win{background:linear-gradient(165deg,#31572c,#17381f);
+ border-color:#ffe18d;box-shadow:0 0 0 3px #ffd48133,inset 0 0 30px #fce47917}
+.ticket-result.state-win .outcome-headline{color:#ffe39a;font-size:clamp(26px,3.2vw,38px)}
+.ticket-result.state-win .outcome-numbers{border-color:#ffe29b;color:#fff3ba}
+.ticket-result.state-jackpot{background:#422f12;border-color:#ffd481}
+.ticket-result.state-jackpot .outcome-headline{color:#ffdb7e}
+.ticket-result.state-lose{background:#301f26;border-color:#f19f9f}
+.ticket-result.state-lose .outcome-headline{color:#ffdddd}
+.ticket-result.state-scratching{background:#18362a;border-color:#9ac4a7}
+.ticket-result.state-scratching .outcome-headline{font-size:clamp(21px,2.7vw,28px)}
+/* Previously popped balloons are disabled to prevent double popping.
+   Override the global disabled-button opacity of .4. */
+.balloon-target.popped,.balloon-target.popped:disabled{
+ opacity:1!important;visibility:visible!important;animation:none!important;
+ color:#fff6cd!important;background:#0b1b2e!important;
+ border:3px solid #fff2ac!important;box-shadow:0 0 0 2px #112c3daa,0 4px 10px #000b!important;
+ font-size:clamp(23px,3vw,34px);font-weight:950;letter-spacing:.3px;
+ text-shadow:0 2px 2px #000,0 0 8px #000!important;
+}
+@media(max-width:650px){
+ .showcase-center .ticket-layout{display:flex;flex-direction:column;gap:10px}
+ .showcase-center #pixelTicket{order:0}
+ .showcase-center .ticket-result{order:1;align-self:stretch;min-height:142px;width:100%}
+ .showcase-center .shot-calculator{order:2;align-self:stretch}
+ .outcome-headline{font-size:clamp(28px,7vw,38px)}
+ .outcome-numbers{font-size:clamp(25px,6.5vw,34px)}
+ .ticket-result.state-win .outcome-headline{font-size:clamp(33px,8vw,42px)}
+ .balloon-target.popped,.balloon-target.popped:disabled{font-size:clamp(24px,6vw,31px)}
+}
 </style>
 </head>
 <body>
 <div class="wrap">
 <header class="header">
 <div class="brand"><div class="brand-mark">$</div><div><small>QUILL PRODUCTIONS</small><h1>Cardboard to Cash</h1></div></div>
-<div class="header-right"><span class="version-badge" title="Lucky Buck simulator version">v2.8.1</span><span class="save" id="saveStatus">Loading…</span></div>
+<div class="header-right"><span class="version-badge" title="Lucky Buck simulator version">v2.8.2</span><span class="save" id="saveStatus">Loading…</span></div>
 </header>
 
 <section class="hero">
@@ -243,6 +299,13 @@
  <button type="button" class="balloon-target b1" data-balloon="0" aria-label="Pop balloon 1">?</button>
  <button type="button" class="balloon-target b2" data-balloon="1" aria-label="Pop balloon 2">?</button>
  <button type="button" class="balloon-target b3" data-balloon="2" aria-label="Pop balloon 3">?</button></div>
+<section id="ticketResult" class="ticket-result state-ready" aria-label="Scratch-off result" role="status" aria-live="polite" aria-atomic="true">
+  <span id="outcomeEyebrow" class="outcome-eyebrow">CURRENT TICKET</span>
+  <strong id="outcomeHeadline" class="outcome-headline">READY TO PLAY</strong>
+  <div id="outcomeNumbers" class="outcome-numbers" aria-label="Revealed numbers">? · ? · ?</div>
+  <p id="outcomeExplanation" class="outcome-explanation">Buy a ticket, then pop all three balloons.</p>
+  <p id="lastOutcomeSummary" class="last-outcome-summary hidden"></p>
+ </section>
  <section class="shot-calculator" id="shotCalculator" aria-label="Shot Calculator">
   <div class="shot-title">🎯 Shot Calculator</div>
   <p class="tiny muted" style="margin:4px 0 10px">Placement influences the next number. Shots apply in balloon order when a ticket is bought.</p>
@@ -433,12 +496,19 @@ const baseRows=()=>[
  {id:3,kind:CASH,amount:5,chance:20},
  {id:4,kind:CASH,amount:25,chance:4}
 ];
-function freshTicket(id='lucky-buck',name='Lucky Buck',price=1){return {id,name,price,rows:baseRows(),luck:0,momentum:0,doubleDown:0,luckMode:'luckyBuck',denominator:600,packSize:600,pack:null,stage:0,stats:stats(),history:[],last:null,unrevealed:[],nextRowId:5,legacyLuck:null,shots:defaultShots(),rates:defaultRates()}}
+function freshTicket(id='lucky-buck',name='Lucky Buck',price=1){return {id,name,price,rows:baseRows(),luck:0,momentum:0,doubleDown:0,luckMode:'luckyBuck',denominator:600,packSize:600,pack:null,stage:0,stats:stats(),history:[],last:null,lastRevealed:null,unrevealed:[],nextRowId:5,legacyLuck:null,shots:defaultShots(),rates:defaultRates()}}
 const defaults=()=>({version:2,shotCalcUpdated:true,selectedId:'lucky-buck',nextTicketId:1,batch:1,tickets:[freshTicket()]});
 const integer=(v,min,max)=>Number.isSafeInteger(Number(v))&&Number(v)>=min&&Number(v)<=max;
 const validName=s=>typeof s==='string'&&s.trim().length>0&&s.trim().length<=70;
 function parseFraction(raw){const s=String(raw).trim();if(/^\d+(?:\.\d+)?(?:\/\d+(?:\.\d+)?)?$/.test(s)){if(s.includes('/')){const [a,b]=s.split('/').map(Number);return b>0?a/b:NaN}return Number(s)}return NaN}
 function cleanRun(raw){if(!raw||typeof raw!=='object')return null;const n=Number(raw.n),won=Number(raw.won);if(!integer(n,1,1000000000)||!Number.isFinite(won)||won<0)return null;return {mode:raw.mode==='single'?'single':raw.mode==='batch'?'batch':n===1?'single':'batch',n,won,wins:sane(raw.wins),best:sane(raw.best),prize:sane(raw.prize),prizeKind:[CASH,LOSE,JACKPOT].includes(raw.prizeKind)?raw.prizeKind:(Number(raw.prize)>0?CASH:LOSE),prizeLabel:String(raw.prizeLabel||'').slice(0,120),jackpots:sane(raw.jackpots),mostFrequent:String(raw.mostFrequent||'').slice(0,160),luck:clampLevel(raw.luck),at:String(raw.at||'').slice(0,80)};}
+function cleanRevealed(q){
+ if(!q||typeof q!=='object'||!['cash','lose','jackpot'].includes(q.kind))return null;
+ const payout=Number(q.payout);
+ if(!Number.isFinite(payout)||payout<0||payout>1e12)return null;
+ const numbers=Array.isArray(q.numbers)&&q.numbers.length===3&&q.numbers.every(n=>[0,1,5,25].includes(n))?q.numbers.slice():null;
+ return {kind:q.kind,payout,label:String(q.label||'').slice(0,120),numbers};
+}
 function cleanTicket(raw){
  if(!raw||typeof raw!=='object'||!validName(raw.name)||!Number.isFinite(Number(raw.price))||Number(raw.price)<=0||Number(raw.price)>1e6)throw Error('Ticket name or price is invalid.');
  if(!Array.isArray(raw.rows)||raw.rows.length<1||raw.rows.length>100)throw Error('A ticket needs between 1 and 100 outcome rows.');
@@ -454,7 +524,7 @@ function cleanTicket(raw){
   const assignments=raw.pack.assignments.filter(a=>a&&integer(a.position,0,Number(raw.packSize)-1)&&rows.some(r=>r.id===Number(a.id)&&r.kind===JACKPOT)).map(a=>({id:Number(a.id),position:Number(a.position)}));
   if(new Set(assignments.map(a=>a.position)).size===assignments.length)pack={index:Number(raw.pack.index),serial:Number(raw.pack.serial),assignments};
  }
- return {id:String(raw.id||'ticket').slice(0,100),name:raw.name.trim(),price:Number(raw.price),rows,luck:clampLevel(raw.luck),momentum:clampLevel(raw.momentum),doubleDown:clampLevel(raw.doubleDown),luckMode:raw.luckMode==='luckyBuck'?'luckyBuck':'none',denominator:integer(raw.denominator,1,600)?Number(raw.denominator):600,packSize:Number(raw.packSize),pack,stage,stats:st,history:Array.isArray(raw.history)?raw.history.slice(0,24).map(cleanRun).filter(Boolean):[],last:cleanRun(raw.last),unrevealed:cleanQueued,nextRowId:Math.max(next+1,integer(raw.nextRowId,1,1000000000)?Number(raw.nextRowId):1),legacyLuck:raw.legacyLuck??null,shots:cleanShots(raw.shots),rates:cleanRates(raw.rates)};
+ return {id:String(raw.id||'ticket').slice(0,100),name:raw.name.trim(),price:Number(raw.price),rows,luck:clampLevel(raw.luck),momentum:clampLevel(raw.momentum),doubleDown:clampLevel(raw.doubleDown),luckMode:raw.luckMode==='luckyBuck'?'luckyBuck':'none',denominator:integer(raw.denominator,1,600)?Number(raw.denominator):600,packSize:Number(raw.packSize),pack,stage,stats:st,history:Array.isArray(raw.history)?raw.history.slice(0,24).map(cleanRun).filter(Boolean):[],last:cleanRun(raw.last),lastRevealed:cleanRevealed(raw.lastRevealed),unrevealed:cleanQueued,nextRowId:Math.max(next+1,integer(raw.nextRowId,1,1000000000)?Number(raw.nextRowId):1),legacyLuck:raw.legacyLuck??null,shots:cleanShots(raw.shots),rates:cleanRates(raw.rates)};
 }
 function migrateOld(old){
  if(!old||!Array.isArray(old.tiers)||old.tiers.length<1)throw Error('Older save has no prize rows.');
@@ -582,6 +652,7 @@ function simulate(n){const t=T(),c=valid(t);if(!c.valid){toast(c.error);return;}
  let most='No paying cash prizes';if(counts.size){const maximum=Math.max(...counts.values());const ties=[...counts].filter(x=>x[1]===maximum).map(x=>x[0]).sort((a,b)=>a-b);most=ties.length===1?usd(ties[0]):'Tie: '+ties.map(v=>usd(v)).join(' / ');}
  record(t,{mode:'batch',n,won,wins,best,prize:0,prizeKind:LOSE,prizeLabel:'',jackpots,mostFrequent:most,luck:t.luck});save();renderStats();refreshOdds();setScratch('batch',{n,won,wins,jackpots,net:won-n*t.price});}
 let activeCard=null;
+let clearedDisplay=false;
 let audioContext=null;
 function audio(){try{if(!audioContext)audioContext=new (window.AudioContext||window.webkitAudioContext)();if(audioContext.state==='suspended')audioContext.resume();return audioContext;}catch{return null;}}
 function popSound(){const ctx=audio();if(!ctx)return;const now=ctx.currentTime;const len=Math.floor(ctx.sampleRate*0.10);const buffer=ctx.createBuffer(1,len,ctx.sampleRate);const samples=buffer.getChannelData(0);for(let j=0;j<len;j++){const s=j/ctx.sampleRate;samples[j]=(Math.random()*2-1)*Math.exp(-s*48);}const src=ctx.createBufferSource(),f=ctx.createBiquadFilter(),g=ctx.createGain();src.buffer=buffer;f.type='lowpass';f.frequency.setValueAtTime(2600,now);f.frequency.exponentialRampToValueAtTime(390,now+0.09);g.gain.setValueAtTime(0.32,now);g.gain.exponentialRampToValueAtTime(0.001,now+0.1);src.connect(f).connect(g).connect(ctx.destination);src.start(now);src.stop(now+0.1);}
@@ -851,8 +922,8 @@ function init(){
  $('batchSize').addEventListener('change',e=>{if(!integer(e.target.value,1,1000000)){toast('Batch must be 1–1,000,000 whole tickets.');e.target.value=state.batch;return;}state.batch=Number(e.target.value);save();});
  $('buyOne').addEventListener('click',buyOne);$('revealBtn').addEventListener('click',reveal);
  $('runBatch').addEventListener('click',()=>{const n=Number($('batchSize').value);if(!integer(n,1,1000000)){toast('Batch must be 1–1,000,000 whole tickets.');return;}state.batch=n;simulate(n);});
- $('resetTicket').addEventListener('click',()=>setScratch('empty'));
- $('resetStats').addEventListener('click',()=>{if(!confirm('Reset statistics, recent runs and waiting tickets for '+T().name+'? This cannot be undone. Other ticket designs are unaffected.'))return;const t=T();t.stats=stats();t.history=[];t.last=null;t.unrevealed=[];t.stage=0;t.pack=null;save();renderStats();refreshOdds();setScratch('empty');toast('Results reset for this ticket only.');});
+ $('resetTicket').addEventListener('click',()=>setScratch('clear'));
+ $('resetStats').addEventListener('click',()=>{if(!confirm('Reset statistics, recent runs and waiting tickets for '+T().name+'? This cannot be undone. Other ticket designs are unaffected.'))return;const t=T();t.stats=stats();t.history=[];t.last=null;t.lastRevealed=null;t.unrevealed=[];t.stage=0;t.pack=null;save();renderStats();refreshOdds();setScratch('empty');toast('Results reset for this ticket only.');});
  $('exportBtn').addEventListener('click',()=>{download('Cardboard_to_Cash_All_Tickets_Backup.json',JSON.stringify(state,null,2),'application/json');toast('JSON backup downloaded.');});
  $('importBtn').addEventListener('click',()=>$('importFile').click());
  $('importFile').addEventListener('change',async e=>{const f=e.target.files?.[0];if(!f)return;try{const next=validateRestore(JSON.parse(await f.text()));if(!confirm('Restore this backup? Your current v2 ticket settings and results will be replaced. Export first if needed.'))return;state=next;canSave=true;loadError=null;save();renderAll();toast('Backup restored successfully.');}catch(err){alert('Could not restore backup: '+err.message);}finally{e.target.value='';}});
