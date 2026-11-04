@@ -75,40 +75,6 @@
 .rates-grid span{color:#a2bfac;font-size:11px;line-height:1.25}
 @media(max-width:480px){.modifier-row{flex-wrap:wrap}.modifier-row .rate-mode{margin-left:auto;width:84px}.modifier-label{min-width:160px}.rates-grid-5 input{font-size:11px;padding:5px 1px}}
 
-/* Responsive, legible odds editor and compact prize row */
-.odds-table .row-name.is-cash{display:flex;align-items:center;gap:6px;min-width:0}
-.odds-table .row-name.is-cash>select[data-field="kind"]{width:72px;min-width:72px;font-size:11px;margin:0;order:2;opacity:.74;padding:7px 2px}
-.odds-table .row-name.is-cash .cash-amount{flex:1;min-width:0;order:1}
-.odds-table .row-name.is-cash .cash-amount input{width:100%;margin:0!important}
-.odds-table .row-name.is-cash .cash-amount span{font-size:18px}
-.odds-table .row-name{min-width:0}
-.odds-table .odds-cell{overflow:visible;text-overflow:clip}
-@media(max-width:650px){
- .odds-table,.odds-table tbody,.odds-table tfoot{display:block;width:100%}
- .odds-table thead{display:none}
- .odds-table tbody{display:grid;gap:10px}
- .odds-table tbody tr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:9px;background:#163427;border:1px solid #3a644e;border-radius:12px;padding:11px}
- .odds-table tbody td{display:flex;flex-direction:column;gap:4px;min-width:0!important;max-width:none;padding:0!important;width:100%}
- .odds-table tbody td:first-child{grid-column:1/-1}
- .odds-table tbody td:before{font-size:10px;font-weight:800;letter-spacing:.5px;color:#9dbbac;text-transform:uppercase;line-height:1.2}
- .odds-table tbody td:nth-child(1):before{content:'Prize'}
- .odds-table tbody td:nth-child(2):before{content:'Percentage'}
- .odds-table tbody td:nth-child(3):before{content:'Probability (select denominator below)'}
- .odds-table tbody td:nth-child(4):before{content:'Modifier'}
- .odds-table tbody td:nth-child(5):before{content:'Final chance (pre-shot)'}
- .odds-table tbody td input,.odds-table tbody td select{font-size:14px!important}
- .odds-table .row-name.is-cash{padding-right:24px}
- .odds-table .row-name.is-cash>select[data-field="kind"]{width:88px;min-width:88px}
- .odds-table .row-name .delete-row{right:0}
- .odds-table .row-final,.odds-table .odds-cell{text-align:center;font-size:15px!important;min-height:39px;display:grid;place-items:center}
- .odds-table tfoot tr{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:center;gap:5px;padding:10px 0}
- .odds-table tfoot td{padding:6px 0;font-size:11px;overflow-wrap:anywhere}
- .odds-table tfoot td:first-child{grid-column:span 2}
- .odds-table tfoot td:nth-child(2){grid-column:span 1}
- .odds-table tfoot td:nth-child(3),.odds-table tfoot td:nth-child(4){display:none}
- .odds-table tfoot td:last-child{grid-column:span 2}
- .denominator-picker{width:100%;min-width:75px;max-width:140px}
-}
 @media(max-width:400px){.ticket-layout{grid-template-columns:minmax(0,1fr) 126px;gap:6px}.card{padding:12px}.shot-field label{font-size:11px}.shot-field select{font-size:12px}}
 
 .odds-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 12px;color:var(--muted);font-size:12px}.odds-toolbar label{font-weight:700}.odds-toolbar select{max-width:135px;flex:none}
@@ -128,37 +94,19 @@
 }
 
 
-/* v2.2.1: aligned prize/odds rows; native type selector behind compact menu */
+
+/* Preserve the original prize grid. Only align its rows and contain numeric text. */
+.odds-table tbody tr{height:91px}
 .odds-table tbody td{vertical-align:middle}
-.odds-table tbody tr{height:54px}
-.odds-table .row-name,.odds-table .row-name.is-cash{
- display:flex;align-items:center;gap:7px;position:relative;min-height:42px;min-width:0;padding:0 27px 0 0
-}
-.odds-table .row-name .cash-amount,
-.odds-table .row-name>input[data-field="label"],
-.odds-table .row-name>.lose-prize-label{order:1;flex:1;min-width:0;margin:0}
-.odds-table .row-name .cash-amount input,
-.odds-table .row-name>input[data-field="label"]{height:40px;min-width:0;margin:0!important;padding:8px 6px}
-.odds-table .row-name .cash-amount span{min-width:12px;font-size:17px;line-height:1}
-.odds-table .row-name .kind-control{
- order:2;flex:none;display:grid;place-items:center;position:relative;
- width:29px;height:38px;border:1px solid #456a57;border-radius:8px;
- background:#254635;color:#f2d58f;font-size:20px;font-weight:800;line-height:1
-}
-.odds-table .row-name .kind-control:focus-within{outline:2px solid var(--gold);outline-offset:1px}
-.odds-table .row-name .kind-control select[data-field="kind"]{
- position:absolute;inset:0;width:100%;height:100%;margin:0;
- padding:0;border:0;opacity:0;cursor:pointer
-}
-.odds-table .row-name .delete-row{top:50%;right:0;transform:translateY(-50%);margin:0}
-.odds-table .row-name .lose-prize-label{font-size:14px;color:var(--muted);padding-left:4px}
-.odds-table .percent-wrap,.odds-table .ratio-wrap,.odds-table .odds-cell{min-height:40px}
-.odds-table .ratio-wrap input,.odds-table .percent-wrap input{min-height:38px}
-@media(max-width:650px){
- .odds-table tbody tr{height:auto}
- .odds-table .row-name,.odds-table .row-name.is-cash{width:100%;min-height:42px;padding-right:27px}
- .odds-table tbody td{justify-content:flex-start}
-}
+.odds-table .row-name{min-width:0;height:80px;display:flex;flex-direction:column;align-items:stretch;gap:5px;justify-content:flex-start;padding-right:22px}
+.odds-table .row-name select,.odds-table .row-name input{width:100%;min-width:0;height:36px;margin:0;padding:7px 5px;font-size:13px}
+.odds-table .row-name small{height:36px;display:flex;align-items:center}
+.odds-table .row-name .delete-row{right:0;top:8px}
+.odds-table .odds-cell{min-width:0;width:100%;overflow:hidden;text-overflow:clip;white-space:nowrap;font-size:12px;display:flex;align-items:center;justify-content:center;padding:8px 2px;font-variant-numeric:tabular-nums}
+.odds-table .percent-wrap,.odds-table .ratio-wrap{min-width:0}
+.odds-table .percent-wrap input,.odds-table .ratio-wrap input{min-width:0;max-width:100%}
+/* Keep the scratch-off prominent on narrow screens; desktop stays top-right. */
+@media(max-width:980px){.layout>.stack{display:contents}.layout>.stack:nth-child(2)>section:first-child{order:-1}}
 
 </style>
 </head>
@@ -195,12 +143,12 @@
 <div class="subtle-notice" id="stageNotice">Momentum applies to the next ticket, never as a guaranteed outcome.</div>
 </section>
 <section class="card">
-<div class="card-top"><h3>Prize odds editor</h3><span class="muted tiny">Base odds · before shots</span></div>
-<div class="odds-toolbar"><label for="denominator">Probability denominator</label><select aria-label="Probability denominator" class="denominator-picker" id="denominator"></select></div><div class="table-wrap"><table class="odds-table">
-<thead><tr><th>Prize</th><th>Percentage</th><th>Probability</th><th>Modifier</th><th>Final chance</th></tr></thead>
-<tbody id="oddsRows"></tbody>
-<tfoot><tr><td><strong>TOTAL · cash + lose</strong></td><td class="total" id="baseTotal">100%</td><td class="muted tiny" style="text-align:center">→</td><td></td><td class="total" id="effectiveTotal">100%</td></tr></tfoot>
-</table></div>
+<div class="card-top"><h3>Prize odds editor</h3><span class="muted tiny">Cash and Lose = 100% total</span></div>
+        <div class="table-wrap"><table class="odds-table">
+          <thead><tr><th>Prize</th><th>Percentage</th><th>Probability<br><select id="denominator" class="denominator-picker" aria-label="Probability denominator"></select></th><th>Modifier</th><th>Final chance</th></tr></thead>
+          <tbody id="oddsRows"></tbody>
+          <tfoot><tr><td><strong>TOTAL · cash + lose</strong></td><td id="baseTotal" class="total">100%</td><td class="muted tiny" style="text-align:center">→</td><td></td><td id="effectiveTotal" class="total">100%</td></tr></tfoot>
+        </table></div>
 <div class="warning" id="warning" role="alert"></div>
 <div class="explain hidden" id="overflowNote"></div>
 <div class="type-config"><select aria-label="New prize type" id="newType"><option value="cash">Cash</option><option value="lose">Lose</option><option value="jackpot">Jackpot</option></select><input aria-label="New cash prize amount" id="newAmount" placeholder="Dollar amount" type="text"/><button class="btn mini" id="addPrize">＋ Add row</button><button class="btn mini ghost" id="restoreOdds">↺ Restore original odds</button></div>
@@ -537,10 +485,10 @@ function renderRateSettings(t){
   }
  }
 }
-function rowHTML(r,t){const isJ=r.kind===JACKPOT,guaranteed=isJ&&r.mode==='guaranteed',chance=guaranteed?100:r.chance,den=t.denominator;const numerator=nfmt(chance*den/100,2);const extra=isJ?`<div><select data-field="mode" aria-label="Jackpot pack rule"><option value="rare" ${r.mode==='rare'?'selected':''}>Rare pack</option><option value="guaranteed" ${guaranteed?'selected':''}>Guaranteed</option></select><small class="muted">${guaranteed?'One per pack':'Pack-level inclusion'}</small></div>`:'';
- const value=r.kind===CASH?`<div class="cash-amount"><span>$</span><input data-field="amount" aria-label="Cash prize amount" type="number" min="0.01" step="any" value="${esc(r.amount)}"></div>`:isJ?`<input data-field="label" aria-label="Jackpot item name" maxlength="100" value="${esc(r.label)}">`:`<strong class="lose-prize-label">Lose</strong>`;
- return `<tr data-id="${r.id}"><td><div class="row-name ${r.kind===CASH?'is-cash':r.kind===LOSE?'is-lose':'is-jackpot'}"><button type="button" class="delete-row" aria-label="Remove outcome" data-delete="${r.id}">×</button><span class="kind-control" title="Change prize type"><span aria-hidden="true">⋯</span><select data-field="kind" aria-label="Change prize type"><option value="cash" ${r.kind===CASH?'selected':''}>Cash</option><option value="lose" ${r.kind===LOSE?'selected':''}>Lose</option><option value="jackpot" ${isJ?'selected':''}>Jackpot</option></select></span>${value}${extra}</div></td>
- <td><div class="percent-wrap"><input aria-label="${isJ?'Pack':'Outcome'} percentage" data-field="chance" ${guaranteed?'disabled':''} type="text" inputmode="decimal" value="${esc(nfmt(chance,2))}"><span class="unit">%</span></div>${isJ?'<span class="type-hint">Per full pack</span>':''}</td>
+function rowHTML(r,t){const isJ=r.kind===JACKPOT,guaranteed=isJ&&r.mode==='guaranteed',chance=guaranteed?100:r.chance,den=t.denominator;const numerator=precise(chance*den/100);const extra=isJ?`<div><select data-field="mode" aria-label="Jackpot pack rule"><option value="rare" ${r.mode==='rare'?'selected':''}>Rare pack</option><option value="guaranteed" ${guaranteed?'selected':''}>Guaranteed</option></select><small class="muted">${guaranteed?'One per pack':'Pack-level inclusion'}</small></div>`:'';
+ const value=r.kind===CASH?`<input data-field="amount" aria-label="Cash prize amount" type="number" min="0.01" step="any" value="${esc(r.amount)}">`:isJ?`<input data-field="label" aria-label="Jackpot item name" maxlength="100" value="${esc(r.label)}">`:`<small class="muted">No payout</small>`;
+ return `<tr data-id="${r.id}"><td><div class="row-name"><button type="button" class="delete-row" aria-label="Remove outcome" data-delete="${r.id}">×</button><select data-field="kind" aria-label="Outcome type"><option value="cash" ${r.kind===CASH?'selected':''}>Cash</option><option value="lose" ${r.kind===LOSE?'selected':''}>Lose</option><option value="jackpot" ${isJ?'selected':''}>Jackpot</option></select>${value}${extra}</div></td>
+ <td><div class="percent-wrap"><input aria-label="${isJ?'Pack':'Outcome'} percentage" data-field="chance" ${guaranteed?'disabled':''} type="text" inputmode="decimal" value="${esc(precise(chance))}"><span class="unit">%</span></div>${isJ?'<span class="type-hint">Per full pack</span>':''}</td>
  <td><div class="ratio-wrap"><input aria-label="Probability numerator" data-field="numerator" ${guaranteed?'disabled':''} type="text" inputmode="decimal" value="${esc(numerator)}"><span>/${den}</span></div>${isJ?'<span class="type-hint">Pack chance ratio</span>':''}</td>
  <td><div class="odds-cell mods" id="mod-${r.id}">—</div></td><td><div class="odds-cell final row-final" id="final-${r.id}">—</div></td></tr>`;}
 function renderRows(){const t=T();$('denominator').value=String(t.denominator);$('oddsRows').innerHTML=t.rows.map(r=>rowHTML(r,t)).join('');
