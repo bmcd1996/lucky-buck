@@ -43,3 +43,15 @@
 - Last completed result (including numbers) is persisted **per ticket**, shown after refresh or ticket switching. During a new scratch, the older result is clearly labeled as previous and never spoils the new ticket. "Clear display" hides it temporarily but does not delete saved data; resetting results removes it.
 - **Tests passed:** 26 in-memory JS/localStorage behavioral checks including win, loss, jackpot, three-number visibility, new ticket, clearing, refresh, and old save support. Syntax and duplicate-ID checks passed. **Actual iPhone visual test remains needed.**
 - Released source commit: `8381f56dae6b91797bed88b729d8186c2e7b4f56`. Recovery branch: `backup/pre-outcome-readability-v2-8-1-2026-11-04`. Odds and underlying ticket mechanics unchanged.
+
+
+## v2.9 — iPhone-first ergonomic flow (November 4, 2026)
+- **Owner approved:** Reorganize the calculator around one-handed actual use: choose ticket → configure shots → buy → scratch → see persistent result → buy another → run optional batch simulations/statistics → open advanced settings.
+- **Visible layout changes:** Existing ticket menu, compact presets and active modifiers remain near top. Shot Calculator moves *before* the primary Buy Ticket button, instead of blocking prize visibility below the scratch art. Shot-effect percentage controls collapse under **Advanced shot effect rates**, while the three balloon-accuracy inputs remain accessible.
+- **Scratch flow:** Buy One is directly before the ticket. Artwork and high-contrast result follow; a **Buy next ticket** button appears beneath the completed result and returns the view to the artwork when used. Existing **Show waiting ticket** and **Clear display** remain accessible below. The next-ticket button is hidden while a new card is being revealed so it does not distract or spoil the result.
+- **Reporting flow:** Batch simulation has been relocated to the section **Simulation & Statistics**, before Totals and Recent Runs; its IDs and behavior are preserved.
+- **Advanced editing:** Price/name, modifier editors, odds table, calculations and backup/restore are now collected in a collapsed-by-default **Advanced Ticket Settings** panel. **Edit ticket settings** and **Edit modifiers** shortcuts open it before scrolling to relevant controls.
+- Existing localStorage save keys, ticket settings, purchased-but-unrevealed tickets, historical results, odds engine, prize calculations and preset behavior are retained. No destructive migration, rollback or data reset.
+- **Tests:** 23 JS/in-memory-DOM functional checks passed (purchase, three-balloon results, next-ticket visibility, scrolled return, simulation, old stored-result reload, advanced shortcuts, HTML nesting and source order). Source comparison verified 11 core ticket, odds and storage functions unchanged. Script parses correctly; no duplicate IDs or missing DOM references; CSS bracket counts balance.
+- **Limit:** Real iPhone interactive visual layout remains to be validated by owner screenshot after GitHub Pages deployment.
+- Released source commit: `3464b7f2b2e50c748d5bc0c8c498c09824770dc1`. Restore branch: `backup/pre-mobile-flow-v2-8-2-2026-11-04`.
