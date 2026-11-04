@@ -127,6 +127,39 @@
  .shot-calculator .shot-edit label{margin:0}
 }
 
+
+/* v2.2.1: aligned prize/odds rows; native type selector behind compact menu */
+.odds-table tbody td{vertical-align:middle}
+.odds-table tbody tr{height:54px}
+.odds-table .row-name,.odds-table .row-name.is-cash{
+ display:flex;align-items:center;gap:7px;position:relative;min-height:42px;min-width:0;padding:0 27px 0 0
+}
+.odds-table .row-name .cash-amount,
+.odds-table .row-name>input[data-field="label"],
+.odds-table .row-name>.lose-prize-label{order:1;flex:1;min-width:0;margin:0}
+.odds-table .row-name .cash-amount input,
+.odds-table .row-name>input[data-field="label"]{height:40px;min-width:0;margin:0!important;padding:8px 6px}
+.odds-table .row-name .cash-amount span{min-width:12px;font-size:17px;line-height:1}
+.odds-table .row-name .kind-control{
+ order:2;flex:none;display:grid;place-items:center;position:relative;
+ width:29px;height:38px;border:1px solid #456a57;border-radius:8px;
+ background:#254635;color:#f2d58f;font-size:20px;font-weight:800;line-height:1
+}
+.odds-table .row-name .kind-control:focus-within{outline:2px solid var(--gold);outline-offset:1px}
+.odds-table .row-name .kind-control select[data-field="kind"]{
+ position:absolute;inset:0;width:100%;height:100%;margin:0;
+ padding:0;border:0;opacity:0;cursor:pointer
+}
+.odds-table .row-name .delete-row{top:50%;right:0;transform:translateY(-50%);margin:0}
+.odds-table .row-name .lose-prize-label{font-size:14px;color:var(--muted);padding-left:4px}
+.odds-table .percent-wrap,.odds-table .ratio-wrap,.odds-table .odds-cell{min-height:40px}
+.odds-table .ratio-wrap input,.odds-table .percent-wrap input{min-height:38px}
+@media(max-width:650px){
+ .odds-table tbody tr{height:auto}
+ .odds-table .row-name,.odds-table .row-name.is-cash{width:100%;min-height:42px;padding-right:27px}
+ .odds-table tbody td{justify-content:flex-start}
+}
+
 </style>
 </head>
 <body>
@@ -505,8 +538,8 @@ function renderRateSettings(t){
  }
 }
 function rowHTML(r,t){const isJ=r.kind===JACKPOT,guaranteed=isJ&&r.mode==='guaranteed',chance=guaranteed?100:r.chance,den=t.denominator;const numerator=nfmt(chance*den/100,2);const extra=isJ?`<div><select data-field="mode" aria-label="Jackpot pack rule"><option value="rare" ${r.mode==='rare'?'selected':''}>Rare pack</option><option value="guaranteed" ${guaranteed?'selected':''}>Guaranteed</option></select><small class="muted">${guaranteed?'One per pack':'Pack-level inclusion'}</small></div>`:'';
- const value=r.kind===CASH?`<div class="cash-amount"><span>$</span><input data-field="amount" aria-label="Cash prize amount" type="number" min="0.01" step="any" value="${esc(r.amount)}"></div>`:isJ?`<input data-field="label" aria-label="Jackpot item name" maxlength="100" value="${esc(r.label)}">`:`<small class="muted">No payout</small>`;
- return `<tr data-id="${r.id}"><td><div class="row-name ${r.kind===CASH?'is-cash':r.kind===LOSE?'is-lose':'is-jackpot'}"><button type="button" class="delete-row" aria-label="Remove outcome" data-delete="${r.id}">×</button><select data-field="kind" aria-label="Outcome type"><option value="cash" ${r.kind===CASH?'selected':''}>Cash</option><option value="lose" ${r.kind===LOSE?'selected':''}>Lose</option><option value="jackpot" ${isJ?'selected':''}>Jackpot</option></select>${value}${extra}</div></td>
+ const value=r.kind===CASH?`<div class="cash-amount"><span>$</span><input data-field="amount" aria-label="Cash prize amount" type="number" min="0.01" step="any" value="${esc(r.amount)}"></div>`:isJ?`<input data-field="label" aria-label="Jackpot item name" maxlength="100" value="${esc(r.label)}">`:`<strong class="lose-prize-label">Lose</strong>`;
+ return `<tr data-id="${r.id}"><td><div class="row-name ${r.kind===CASH?'is-cash':r.kind===LOSE?'is-lose':'is-jackpot'}"><button type="button" class="delete-row" aria-label="Remove outcome" data-delete="${r.id}">×</button><span class="kind-control" title="Change prize type"><span aria-hidden="true">⋯</span><select data-field="kind" aria-label="Change prize type"><option value="cash" ${r.kind===CASH?'selected':''}>Cash</option><option value="lose" ${r.kind===LOSE?'selected':''}>Lose</option><option value="jackpot" ${isJ?'selected':''}>Jackpot</option></select></span>${value}${extra}</div></td>
  <td><div class="percent-wrap"><input aria-label="${isJ?'Pack':'Outcome'} percentage" data-field="chance" ${guaranteed?'disabled':''} type="text" inputmode="decimal" value="${esc(nfmt(chance,2))}"><span class="unit">%</span></div>${isJ?'<span class="type-hint">Per full pack</span>':''}</td>
  <td><div class="ratio-wrap"><input aria-label="Probability numerator" data-field="numerator" ${guaranteed?'disabled':''} type="text" inputmode="decimal" value="${esc(numerator)}"><span>/${den}</span></div>${isJ?'<span class="type-hint">Pack chance ratio</span>':''}</td>
  <td><div class="odds-cell mods" id="mod-${r.id}">—</div></td><td><div class="odds-cell final row-final" id="final-${r.id}">—</div></td></tr>`;}
