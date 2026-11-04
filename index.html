@@ -580,11 +580,25 @@ function renderShotSettings(){const t=T(),s=t.shots;if(!s)return;const enabled=c
  $('shotRateMode').value=s.mode;$('shotEdit').classList.toggle('hidden',s.mode!=='edit');$('shotBullMax').value=String(s.bullMax);$('shotMissMax').value=String(s.missMax);
  const c=valid(t),x=shotExpected(t,c);$('shotProjection').textContent=x?`Modeled chance of paying: ${pct(x.winPercent)} · Expected payout ${usd(x.ev,4)} / ticket (${x.change>=0?'+':''}${usd(x.change,4)} vs no shots)`:'Shot calculation needs the standard Lucky Buck outcomes.';
 }
-function renderTicketSelector(){const t=T();$('ticketSelector').innerHTML=state.tickets.map(x=>`<option value="${esc(x.id)}">${esc(x.name)} · ${usd(x.price)}</option>`).join('');$('ticketSelector').value=t.id;$('ticketName').value=t.name;$('ticketPrice').value=precise(t.price);$('packSize').value=t.packSize;$('luckMode').value=t.luckMode;$('heroTicketName').textContent=t.name;$('heroTicketCost').textContent=usd(t.price,t.price%1===0?0:2);$('scratchTitle').textContent=t.name.toUpperCase()+' • INSTANT WIN';$('buyOne').textContent='Buy one ticket · '+usd(t.price,t.price%1===0?0:2);$('evHeading').textContent=`Expected cash payout per ${usd(t.price,t.price%1===0?0:2)} ticket`;
- const options=state.tickets.length>1?'Switching tickets restores each ticket\'s own odds, results and settings.':'Create another ticket with the + button next to the ticket price.';$('ticketHint').textContent=options;}
+function renderTicketSelector(){
+ const t=T();
+ $('ticketSelector').innerHTML=state.tickets.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.name)+' · '+usd(x.price,x.price%1===0?0:2)+'</option>').join('')+'<option value="__create__">＋ Create New Ticket…</option>';
+ $('ticketSelector').value=t.id;
+ $('ticketName').value=t.name;
+ $('ticketPrice').value=precise(t.price);
+ $('packSize').value=t.packSize;
+ $('luckMode').value=t.luckMode;
+ $('heroTicketName').textContent=t.name;
+ $('heroTicketCost').textContent=usd(t.price,t.price%1===0?0:2);
+ $('scratchTitle').textContent=t.name.toUpperCase()+' • INSTANT WIN';
+ $('buyOne').textContent='Buy one ticket · '+usd(t.price,t.price%1===0?0:2);
+ $('evHeading').textContent='Expected cash payout per '+usd(t.price,t.price%1===0?0:2)+' ticket';
+ $('ticketHint').textContent=state.tickets.length>1?'Select another ticket at the top to see its own odds, settings and past results.':'Use the ticket menu above to create another ticket. This one will remain saved.';
+}
 function renderModifiers(){
  const t=T();
  for(const [id,v] of [['doubleLevel',t.doubleDown],['momentumLevel',t.momentum],['luckLevel',t.luck]]){$(id).value=String(v);}
+ $('activeDouble').textContent=t.doubleDown+'/3';$('activeMomentum').textContent=t.momentum+'/3';$('activeLuck').textContent=t.luck+'/3';
  $('doubleDescription').textContent='When you win the highest cash prize, you have a chance to double your winnings.';
  $('momentumDescription').textContent='Winning the highest cash prize increases your chance of hitting it again on the next ticket. Win twice in a row for an even bigger boost! Any other result breaks your streak.';
  $('luckDescription').textContent='Improves your chances of winning by taking probability away from losing tickets and adding it to cash prizes. Higher levels provide bigger bonuses.'+(isLuckyCurve(t)?'':' (Only available with the standard Lucky Buck prize odds.)');
@@ -683,8 +697,42 @@ function init(){
  $('presetReset').addEventListener('click',()=>{selectedPreset='default';$('presetSelect').dispatchEvent(new Event('change'));});
  for(const id of ['doubleLevel','momentumLevel','luckLevel'])$(id).innerHTML=[0,1,2,3].map(v=>`<option value="${v}">${v}/3</option>`).join('');
  $('denominator').innerHTML=Array.from({length:600},(_,i)=>`<option value="${i+1}">/${i+1}</option>`).join('');
- $('ticketSelector').addEventListener('change',e=>{state.selectedId=e.target.value;save();renderAll();});
- $('addTicket').addEventListener('click',()=>{if(state.tickets.length>=100){toast('Maximum 100 ticket designs.');return;}const t=freshTicket('ticket-'+state.nextTicketId++,'New Ticket '+state.nextTicketId,1);t.luckMode='none';state.tickets.push(t);state.selectedId=t.id;save();renderAll();toast('New ticket created · Edit its name and prize odds.');});
+ $('ticketSelector').addEventListener('change',e=>{
+  const choice=e.target.value;
+  if(choice==='__create__'){
+   e.target.value=state.selectedId;
+   if(!canSave){toast('Browser save unavailable. Export your data before creating tickets.');return;}
+   if(state.tickets.length>=100){toast('Maximum 100 ticket designs.');return;}
+   while(state.tickets.some(x=>x.id==='ticket-'+state.nextTicketId))state.nextTicketId++;
+   $('createTicketName').value='New Ticket '+state.nextTicketId;
+   $('createTicketPrice').value='1';
+   $('createTicketError').textContent='';
+   $('createTicketDialog').showModal();
+   $('createTicketName').focus();
+   return;
+  }
+  if(!state.tickets.some(x=>x.id===choice)){e.target.value=state.selectedId;return;}
+  state.selectedId=choice;
+  selectedPreset='default';
+  save();renderAll();
+  toast('Switched to '+T().name+'. Your other tickets are still saved.');
+ });
+ $('cancelCreateTicket').addEventListener('click',()=>$('createTicketDialog').close());
+ $('createTicketForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const name=$('createTicketName').value.trim(),price=Number($('createTicketPrice').value);
+  if(!validName(name)){$('createTicketError').textContent='Give your ticket a name from 1 to 70 characters.';return;}
+  if(!Number.isFinite(price)||price<.01||price>1000000){$('createTicketError').textContent='Enter a price from $0.01 to $1,000,000.';return;}
+  if(!canSave||state.tickets.length>=100){$('createTicketError').textContent='Cannot save a new ticket at this time.';return;}
+  while(state.tickets.some(x=>x.id==='ticket-'+state.nextTicketId))state.nextTicketId++;
+  const id='ticket-'+state.nextTicketId++;
+  const t=freshTicket(id,name,price);
+  t.luckMode='none';
+  state.tickets.push(t);state.selectedId=id;selectedPreset='default';
+  const persisted=save();renderAll();$('createTicketDialog').close();
+  toast(persisted?name+' created. Switch back anytime from the ticket menu.':'Ticket made in memory, but browser save failed. Export JSON now.');
+ });
+ $('editModifiers').addEventListener('click',()=>$('modifierEditor').scrollIntoView({behavior:'smooth',block:'start'}));
  $('ticketName').addEventListener('change',e=>{const name=e.target.value.trim();if(!validName(name)){toast('Enter a name from 1 to 70 characters.');e.target.value=T().name;return;}T().name=name;save();renderTicketSelector();});
  $('ticketPrice').addEventListener('change',e=>{const n=Number(e.target.value);if(!Number.isFinite(n)||n<=0||n>1000000){toast('Price must be above $0 and at most $1,000,000.');e.target.value=T().price;return;}T().price=n;save();renderTicketSelector();refreshOdds();renderStats();});
  $('packSize').addEventListener('change',e=>{const n=Number(e.target.value);if(!integer(n,1,1000000)){toast('Pack size must be an integer from 1 to 1,000,000.');e.target.value=T().packSize;return;}T().packSize=n;T().pack=null;T().stage=0;save();refreshOdds();});
