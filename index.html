@@ -121,7 +121,7 @@
 <div class="wrap">
 <header class="header">
 <div class="brand"><div class="brand-mark">$</div><div><small>QUILL PRODUCTIONS</small><h1>Cardboard to Cash</h1></div></div>
-<div class="header-right"><span class="tag">Version 2.4 · Offline</span><span class="save" id="saveStatus">Loading…</span></div>
+<div class="header-right"><span class="tag">Version 2.5 · Offline</span><span class="save" id="saveStatus">Loading…</span></div>
 </header>
 <section class="hero">
 <div><div class="eyebrow">SCRATCH-OFF SAGA · SIMULATOR</div><h2 id="heroTicketName">Lucky Buck</h2><p>Build the odds, equip your luck, test the economy.</p></div>
@@ -176,7 +176,6 @@
 </div>
 <div class="rate-editor hidden" id="luckEdit"><strong>Luck custom rates (%)</strong><div class="rates-grid rates-grid-5"><span>Level</span><span>Lose</span><span>$1</span><span>$5</span><span>$25</span><label>1/3</label><input data-rate="1" data-level="1" data-column="0" type="number" step="any" min="0" max="100" aria-label="Luck 1 lose percent"><input data-rate="1" data-level="1" data-column="1" type="number" step="any" min="0" max="100" aria-label="Luck 1 one percent"><input data-rate="1" data-level="1" data-column="2" type="number" step="any" min="0" max="100" aria-label="Luck 1 five percent"><input data-rate="1" data-level="1" data-column="3" type="number" step="any" min="0" max="100" aria-label="Luck 1 twentyfive percent"><label>2/3</label><input data-rate="1" data-level="2" data-column="0" type="number" step="any" min="0" max="100" aria-label="Luck 2 lose percent"><input data-rate="1" data-level="2" data-column="1" type="number" step="any" min="0" max="100" aria-label="Luck 2 one percent"><input data-rate="1" data-level="2" data-column="2" type="number" step="any" min="0" max="100" aria-label="Luck 2 five percent"><input data-rate="1" data-level="2" data-column="3" type="number" step="any" min="0" max="100" aria-label="Luck 2 twentyfive percent"><label>3/3</label><input data-rate="1" data-level="3" data-column="0" type="number" step="any" min="0" max="100" aria-label="Luck 3 lose percent"><input data-rate="1" data-level="3" data-column="1" type="number" step="any" min="0" max="100" aria-label="Luck 3 one percent"><input data-rate="1" data-level="3" data-column="2" type="number" step="any" min="0" max="100" aria-label="Luck 3 five percent"><input data-rate="1" data-level="3" data-column="3" type="number" step="any" min="0" max="100" aria-label="Luck 3 twentyfive percent"></div><small>Each level must add up to 100%.</small></div>
 </div>
-<div class="subtle-notice" id="stageNotice">Momentum applies to the next ticket, never as a guaranteed outcome.</div>
 </section>
 <section class="card">
 <div class="card-top"><h3>Prize odds editor</h3><span class="muted tiny">Cash and Lose = 100% total</span></div>
@@ -552,9 +551,6 @@ function renderModifiers(){
  }
 
  $('ticketLuck').textContent=`Luck ${t.luck}/3`;renderRateSettings(t);
- $('stageNotice').textContent=t.momentum===0?'Momentum is off. Choose a level to boost repeat top-prize wins.':
- t.stage===0?'No top-prize streak yet. Win the highest cash prize to boost your next ticket.':
- `Top-prize streak: ${t.stage}. Your next ticket has at least ${pct(momentumRates(t)[t.stage-1])} chance of hitting the top prize. Any other outcome resets your streak.`;
 }
 function renderRateSettings(t){
  if(!t.rates)t.rates=defaultRates();
