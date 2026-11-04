@@ -29,3 +29,8 @@
 - Successful GitHub Pages deployment for v2.7 commit, confirmed from Actions.
 - Static JS syntax audit passed. No duplicate DOM element IDs and no missing literal document element ID references. Formula sanity checks passed: base EV $2.32; Luck level 3 EV $3.15; Momentum stage 1 top prize 20%; shot effects and state restore could be evaluated. This is **not** a complete interactive browser or device test.
 - Do not roll back v2.7 without evidence of damage. No data-reset operations authorized.
+
+## Owner's idea-preservation rule (November 4, 2026)
+- Owner requests a **notes-only GitHub backup after each ten game-related user messages**. Ask ahead of checkpoint (around ninth message); if the user is away or doesn't respond, the user's standing permission allows saving the notes at the tenth unless they've explicitly vetoed it. Don't imply background monitoring or real-time tracking across separate chats.
+- Canonical instruction: [Project Quill BACKUP_PROTOCOL.md](https://github.com/bmcd1996/project-quill/blob/main/BACKUP_PROTOCOL.md).
+- When a checkpoint concerns Lucky Buck, append updates to this ledger. Preserve full creative ideas for Scratch-Off Saga separately in the private project's CREATIVE_ARCHIVE.md. Keep changes notes-only; do not deploy new calculator features merely to back up discussions.
