@@ -129,7 +129,7 @@
       </section>
       <section class="card">
         <div class="card-top"><h3>Save &amp; transfer</h3><span class="tag">No account needed</span></div>
-        <p class="muted tiny" style="margin-top:0">Your earlier v1 save is left untouched. v2 stores all tickets separately in this browser. Download a JSON backup before moving computers or clearing browser data.</p>
+        <p class="muted tiny" style="margin-top:0">Your earlier v1 save is left untouched; its settings and history appear as an imported ticket. The approved Lucky Buck settings are available separately. v2 stores all tickets in this browser. Download a JSON backup before moving computers or clearing browser data.</p>
         <div class="grid-tools"><button class="btn mini" id="exportBtn">↓ Backup as JSON</button><button class="btn mini ghost" id="importBtn">↑ Restore backup</button></div>
         <input id="importFile" type="file" accept=".json,application/json">
       </section>
@@ -165,7 +165,7 @@ const defaults=()=>({version:2,selectedId:'lucky-buck',nextTicketId:1,batch:1000
 const integer=(v,min,max)=>Number.isSafeInteger(Number(v))&&Number(v)>=min&&Number(v)<=max;
 const validName=s=>typeof s==='string'&&s.trim().length>0&&s.trim().length<=70;
 function parseFraction(raw){const s=String(raw).trim();if(/^\d+(?:\.\d+)?(?:\/\d+(?:\.\d+)?)?$/.test(s)){if(s.includes('/')){const [a,b]=s.split('/').map(Number);return b>0?a/b:NaN}return Number(s)}return NaN}
-function cleanRun(raw){if(!raw||typeof raw!=='object')return null;const n=Number(raw.n),won=Number(raw.won);if(!integer(n,1,1000000000)||!Number.isFinite(won)||won<0)return null;return {mode:raw.mode==='single'?'single':raw.mode==='batch'?'batch':n===1?'single':'batch',n,won,wins:sane(raw.wins),best:sane(raw.best),prize:sane(raw.prize),prizeKind:[CASH,LOSE,JACKPOT].includes(raw.prizeKind)?raw.prizeKind:(Number(raw.prize)>0?CASH:LOSE),prizeLabel:String(raw.prizeLabel||'').slice(0,120),jackpots:sane(raw.jackpots),mostFrequent:String(raw.mostFrequent||'').slice(0,160),luck:clampLevel(raw.luck),at:String(raw.at||'').slice(0,80)};}
+function cleanRun(raw){if(!raw||typeof raw!=='object')return null;const n=Number(raw.n),won=Number(raw.won);if(!integer(n,1,1000000000)||!Number.isFinite(won)||won<0)return null;return {mode:raw.mode==='single'?'single':raw.mode==='batch'?'batch':n===1?'single':'batch',n,won,wins:sane(raw.wins),best:sane(raw.best),prize:sane(raw.prize),prizeKind:[CASH,LOSE,JACKPOT].includes(raw.prizeKind)?raw.prizeKind:(Number(raw.prize)>0?CASH:LOSE),prizeLabel:String(raw.prizeLabel||'').slice(0,120),jackpots:sane(raw.jackpots),mostFrequent:String(raw.mostFrequent||'').slice(0,160),luck:clampLevel(raw.luck),price:Number.isFinite(Number(raw.price))&&Number(raw.price)>0?Number(raw.price):null,at:String(raw.at||'').slice(0,80)};}
 function cleanTicket(raw){
  if(!raw||typeof raw!=='object'||!validName(raw.name)||!Number.isFinite(Number(raw.price))||Number(raw.price)<=0||Number(raw.price)>1e6)throw Error('Ticket name or price is invalid.');
  if(!Array.isArray(raw.rows)||raw.rows.length<1||raw.rows.length>100)throw Error('A ticket needs between 1 and 100 outcome rows.');
@@ -185,7 +185,7 @@ function cleanTicket(raw){
 }
 function migrateOld(old){
  if(!old||!Array.isArray(old.tiers)||old.tiers.length<1)throw Error('Older save has no prize rows.');
- const t=freshTicket();t.rows=[];let sum=0;
+ const t=freshTicket('legacy-v1','Imported v1 calculator',1);t.rows=[];let sum=0;
  for(const r of old.tiers){const amount=Number(r.amount),chance=Number(r.chance);if(!Number.isFinite(amount)||amount<=0||!Number.isFinite(chance)||chance<0||chance>100)throw Error('Older save contains invalid prize odds.');sum+=chance;t.rows.push({id:t.rows.length+2,kind:CASH,amount,chance,mode:'rare',label:''});}
  if(sum>100+1e-7)throw Error('Older save odds exceed 100%.');t.rows.unshift({id:1,kind:LOSE,amount:0,chance:Math.max(0,100-sum),mode:'rare',label:''});
  t.nextRowId=t.rows.length+2;
@@ -193,10 +193,10 @@ function migrateOld(old){
  t.legacyLuck=old.luck;t.luck=0;
  t.luckMode=t.rows.length===4&&[1,5,25].every(a=>t.rows.some(r=>r.kind===CASH&&r.amount===a))?'luckyBuck':'none';
  const oldStats=old.stats||{};for(const k of ['count','spent','won','wins','best'])t.stats[k]=sane(oldStats[k]);
- t.history=(old.history||[]).slice(0,24).map(h=>cleanRun({...h,mode:Number(h.n)===1?'single':'batch'})).filter(Boolean);
- t.last=cleanRun(old.last);
+ t.history=(old.history||[]).slice(0,24).map(h=>cleanRun({...h,price:1,mode:Number(h.n)===1?'single':'batch'})).filter(Boolean);
+ t.last=old.last?cleanRun({...old.last,price:1}):null;
  if(old.pending&&Number.isFinite(Number(old.pending.prize))&&Number(old.pending.prize)>=0)t.unrevealed.push({kind:Number(old.pending.prize)>0?CASH:LOSE,payout:Number(old.pending.prize),label:'',accounted:false});
- return {version:2,selectedId:t.id,nextTicketId:1,batch:integer(old.batch,1,1000000)?Number(old.batch):1000,tickets:[cleanTicket(t)]};
+ return {version:2,selectedId:'lucky-buck',nextTicketId:1,batch:integer(old.batch,1,1000000)?Number(old.batch):1000,tickets:[freshTicket(),cleanTicket(t)]};
 }
 function validateRestore(obj){if(!obj||typeof obj!=='object')throw Error('Backup is not a valid object.');if(obj.version!==2){if(Array.isArray(obj.tiers))return migrateOld(obj);throw Error('Backup format is not recognized.');}if(!Array.isArray(obj.tickets)||obj.tickets.length<1||obj.tickets.length>100)throw Error('Backup must contain 1–100 tickets.');const tickets=obj.tickets.map(cleanTicket);const ids=new Set();for(const t of tickets){if(ids.has(t.id))throw Error('Duplicate ticket IDs in backup.');ids.add(t.id);}return {version:2,selectedId:ids.has(String(obj.selectedId))?String(obj.selectedId):tickets[0].id,nextTicketId:integer(obj.nextTicketId,1,1000000000)?Number(obj.nextTicketId):tickets.length+1,batch:integer(obj.batch,1,1000000)?Number(obj.batch):1000,tickets};}
 let state,canSave=true,loadError=null;
@@ -204,7 +204,7 @@ try{const v2=localStorage.getItem(KEY);const v1=localStorage.getItem(OLD_KEY);st
 const T=()=>state.tickets.find(t=>t.id===state.selectedId)||state.tickets[0];
 function save(){if(!canSave){$('saveStatus').textContent='⚠ Existing save could not load; export first';return false;}try{localStorage.setItem(KEY,JSON.stringify(state));$('saveStatus').textContent='● Saved locally';return true;}catch(e){$('saveStatus').textContent='⚠ Storage unavailable; back up JSON';return false;}}
 function toast(message){const el=$('toast');el.textContent=message;el.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>el.classList.remove('show'),3100);}
-function isLuckyCurve(t){const rows=t.rows.filter(r=>r.kind!==JACKPOT);return t.luckMode==='luckyBuck'&&rows.length===4&&rows.filter(r=>r.kind===LOSE).length===1&&[1,5,25].every(v=>rows.some(r=>r.kind===CASH&&r.amount===v));}
+function isLuckyCurve(t){const rows=t.rows.filter(r=>r.kind!==JACKPOT);return Math.abs(t.price-1)<1e-8&&t.luckMode==='luckyBuck'&&rows.length===4&&rows.filter(r=>r.kind===LOSE).length===1&&[1,5,25].every(v=>rows.some(r=>r.kind===CASH&&r.amount===v));}
 function normalOdds(t,stage=t.stage){
  const rows=t.rows.filter(r=>r.kind!==JACKPOT).map(r=>({...r,base:r.chance,final:r.chance,modifier:0}));
  if(rows.length===0)return {valid:false,error:'Add at least a Cash or Lose outcome.'};
@@ -263,7 +263,7 @@ function singleDraw(t){
  else t.stage=0;
  return outcome;
 }
-function record(t,r){const s=t.stats;s.count+=r.n;s.spent+=t.price*r.n;s.won+=r.won;s.wins+=r.wins;s.best=Math.max(s.best,r.best);s.jackpots+=r.jackpots||0;t.last={...r,at:new Date().toLocaleString()};t.history.unshift({...t.last});t.history=t.history.slice(0,24);}
+function record(t,r){const s=t.stats;s.count+=r.n;s.spent+=t.price*r.n;s.won+=r.won;s.wins+=r.wins;s.best=Math.max(s.best,r.best);s.jackpots+=r.jackpots||0;t.last={...r,price:t.price,at:new Date().toLocaleString()};t.history.unshift({...t.last});t.history=t.history.slice(0,24);}
 function buyOne(){const t=T();const c=valid(t);if(!c.valid){toast(c.error);return;}if(t.unrevealed.length>80000){toast('Reveal some tickets or export a backup before buying more.');return;}
  const p=singleDraw(t);t.unrevealed.push({kind:p.kind,payout:p.payout,label:p.label,accounted:true});record(t,{mode:'single',n:1,won:p.payout,wins:p.kind===CASH&&p.payout>0?1:0,best:p.payout,prize:p.payout,prizeKind:p.kind,prizeLabel:p.label,jackpots:p.kind===JACKPOT?1:0,mostFrequent:'',luck:t.luck});save();renderStats();refreshOdds();updateRevealButton();$('scratchMessage').textContent=`Purchased! ${nfmt(t.unrevealed.length,0)} ticket(s) available to reveal.`;}
 function simulate(n){const t=T(),c=valid(t);if(!c.valid){toast(c.error);return;}if(!integer(n,1,1000000)){toast('Enter an integer batch size from 1 to 1,000,000.');return;}
@@ -323,14 +323,14 @@ function renderStats(){const t=T(),s=t.stats,last=t.last;$('count').textContent=
  $('lastLabel').textContent=last?.mode==='single'?'Last ticket winnings':'Average winnings per ticket';$('lastAverage').textContent=!last?'—':last.mode==='single'?(last.prizeKind===JACKPOT?'Item jackpot':last.prizeKind===LOSE?'Lose':usd(last.prize)):usd(last.won/last.n,4);
  $('lastDetail').textContent=!last?'No tickets played yet':last.mode==='single'?(last.prizeKind===JACKPOT?last.prizeLabel:'Most recent individual purchase'):`Most recent batch · ${nfmt(last.n,0)} tickets`;
  $('mostFrequent').textContent=last?.mode==='batch'?last.mostFrequent||'No paying cash prizes':'—';
- $('history').innerHTML=t.history.length?t.history.map(h=>`<div class="history-item"><div><strong>${nfmt(h.n,0)} ${h.n===1?'ticket':'tickets'}</strong><div class="sub">Luck ${h.luck}/3 · ${esc(h.at)}</div></div><div style="text-align:right"><strong>${usd(h.won)} cash won</strong><div class="sub">${usd(h.won-h.n*t.price)} net · ${nfmt(h.jackpots||0,0)} items</div></div></div>`).join(''):'<div class="empty">Your runs will show here.</div>';}
+ $('history').innerHTML=t.history.length?t.history.map(h=>`<div class="history-item"><div><strong>${nfmt(h.n,0)} ${h.n===1?'ticket':'tickets'}</strong><div class="sub">Luck ${h.luck}/3 · ${esc(h.at)}</div></div><div style="text-align:right"><strong>${usd(h.won)} cash won</strong><div class="sub">${usd(h.won-h.n*(h.price||t.price))} net · ${nfmt(h.jackpots||0,0)} items</div></div></div>`).join(''):'<div class="empty">Your runs will show here.</div>';}
 function renderAll(){renderTicketSelector();renderRows();refreshOdds();renderStats();setScratch('empty');$('batchSize').value=String(state.batch);}
 function download(filename,data,type){const blob=new Blob([data],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);}
 function init(){
  for(const id of ['doubleLevel','momentumLevel','luckLevel'])$(id).innerHTML=[0,1,2,3].map(v=>`<option value="${v}">${v}/3</option>`).join('');
  $('denominator').innerHTML=Array.from({length:600},(_,i)=>`<option value="${i+1}">/${i+1}</option>`).join('');
  $('ticketSelector').addEventListener('change',e=>{state.selectedId=e.target.value;save();renderAll();});
- $('addTicket').addEventListener('click',()=>{if(state.tickets.length>=100){toast('Maximum 100 ticket designs.');return;}const t=freshTicket('ticket-'+state.nextTicketId++,'New Ticket '+state.nextTicketId,1);t.luckMode='none';state.tickets.push(t);state.selectedId=t.id;save();renderAll();toast('New ticket created · Edit its name and prize odds.');});
+ $('addTicket').addEventListener('click',()=>{if(state.tickets.length>=100){toast('Maximum 100 ticket designs.');return;}const id=state.nextTicketId++;const t=freshTicket('ticket-'+id,'New Ticket '+id,1);t.luckMode='none';state.tickets.push(t);state.selectedId=t.id;save();renderAll();toast('New ticket created · Edit its name and prize odds.');});
  $('ticketName').addEventListener('change',e=>{const name=e.target.value.trim();if(!validName(name)){toast('Enter a name from 1 to 70 characters.');e.target.value=T().name;return;}T().name=name;save();renderTicketSelector();});
  $('ticketPrice').addEventListener('change',e=>{const n=Number(e.target.value);if(!Number.isFinite(n)||n<=0||n>1000000){toast('Price must be above $0 and at most $1,000,000.');e.target.value=T().price;return;}T().price=n;save();renderTicketSelector();refreshOdds();renderStats();});
  $('packSize').addEventListener('change',e=>{const n=Number(e.target.value);if(!integer(n,1,1000000)){toast('Pack size must be an integer from 1 to 1,000,000.');e.target.value=T().packSize;return;}T().packSize=n;T().pack=null;T().stage=0;save();refreshOdds();});
