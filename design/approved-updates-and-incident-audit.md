@@ -78,3 +78,16 @@
 
 ### Idea-backup checkpoint
 - Saved this current discussion to GitHub pursuant to the standing every-ten-game-messages notes-only protocol. No app code, styles, calculations or live page were changed. The most recent user emphasis is **ticket-specific front logo and complete per-ticket math/settings switching**.
+
+
+## Foundational purpose — Lucky Buck is the game-ticket laboratory (November 4, 2026; DESIGN RULE)
+**Owner clarification, high priority:** "The whole point of this program is to test test the tickets and get them perfect or at least as close as we can to working good so that we can add them directly to our game from there."
+
+- **PRIMARY MISSION:** Lucky Buck is NOT a standalone novelty calculator. It is the authoritative **ticket-design, probability-testing and economic-balancing workbench** for scratch-off ticket types intended to ship in **Scratch-Off Saga**. Playtest, refine and approve tickets here so those finalized specs can be incorporated into the Godot game with minimal rework.
+- Every ticket should become a self-contained, independently versioned **ticket definition**: stable ticket ID; display name; its **own front-logo and visual artwork references**; price; prize kinds/amounts; exact probabilities and denominator; any pack/item-jackpot rules; compatible shot/balloon mechanics and effect rates; modifier settings/rates; optional ticket-specific presentation/animation/audio information; and provenance/approval status.
+- **Game production path:** design ticket and artwork → repeatedly simulate and examine RTP/EV, prize-frequency and economic impact → refine with owner → lock a reviewed ticket-definition version → export the specification and art references → import through Godot/GDScript adapter → parity tests confirm identical meaningful payout odds and rules → release ticket in appropriate game shop/district.
+- **Separate TICKET SPECIFICATION from TEST RESULTS:** simulation totals, recent test history, saved custom test presets, and testing-only UI values should not accidentally change production payouts in the game. Do not rely on fragile browser localStorage copies as the only source of a finalized ticket.
+- Plan a durable **versioned JSON (or similar agreed shared data schema) export**, and an explicit Godot importer/validator; preserve all numbers without rounding drift. Mark approved vs experimental tickets. Graphics must follow the selected ticket; never show the Lucky Buck deer art on another ticket by mistake.
+- **Critical parity test:** the simulator's Javascript logic and Godot's GDScript code must produce statistically/analytically equivalent behavior for prize allocation, jackpot packs, modifier bonuses, balloon changes and payout computation. If an engine differs, resolve before shipping; don't merely copy a summary of percentages.
+- "Directly to our game" is the intended streamlined workflow, **not a claim that export-to-Godot already works**. The current website is v2.9 and production/export conversion has NOT yet been implemented or approved for a code change.
+- **HOLD:** User has explicitly requested continuing visual drafts and NO live-code changes while the two-iPhone-column layout and per-ticket art selection are discussed.
