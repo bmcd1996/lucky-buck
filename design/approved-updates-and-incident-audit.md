@@ -55,3 +55,26 @@
 - **Tests:** 23 JS/in-memory-DOM functional checks passed (purchase, three-balloon results, next-ticket visibility, scrolled return, simulation, old stored-result reload, advanced shortcuts, HTML nesting and source order). Source comparison verified 11 core ticket, odds and storage functions unchanged. Script parses correctly; no duplicate IDs or missing DOM references; CSS bracket counts balance.
 - **Limit:** Real iPhone interactive visual layout remains to be validated by owner screenshot after GitHub Pages deployment.
 - Released source commit: `3464b7f2b2e50c748d5bc0c8c498c09824770dc1`. Restore branch: `backup/pre-mobile-flow-v2-8-2-2026-11-04`.
+
+
+## Creative/layout checkpoint — next multi-ticket design (November 4, 2026; DESIGNS ONLY, NOT IMPLEMENTED)
+**Owner says explicitly:** Do not change the live calculator while discussing mockups. Circled numbers on their hand-drawn notebook sketch were **planning references only**, never UI decorations or tab numbering. The next ticket design will be discussed/created later today. Do not claim these specs are coded in v2.9.
+
+### Latest preferred full-layout concept
+- The layout is **two side-by-side, independently full iPhone-screen-width columns**. Normal-size mobile experience can scroll/swipe horizontally between them. Add a **Fit Both / zoom-out** way to view the *two complete columns together, proportionally scaled*, rather than reflowing all the cards into a skinny single-column list. Exact zoom method and touch controls need to be tested on the owner's iPhone.
+- **Left column, in order:** branded ticket selector/header; prominent scratch-off artwork; **Buy One Ticket directly under the artwork inside the same scratch panel**; **compact 45–55px-ish result strip** beneath (e.g., WIN $5 | 5 · 5 · 5); Shot Calculator; active/equipped modifiers.
+- **Right column:** **Prize Odds Editor starts at the very top, directly to the RIGHT of the scratch-off art**, not in a collapsed Advanced drawer and **not squeezed alongside the art inside the left column**. It is one of the most important interfaces. Simulation Totals, batch simulation, Live Calculations, and Recent Simulations follow in a useful order beneath. Treat these boxes as full iPhone-width in ordinary zoom.
+- **Save & Transfer** spans both columns at the bottom in the fully zoomed-out desktop-like composition.
+- Controls, small-result strip, sizes and positioning are evolving drafts; do not over-design or lock visual styles without feedback. An image mockup incorrectly placed editor beside ticket **within the left column**; owner wanted it **in the right column**.
+- The older v2.9 page order (shots before Buy; odds editor in Advanced) is NOT the new approved visual direction. This is a future redesign proposal; preserve working v2.9 until authorized to implement.
+- The header should use the **exact existing colorful outlined “Lucky Buck” logo from the scratch-ticket face**, not plain text, a generic different font or AI-recreated approximation.
+
+### Important NEW rule: switching ticket switches ALL ticket-specific identity AND mechanics
+- Selecting another ticket in the very prominent first-screen **Your Tickets** dropdown must load **that specific ticket's artwork/graphics and logo on the FRONT of the scratch-off**, not merely rename a shared static Lucky Buck image. The top page/header branding should also reflect the chosen ticket's own branding rather than stay stuck on Lucky Buck.
+- The same selection must switch ticket name, price, unique prize amounts, prize odds/denominators, Jackpot item configuration, pack size, modifiers and rates, shot settings where applicable, calculations, purchased-but-unrevealed ticket state, completed result, statistics and history. Changing ticket A must never alter ticket B's figures, images, or history.
+- For new ticket designs with no artwork yet, show a clearly labeled temporary placeholder until the owner supplies/approves its unique ticket art/logo; NEVER silently reuse Lucky Buck art as though it belongs to the new ticket. Art/branding must be associated with ticket IDs and persist after reloading or importing.
+- Art references and ticket settings should be stored safely without excessive browser localStorage usage (asset strategy not decided). Switching must restore independent state on each ticket and not leak one ticket's graphics/odds into another.
+- This is **approved functional intent for upcoming multi-ticket design**, not implementation authorization. Do not generate the next ticket design without owner direction.
+
+### Idea-backup checkpoint
+- Saved this current discussion to GitHub pursuant to the standing every-ten-game-messages notes-only protocol. No app code, styles, calculations or live page were changed. The most recent user emphasis is **ticket-specific front logo and complete per-ticket math/settings switching**.
