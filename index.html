@@ -645,7 +645,7 @@ function singleDraw(t,random=Math.random){
 }
 function record(t,r){const s=t.stats;s.count+=r.n;s.spent+=t.price*r.n;s.won+=r.won;s.wins+=r.wins;s.best=Math.max(s.best,r.best);s.jackpots+=r.jackpots||0;t.last={...r,at:new Date().toLocaleString()};t.history.unshift({...t.last});t.history=t.history.slice(0,24);}
 function buyOne(){const t=T();const c=valid(t);if(!c.valid){toast(c.error);return;}if(t.unrevealed.length>80000){toast('Reveal some tickets or export a backup before buying more.');return;}
- const p=singleDraw(t);t.unrevealed.push({kind:p.kind,payout:p.payout,label:p.label,accounted:true,numbers:p.numbers,original:p.original,changed:p.changed,uid:'t-'+(t.stats.count+1)});record(t,{mode:'single',n:1,won:p.payout,wins:p.kind===CASH&&p.payout>0?1:0,best:p.payout,prize:p.payout,prizeKind:p.kind,prizeLabel:p.label,jackpots:p.kind===JACKPOT?1:0,mostFrequent:'',luck:t.luck});save();renderStats();refreshOdds();playPurchaseSound();if(canShoot(t))showTicket(t.unrevealed[t.unrevealed.length-1]);else{setScratch('single',p);updateRevealButton();}}
+ const p=singleDraw(t);t.unrevealed.push({kind:p.kind,payout:p.payout,label:p.label,accounted:true,numbers:p.numbers,original:p.original,changed:p.changed,uid:'t-'+(t.stats.count+1)});record(t,{mode:'single',n:1,won:p.payout,wins:p.kind===CASH&&p.payout>0?1:0,best:p.payout,prize:p.payout,prizeKind:p.kind,prizeLabel:p.label,jackpots:p.kind===JACKPOT?1:0,mostFrequent:'',luck:t.luck});if(!canShoot(t))t.lastRevealed=cleanRevealed(p);save();renderStats();refreshOdds();playPurchaseSound();if(canShoot(t))showTicket(t.unrevealed[t.unrevealed.length-1]);else{setScratch('single',p);updateRevealButton();}}
 function simulate(n){const t=T(),c=valid(t);if(!c.valid){toast(c.error);return;}if(!integer(n,1,1000000)){toast('Enter an integer batch size from 1 to 1,000,000.');return;}
  let won=0,wins=0,best=0,jackpots=0;const counts=new Map();
  for(let i=0;i<n;i++){const p=singleDraw(t);won+=p.payout;best=Math.max(best,p.payout);if(p.kind===CASH&&p.payout>0){wins++;counts.set(p.payout,(counts.get(p.payout)||0)+1);}if(p.kind===JACKPOT)jackpots++;}
@@ -658,23 +658,66 @@ function audio(){try{if(!audioContext)audioContext=new (window.AudioContext||win
 function popSound(){const ctx=audio();if(!ctx)return;const now=ctx.currentTime;const len=Math.floor(ctx.sampleRate*0.10);const buffer=ctx.createBuffer(1,len,ctx.sampleRate);const samples=buffer.getChannelData(0);for(let j=0;j<len;j++){const s=j/ctx.sampleRate;samples[j]=(Math.random()*2-1)*Math.exp(-s*48);}const src=ctx.createBufferSource(),f=ctx.createBiquadFilter(),g=ctx.createGain();src.buffer=buffer;f.type='lowpass';f.frequency.setValueAtTime(2600,now);f.frequency.exponentialRampToValueAtTime(390,now+0.09);g.gain.setValueAtTime(0.32,now);g.gain.exponentialRampToValueAtTime(0.001,now+0.1);src.connect(f).connect(g).connect(ctx.destination);src.start(now);src.stop(now+0.1);}
 function playPurchaseSound(){const ctx=audio();if(!ctx)return;const when=ctx.currentTime;[840,1260,1680].forEach((hz,i)=>{const o=ctx.createOscillator(),g=ctx.createGain(),s=when+i*.068;o.type='square';o.frequency.setValueAtTime(hz,s);g.gain.setValueAtTime(.045,s);g.gain.exponentialRampToValueAtTime(.0001,s+.12);o.connect(g).connect(ctx.destination);o.start(s);o.stop(s+.12);});}
 function updateRevealButton(){const t=T();const btn=$('revealBtn');btn.classList.toggle('hidden',t.unrevealed.length===0);btn.textContent=`Show waiting ticket (${nfmt(t.unrevealed.length,0)})`;}
-function showTicket(q){activeCard={ticketId:T().id,uid:q.uid||'',item:q,popped:[false,false,false]};$('ticketPanel').classList.remove('hidden');$('genericScratch').classList.add('hidden');$('ticketPanelMessage').textContent='Swipe or tap each balloon to pop it and reveal its number.';renderBalloonCover();updateRevealButton();}
-function renderBalloonCover(){const q=activeCard;const btns=document.querySelectorAll('.balloon-target');btns.forEach((b,i)=>{const popped=!!q?.popped[i];b.classList.toggle('popped',popped);b.textContent=popped?(q.item.numbers?String(q.item.numbers[i]):'★'):'?';b.setAttribute('aria-label',popped?`Balloon ${i+1}: ${b.textContent}`:`Pop balloon ${i+1}`);b.disabled=!q||popped;});}
+function renderTicketResult(mode='ready',q=null){
+ const t=T(),box=$('ticketResult'),prev=$('lastOutcomeSummary');
+ let kind='ready',heading='READY TO PLAY',eyebrow='CURRENT TICKET';
+ let numbers='? · ? · ?',detail='Buy a ticket, then pop all three balloons.';
+ const revealed=mode==='complete'&&q?cleanRevealed(q):!clearedDisplay&&mode!=='scratching'?t.lastRevealed:null;
+ if(revealed){
+  kind=revealed.kind===JACKPOT?'jackpot':revealed.payout>0?'win':'lose';
+  eyebrow=mode==='complete'?'THIS TICKET':'LAST REVEALED TICKET';
+  heading=kind==='jackpot'?'🏆 JACKPOT!':kind==='win'?'WIN! '+usd(revealed.payout,revealed.payout%1===0?0:2):'NO WIN';
+  numbers=revealed.numbers?revealed.numbers.join(' · '):'—';
+  detail=kind==='jackpot'?'Item prize: '+(revealed.label||'Jackpot item'):kind==='win'?'Cash prize paid: '+usd(revealed.payout):'No paying three-number match on this ticket.';
+ }else if(mode==='scratching'&&activeCard){
+  kind='scratching';
+  const popped=activeCard.popped.filter(Boolean).length;
+  eyebrow='CURRENT TICKET';
+  heading=popped?'KEEP GOING':'SCRATCH TO REVEAL';
+  numbers=[0,1,2].map(i=>activeCard.popped[i]?(activeCard.item.numbers?String(activeCard.item.numbers[i]):'★'):'?').join(' · ');
+  detail=(popped===0?'Pop balloon 1 first.':popped+'/3 revealed · Pop the next balloon.')+' The numbers stay visible after the last pop.';
+ }else if(mode==='clear'){
+  eyebrow='DISPLAY CLEARED';
+  detail='Your ticket statistics and results are still saved.';
+ }
+ box.className='ticket-result state-'+kind;
+ $('outcomeEyebrow').textContent=eyebrow;
+ $('outcomeHeadline').textContent=heading;
+ $('outcomeNumbers').textContent=numbers;
+ $('outcomeExplanation').textContent=detail;
+ const older=mode==='scratching'?t.lastRevealed:null;
+ prev.classList.toggle('hidden',!older);
+ prev.textContent=older?'Previous ticket: '+(older.kind===JACKPOT?'ITEM JACKPOT':older.payout>0?'WIN '+usd(older.payout):'NO WIN')+(older.numbers?' · '+older.numbers.join(' · '):''):'';
+}
+function showTicket(q){clearedDisplay=false;activeCard={ticketId:T().id,uid:q.uid||'',item:q,popped:[false,false,false]};$('ticketPanel').classList.remove('hidden');$('genericScratch').classList.add('hidden');$('ticketPanelMessage').textContent='Pop all three balloons to reveal your prize.';renderBalloonCover();renderTicketResult('scratching');updateRevealButton();}
+function renderBalloonCover(){
+ const q=activeCard;
+ const previous=!q&&!clearedDisplay?T().lastRevealed:null;
+ document.querySelectorAll('.balloon-target').forEach((b,i)=>{
+  const storedNumber=previous?.numbers?.[i];
+  const popped=q?!!q.popped[i]:storedNumber!==undefined&&storedNumber!==null;
+  const value=q?.item?.numbers?.[i]??storedNumber;
+  b.classList.toggle('popped',popped);
+  b.textContent=popped?(value!==undefined&&value!==null?String(value):'★'):'?';
+  b.setAttribute('aria-label',popped?'Balloon '+(i+1)+': '+b.textContent:'Pop balloon '+(i+1));
+  b.disabled=!q||popped;
+ });
+}
 function finishCard(){const t=T();if(!activeCard||activeCard.ticketId!==t.id)return;const q=activeCard.item;
  const idx=t.unrevealed.findIndex(x=>x===q||(q.uid&&x.uid===q.uid));if(idx>=0)t.unrevealed.splice(idx,1);
  if(q.accounted===false){record(t,{mode:'single',n:1,won:q.payout,wins:q.kind===CASH&&q.payout>0?1:0,best:q.payout,prize:q.payout,prizeKind:q.kind,prizeLabel:q.label,jackpots:q.kind===JACKPOT?1:0,mostFrequent:'',luck:t.luck});}
- save();renderStats();updateRevealButton();$('ticketPanelMessage').textContent=(q.kind===JACKPOT?`ITEM JACKPOT: ${q.label}`:q.payout>0?`Winner! ${usd(q.payout)} paid`:'No match · Lose')+(q.changed?.length?` · ${q.changed.length} shot change${q.changed.length>1?'s':''}`:'');
+ t.lastRevealed=cleanRevealed(q);save();renderStats();updateRevealButton();renderTicketResult('complete',q);$('ticketPanelMessage').textContent=(q.kind===JACKPOT?`ITEM JACKPOT: ${q.label}`:q.payout>0?`Winner! ${usd(q.payout)} paid`:'No match · Lose')+(q.changed?.length?` · ${q.changed.length} shot change${q.changed.length>1?'s':''}`:'');
 }
 function popBalloon(i){if(!activeCard||activeCard.ticketId!==T().id||activeCard.popped[i])return;
  // Reveal in order; this makes the sequential shot simulation understandable to the player.
  if(i>0&&!activeCard.popped[i-1]){$('ticketPanelMessage').textContent=`Pop Balloon ${i} first — the shot order matters.`;return;}
  activeCard.popped[i]=true;popSound();renderBalloonCover();
- const q=activeCard.item;if(i===2)finishCard();else $('ticketPanelMessage').textContent=`Balloon ${i+1}: ${q.numbers?String(q.numbers[i]):'★'} · Pop Balloon ${i+2} next.`;
+ const q=activeCard.item;if(i===2)finishCard();else {$('ticketPanelMessage').textContent=`Balloon ${i+1}: ${q.numbers?String(q.numbers[i]):'★'} · Pop Balloon ${i+2} next.`;renderTicketResult('scratching');}
 }
-function reveal(){const t=T();if(!t.unrevealed.length)return;if(canShoot(t))showTicket(t.unrevealed[0]);else{const p=t.unrevealed.shift();if(p.accounted===false)record(t,{mode:'single',n:1,won:p.payout,wins:p.kind===CASH&&p.payout>0?1:0,best:p.payout,prize:p.payout,prizeKind:p.kind,prizeLabel:p.label,jackpots:p.kind===JACKPOT?1:0,mostFrequent:'',luck:t.luck});save();renderStats();setScratch('single',p);}}
+function reveal(){const t=T();if(!t.unrevealed.length)return;if(canShoot(t))showTicket(t.unrevealed[0]);else{const p=t.unrevealed.shift();if(p.accounted===false)record(t,{mode:'single',n:1,won:p.payout,wins:p.kind===CASH&&p.payout>0?1:0,best:p.payout,prize:p.payout,prizeKind:p.kind,prizeLabel:p.label,jackpots:p.kind===JACKPOT?1:0,mostFrequent:'',luck:t.luck});t.lastRevealed=cleanRevealed(p);save();renderStats();setScratch('single',p);}}
 function setScratch(mode,p){const t=T(),icon=$('scratchIcon'),num=$('scratchNumber'),msg=$('scratchMessage');
- activeCard=null;const ticket=canShoot(t);$('ticketPanel').classList.toggle('hidden',!ticket);$('genericScratch').classList.toggle('hidden',ticket);
- if(ticket){$('ticketPanelMessage').textContent=mode==='batch'?`Simulated ${nfmt(p.n,0)} tickets · ${usd(p.won)} won. Buy one to pop a ticket.`:'Buy a ticket to pop the three balloons.';renderBalloonCover();}
+ activeCard=null;clearedDisplay=mode==='clear';const ticket=canShoot(t);$('ticketPanel').classList.toggle('hidden',!ticket);$('genericScratch').classList.toggle('hidden',ticket);
+ if(ticket){$('ticketPanelMessage').textContent=mode==='batch'?`Simulated ${nfmt(p.n,0)} tickets · ${usd(p.won)} won. Your last scratch result stays above.`:mode==='clear'?'Display cleared. Your results remain saved.':'Buy a ticket to pop the three balloons.';renderBalloonCover();renderTicketResult(mode==='clear'?'clear':'ready');}
  else if(mode==='single'){icon.textContent=p.kind===JACKPOT?'🏆':p.kind===CASH?'✨':'✕';num.textContent=p.kind===JACKPOT?'JACKPOT':p.kind===CASH?usd(p.payout):'LOSE';num.className='win';msg.textContent=p.kind===JACKPOT?`Item prize: ${p.label}`:p.kind===CASH?`Cash prize · ${usd(p.payout-t.price)} net for this ticket`:'No cash prize on this ticket.';}
  else if(mode==='batch'){icon.textContent='🎟️';num.textContent=usd(p.won);num.className='win';msg.textContent=`${nfmt(p.wins,0)} paying cash tickets · ${nfmt(p.jackpots,0)} item jackpots · Net ${usd(p.net)}`;}
  else{icon.textContent='✦';num.textContent='? ? ?';num.className='question';msg.textContent=t.unrevealed.length?`${nfmt(t.unrevealed.length,0)} purchased ticket(s) ready to reveal.`:'Your prize is waiting.';}
