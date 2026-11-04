@@ -754,6 +754,12 @@ let audioContext=null;
 function audio(){try{if(!audioContext)audioContext=new (window.AudioContext||window.webkitAudioContext)();if(audioContext.state==='suspended')audioContext.resume();return audioContext;}catch{return null;}}
 function popSound(){const ctx=audio();if(!ctx)return;const now=ctx.currentTime;const len=Math.floor(ctx.sampleRate*0.10);const buffer=ctx.createBuffer(1,len,ctx.sampleRate);const samples=buffer.getChannelData(0);for(let j=0;j<len;j++){const s=j/ctx.sampleRate;samples[j]=(Math.random()*2-1)*Math.exp(-s*48);}const src=ctx.createBufferSource(),f=ctx.createBiquadFilter(),g=ctx.createGain();src.buffer=buffer;f.type='lowpass';f.frequency.setValueAtTime(2600,now);f.frequency.exponentialRampToValueAtTime(390,now+0.09);g.gain.setValueAtTime(0.32,now);g.gain.exponentialRampToValueAtTime(0.001,now+0.1);src.connect(f).connect(g).connect(ctx.destination);src.start(now);src.stop(now+0.1);}
 function playPurchaseSound(){const ctx=audio();if(!ctx)return;const when=ctx.currentTime;[840,1260,1680].forEach((hz,i)=>{const o=ctx.createOscillator(),g=ctx.createGain(),s=when+i*.068;o.type='square';o.frequency.setValueAtTime(hz,s);g.gain.setValueAtTime(.045,s);g.gain.exponentialRampToValueAtTime(.0001,s+.12);o.connect(g).connect(ctx.destination);o.start(s);o.stop(s+.12);});}
+function updateNextTicketButton(){
+ const t=T(),btn=$('buyNext');
+ btn.textContent='Buy next ticket · '+usd(t.price,t.price%1===0?0:2);
+ const completed=!clearedDisplay&&!!t.lastRevealed&&(!activeCard||activeCard.popped.every(Boolean));
+ btn.classList.toggle('hidden',!completed);
+}
 function updateRevealButton(){const t=T();const btn=$('revealBtn');btn.classList.toggle('hidden',t.unrevealed.length===0);btn.textContent=`Show waiting ticket (${nfmt(t.unrevealed.length,0)})`;}
 function renderTicketResult(mode='ready',q=null){
  const t=T(),box=$('ticketResult'),prev=$('lastOutcomeSummary');
@@ -786,7 +792,7 @@ function renderTicketResult(mode='ready',q=null){
  prev.classList.toggle('hidden',!older);
  prev.textContent=older?'Previous ticket: '+(older.kind===JACKPOT?'ITEM JACKPOT':older.payout>0?'WIN '+usd(older.payout):'NO WIN')+(older.numbers?' · '+older.numbers.join(' · '):''):'';
 }
-function showTicket(q){clearedDisplay=false;activeCard={ticketId:T().id,uid:q.uid||'',item:q,popped:[false,false,false]};$('ticketPanel').classList.remove('hidden');$('genericScratch').classList.add('hidden');$('ticketPanelMessage').textContent='Pop all three balloons to reveal your prize.';renderBalloonCover();renderTicketResult('scratching');updateRevealButton();}
+function showTicket(q){clearedDisplay=false;activeCard={ticketId:T().id,uid:q.uid||'',item:q,popped:[false,false,false]};$('ticketPanel').classList.remove('hidden');$('genericScratch').classList.add('hidden');$('ticketPanelMessage').textContent='Pop all three balloons to reveal your prize.';renderBalloonCover();renderTicketResult('scratching');updateRevealButton();updateNextTicketButton();}
 function renderBalloonCover(){
  const q=activeCard;
  const previous=!q&&!clearedDisplay?T().lastRevealed:null;
@@ -803,7 +809,7 @@ function renderBalloonCover(){
 function finishCard(){const t=T();if(!activeCard||activeCard.ticketId!==t.id)return;const q=activeCard.item;
  const idx=t.unrevealed.findIndex(x=>x===q||(q.uid&&x.uid===q.uid));if(idx>=0)t.unrevealed.splice(idx,1);
  if(q.accounted===false){record(t,{mode:'single',n:1,won:q.payout,wins:q.kind===CASH&&q.payout>0?1:0,best:q.payout,prize:q.payout,prizeKind:q.kind,prizeLabel:q.label,jackpots:q.kind===JACKPOT?1:0,mostFrequent:'',luck:t.luck});}
- t.lastRevealed=cleanRevealed(q);save();renderStats();updateRevealButton();renderTicketResult('complete',q);$('ticketPanelMessage').textContent=(q.kind===JACKPOT?`ITEM JACKPOT: ${q.label}`:q.payout>0?`Winner! ${usd(q.payout)} paid`:'No match · Lose')+(q.changed?.length?` · ${q.changed.length} shot change${q.changed.length>1?'s':''}`:'');
+ t.lastRevealed=cleanRevealed(q);save();renderStats();updateRevealButton();renderTicketResult('complete',q);updateNextTicketButton();$('ticketPanelMessage').textContent=(q.kind===JACKPOT?`ITEM JACKPOT: ${q.label}`:q.payout>0?`Winner! ${usd(q.payout)} paid`:'No match · Lose')+(q.changed?.length?` · ${q.changed.length} shot change${q.changed.length>1?'s':''}`:'');
 }
 function popBalloon(i){if(!activeCard||activeCard.ticketId!==T().id||activeCard.popped[i])return;
  // Reveal in order; this makes the sequential shot simulation understandable to the player.
@@ -818,7 +824,7 @@ function setScratch(mode,p){const t=T(),icon=$('scratchIcon'),num=$('scratchNumb
  else if(mode==='single'){icon.textContent=p.kind===JACKPOT?'🏆':p.kind===CASH?'✨':'✕';num.textContent=p.kind===JACKPOT?'JACKPOT':p.kind===CASH?usd(p.payout):'LOSE';num.className='win';msg.textContent=p.kind===JACKPOT?`Item prize: ${p.label}`:p.kind===CASH?`Cash prize · ${usd(p.payout-t.price)} net for this ticket`:'No cash prize on this ticket.';}
  else if(mode==='batch'){icon.textContent='🎟️';num.textContent=usd(p.won);num.className='win';msg.textContent=`${nfmt(p.wins,0)} paying cash tickets · ${nfmt(p.jackpots,0)} item jackpots · Net ${usd(p.net)}`;}
  else{icon.textContent='✦';num.textContent='? ? ?';num.className='question';msg.textContent=t.unrevealed.length?`${nfmt(t.unrevealed.length,0)} purchased ticket(s) ready to reveal.`:'Your prize is waiting.';}
- updateRevealButton();}
+ updateRevealButton();updateNextTicketButton();}
 function shotExpected(t,c){
  if(!canShoot(t)||!c.valid)return null;
  const a=shotEffect(t,0)/100,b=shotEffect(t,1)/100;
@@ -1032,7 +1038,13 @@ function init(){
   const persisted=save();renderAll();$('createTicketDialog').close();
   toast(persisted?name+' created. Switch back anytime from the ticket menu.':'Ticket made in memory, but browser save failed. Export JSON now.');
  });
- $('editModifiers').addEventListener('click',()=>$('modifierEditor').scrollIntoView({behavior:'smooth',block:'start'}));
+ $('editModifiers').addEventListener('click',()=>{$('advancedSettings').open=true;$('modifierEditor').scrollIntoView({behavior:'smooth',block:'start'});});
+ $('quickEditTicket').addEventListener('click',()=>{$('advancedSettings').open=true;$('ticketName').scrollIntoView({behavior:'smooth',block:'center'});});
+ $('buyNext').addEventListener('click',()=>{
+  const t=T(),before=t.stats.count;
+  buyOne();
+  if(t.stats.count>before){(canShoot(t)?$('pixelTicket'):$('genericScratch')).scrollIntoView({behavior:'smooth',block:'start'});}
+ });
  $('ticketName').addEventListener('change',e=>{const name=e.target.value.trim();if(!validName(name)){toast('Enter a name from 1 to 70 characters.');e.target.value=T().name;return;}T().name=name;save();renderTicketSelector();});
  $('ticketPrice').addEventListener('change',e=>{const n=Number(e.target.value);if(!Number.isFinite(n)||n<=0||n>1000000){toast('Price must be above $0 and at most $1,000,000.');e.target.value=T().price;return;}T().price=n;save();renderTicketSelector();refreshOdds();renderStats();});
  $('packSize').addEventListener('change',e=>{const n=Number(e.target.value);if(!integer(n,1,1000000)){toast('Pack size must be an integer from 1 to 1,000,000.');e.target.value=T().packSize;return;}T().packSize=n;T().pack=null;T().stage=0;save();refreshOdds();});
