@@ -91,3 +91,10 @@
 - **Critical parity test:** the simulator's Javascript logic and Godot's GDScript code must produce statistically/analytically equivalent behavior for prize allocation, jackpot packs, modifier bonuses, balloon changes and payout computation. If an engine differs, resolve before shipping; don't merely copy a summary of percentages.
 - "Directly to our game" is the intended streamlined workflow, **not a claim that export-to-Godot already works**. The current website is v2.9 and production/export conversion has NOT yet been implemented or approved for a code change.
 - **HOLD:** User has explicitly requested continuing visual drafts and NO live-code changes while the two-iPhone-column layout and per-ticket art selection are discussed.
+
+
+## November 5, 2026 — Shot-mechanic checkpoint (NOTES ONLY)
+- Permanent discussion record: [Shot 1 and Shot 3 new rules](https://github.com/bmcd1996/lucky-buck/blob/main/design/shot-mechanics-discussion-2026-11-05.md).
+- Confirmed: if shot 1 bullseye effect triggers on **0,5,25**, it atomically changes **both** first and second numbers to **1,1,25**. One trigger, not two separate odds rolls; a successful bullseye must not spread a zero and harm the result. A triggered second shot can produce **1,1,1**.
+- Under discussion: each shot gets an independently adjustable effect chance. Triple-bullseye third shot potentially upgrades an existing winner exactly one tier at a default **10%** adjustable chance; no higher than $25. Whether zero can be rescued by shot 3 and how the zero exception generalizes are unresolved.
+- **Owner explicitly requested no final decision or live change to third shot yet.** Preserve as design notes; do not deploy code on this checkpoint. Prior stored history and project files must remain intact.
