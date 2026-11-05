@@ -1,50 +1,75 @@
 # Lucky Buck — shot mechanics, owner's restated spec (November 5, 2026)
 
 **Status: NOTES ONLY. Not implemented. Do not change the live calculator until the owner says so.**
-**This file supersedes** `shot-mechanics-discussion-2026-11-05.md` and the shot sections of `lucky-buck-chance-of-streak.md` wherever they conflict. The owner asked to set aside the earlier notes and the current code and describe the mechanic from scratch.
+**Standing rule from the owner: never make code changes without explicit permission.** Build changes as a separate preview page first; nothing goes live until the owner approves.
+**This file supersedes** `shot-mechanics-discussion-2026-11-05.md` and the shot sections of `lucky-buck-chance-of-streak.md` wherever they conflict. The owner set aside the earlier notes and the current code and described the mechanic from scratch. Latest update: 12:38 Central.
 
 ## How to win
-- Three matching dollar numbers wins that amount. Values on the ticket: 0, 1, 5, 25.
+- Three matching dollar numbers wins that amount. Ticket values: 0, 1, 5, 25.
 - A number changing does nothing on its own. Only three matching non-zero numbers is a win.
 
-## Special feature
-- The player shoots three balloons in order. A **bullseye** gives a chance at a bonus.
-- Each shot's bonus chance is a separate setting: **default 5%**, adjustable in its own dropdown.
+## Shot accuracy zones (each shot's accuracy is 0–100%)
+| Zone | Default | What happens |
+|---|---|---|
+| **Bullseye range** | exactly 100% (adjustable box, e.g. 90–100%) | Full bonus chance. Counts toward shot 3's requirement. |
+| **Partial hit** | anything between the zones | **Scaled** bonus chance = accuracy × that shot's bonus. Example: 75% accuracy × 5% = 3.75%. |
+| **No-bonus zone** | **off** (adjustable box, e.g. 5% accuracy or less = "95% off center") | No bonus and no penalty. |
+| **Complete miss** | 0% | Missed-shot penalty roll. |
 
-## Shot 1 (bullseye)
-- 5% chance that balloon 2 changes to match balloon 1.
+## Bonus chances, stacking and display
+- Every shot's bonus starts at **5%** in its own dropdown, with the **stacked (boosted) chance shown next to it in green**, also editable:
+  - **Shot 1:** 5%
+  - **Shot 2:** 5% | **10%** (green)
+  - **Shot 3:** 5% | **15%** (green)
+- **Stacking only happens when the previous roll actually succeeds** — bullseyes included. A bullseye whose roll misses does not boost the next shot.
+- A successful **partial** roll stacks **its own percentage** onto the next shot. Example: shot 1 at 75% accuracy succeeds at 3.75% → a shot 2 bullseye gets 5% + 3.75% = 8.75%.
+- A **shotgun sound** plays whenever a bonus roll succeeds.
+
+## Shot 1 bonus
+- If it succeeds: balloon 2 changes to match balloon 1.
 - Example: hidden 5, 1, 25 → **5, 5, 25** (still a loser).
-- **Zero rule:** a bullseye only ever helps. If balloon 1 is 0, the 0 becomes 1 (the next prize level) **and** balloon 2 becomes 1. One roll covers both changes.
-- Example: hidden 0, 0, 5 → **1, 1, 5**.
+- **Zero rule:** a bonus only ever helps. If balloon 1 is 0, it becomes 1 (the next prize level) **and** balloon 2 becomes 1, from one roll. Example: 0, 0, 5 → **1, 1, 5**.
 
-## Shot 2 (bullseye)
-- 5% chance that balloon 3 changes to match balloon 2.
-- Example: 5, 5, 25 → **5, 5, 5** ($5 winner). 1, 1, 5 → **1, 1, 1** ($1 winner).
-- **Same zero rule:** if balloon 2 is 0, it becomes 1 and balloon 3 becomes 1, from one roll.
-- Example: hidden 1, 0, 25, shot 1 misses, shot 2 bullseye triggers → **1, 1, 1** ($1 winner).
+## Shot 2 bonus
+- If it succeeds: balloon 3 changes to match balloon 2.
+- Examples: 5, 5, 25 → **5, 5, 5** ($5). 1, 1, 5 → **1, 1, 1** ($1).
+- **Same zero rule:** if balloon 2 is 0, it becomes 1 and balloon 3 becomes 1, from one roll. Example: 1, 0, 25 (shot 1 missed) → **1, 1, 1** ($1).
 
-## Shot 3 (bullseye) — prize upgrade
-- 5% chance (own dropdown) that all three numbers move up one prize level.
-- Example: 1, 1, 1 → **5, 5, 5**.
-- **Catch (confirmed):** shots 1, 2 **and** 3 must all be bullseyes. In the 1, 0, 25 example above, shot 1 missed, so the ticket ends at 1, 1, 1 — no upgrade chance.
+## Shot 3 bonus — prize upgrade
+- If it succeeds, a **winning** card moves up exactly one prize level: **1 → 5 → 25 → Grand Prize**.
+- **Grand Prize:** its own dropdown next to shot 3's boxes, default **$50**, editable. ("Grand prize ($50)".)
+- **Eligibility:** shots 1 **and** 2 must both land in the **bullseye range** **and** their rolls must **succeed**.
+- Shot 3 itself gets the full chance on a bullseye, or a **scaled** chance on a partial hit.
+- On a card that is **already a winner** (e.g. 1, 1, 1), shots 1 and 2 still roll and can succeed (and play the sound) even though nothing changes, so the card can still earn the upgrade: 1, 1, 1 → **5, 5, 5**.
+- A **losing** card is never upgraded. Example: three successful bullseyes on 5, 5, 25 → stays a loser.
 
-## Full worked examples from the owner
-1. Hidden 5, 1, 25. Shot 1 bullseye triggers → 5, 5, 25. Shot 2 bullseye triggers → 5, 5, 5. Shot 3 reveals 5. **$5 winner.**
-2. Hidden 0, 0, 5. Shot 1 bullseye triggers → 1, 1, 5. Shot 2 bullseye triggers → 1, 1, 1. Shot 3 bullseye (all three bullseyes) triggers → **5, 5, 5.**
+## Missed-shot penalty
+- A **complete miss** (0% accuracy) rolls a chance that **the missed balloon turns to 0**.
+- **One dropdown** for all misses on any balloon ("Missed shot penalty"), default **5%**.
+- **Back-to-back misses stack:** 5%, then 10%, then 15%.
+- Example: 5, 5, 5 winner, shot 2 misses and the penalty hits → **5, 0, 5** (loser).
 
-## Still open — ask the owner before coding
-1. **Shot 2's chance:** flat 5% in its own dropdown, or does it stack (e.g. 10%) after a shot 1 bullseye, as older notes described?
-2. **Shot 3 on a losing card:** assumed it only upgrades a card that is already a winner, and 25, 25, 25 is the top (no further upgrade). Confirm.
-3. **Shot 3's catch:** do shots 1 and 2 only need to be bullseyes, or must their 5% rolls also have succeeded?
-4. **Non-bullseyes:** assumed anything other than a bullseye does nothing (dropping the current partial-accuracy bonuses and miss penalties that can turn winners into losers). Confirm.
-5. **0, 0, 0:** the simulator never deals 0, 0, 0, and under these rules zeros never spread, so shot 3 never needs to handle it — unless the owner wants 0, 0, 0 to exist as a losing ticket in the game.
+## Double Down
+- Stacks with the shot 3 upgrade. A Grand Prize ($50) that also hits Double Down pays **$100**.
+
+## Worked examples from the owner
+1. Hidden 5, 1, 25. Shot 1 bullseye succeeds → 5, 5, 25. Shot 2 bullseye succeeds → 5, 5, 5. **$5 winner.**
+2. Hidden 0, 0, 5. Shot 1 bullseye succeeds → 1, 1, 5. Shot 2 bullseye succeeds → 1, 1, 1. Shot 3 bullseye succeeds → **5, 5, 5.**
+3. Hidden 1, 0, 25. Shot 1 misses, shot 2 bullseye succeeds → **1, 1, 1.** No upgrade chance (shot 1 wasn't a successful bullseye).
+4. 25, 25, 25 with three successful bullseye rolls → **$50 Grand Prize**; plus Double Down → **$100**.
+
+## Possible future question (not raised by owner yet)
+- The simulator never deals 0, 0, 0, and bonuses never spread zeros, but the **miss penalty can now create zeros**. Check with the owner whether any further zero handling is wanted.
 
 ## Next steps
-- Owner will next describe **how this should be displayed** in the calculator.
-- Then: test the current calculator against this spec and report where it matches and where it doesn't.
+1. Owner describes **how this should be displayed** in the calculator.
+2. Test the current calculator against this spec and report where it matches and where it doesn't.
+3. Only with explicit permission: build it as a **preview page**, owner tests on phone, then goes live.
 
 ## Known gaps in the current code (v3.0) vs this spec
-- Shots 1 and 2 share one effect rate; no separate dropdowns.
-- Shot 3 does nothing.
-- A bullseye can copy a 0 forward (e.g. 0, 5, 25 → 0, 0, 25), which breaks the zero rule.
-- Partial accuracy and miss penalties exist that this spec may remove (open question 4).
+- Shots 1 and 2 share one effect rate; no separate or boosted dropdowns.
+- Shot 3 does nothing; no Grand Prize.
+- A bonus can copy a 0 forward (e.g. 0, 5, 25 → 0, 0, 25), which breaks the zero rule.
+- Bullseye is fixed at exactly 100%; no bullseye range or no-bonus zone boxes.
+- Stacking currently multiplies on consecutive 100% shots regardless of whether the roll succeeded.
+- Current penalties scale for any shot below 50% and replace a matching number with a different non-zero value; spec wants penalties only on a complete miss, turning that balloon to 0.

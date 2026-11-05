@@ -104,3 +104,4 @@
 - New source of truth: [Owner's shot-mechanics spec](https://github.com/bmcd1996/lucky-buck/blob/main/design/shot-mechanics-owner-spec-2026-11-05.md). It supersedes the earlier Nov 5 shot discussion where they conflict.
 - Confirmed: separate default-5% dropdowns per shot; bullseyes never spread a zero (0 → 1 and the next balloon → 1, one roll) on shots 1 and 2; shot 3 upgrades all three numbers one prize level only if all three shots were bullseyes.
 - Open questions and next steps are listed in that file. The live calculator is v3.0 (not v2.7 as noted above). No code changed.
+- **Update, 12:38 Central:** spec now also covers accuracy zones (bullseye range, scaled partial hits, no-bonus zone), stacking only on successful rolls, shot 3 upgrade to an editable Grand Prize (default $50, stacks with Double Down), and a complete-miss penalty that turns the missed balloon to 0. **Standing rule: never change the calculator code without the owner's explicit permission.**
