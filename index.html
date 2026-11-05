@@ -397,7 +397,10 @@ html,body{overflow-x:hidden}
 .v3-shot-readout{display:flex;flex-direction:column;gap:1px;flex:0 0 auto;max-width:136px;font-size:10px}
 .v3-shot-line{display:grid;grid-template-columns:repeat(3,27px);gap:2px;justify-content:end}
 .v3-shot-cell{background:#234434;border:1px solid #47705b;border-radius:4px;color:#9fafa7;text-align:center;font-variant-numeric:tabular-nums;line-height:18px;font-weight:800}
-.v3-shot-cell.changed{color:#6ee2a1;border-color:#4c976b}
+.v3-shot-cell.changed{color:#6ee2a1;border-color:#4c976b}.v3-shot-cell.penalty{color:#ff8f8f;border-color:#a35454}
+.shot-rates{display:grid;gap:2px}.shot-rates label{font-size:10px;font-weight:750;color:#e6f6e6;margin:3px 0 0;line-height:1.2}
+.rate-pair{display:flex;gap:3px;min-width:0}.rate-pair select{flex:1 1 0;width:auto!important;min-width:0;font-size:11px;padding:3px 2px;min-height:27px}
+.rate-pair select.boost{color:#6ee2a1;border-color:#4c976b}.shot-boost{color:#6ee2a1;font-weight:800}
 .v3-shot-actions{display:flex;gap:4px;align-items:center}
 .v3-help{border:1px solid #648b77;background:#18392d;color:#d9e5db;border-radius:50%;font-size:10px;line-height:1;width:21px;height:21px;min-width:21px;padding:0;display:inline-grid;place-items:center;vertical-align:middle;box-shadow:none}
 .v3-help:focus-visible{outline:2px solid #ffd481;outline-offset:2px}
@@ -487,7 +490,7 @@ html,body{overflow-x:hidden}
 <div class="wrap">
 <header class="header">
 <div class="brand"><div class="brand-mark">$</div><div><small>QUILL PRODUCTIONS</small><h1>Cardboard to Cash</h1></div></div>
-<div class="header-right"><span class="version-badge" title="Lucky Buck simulator version">v3.0</span><span class="save" id="saveStatus">Loading…</span></div>
+<div class="header-right"><span class="version-badge" title="Lucky Buck simulator version">v3.1</span><span class="save" id="saveStatus">Loading…</span></div>
 </header>
 
 <section class="hero">
@@ -520,9 +523,7 @@ html,body{overflow-x:hidden}
   <div class="shot-field"><label for="shot1">Balloon 1</label><select id="shot1"></select><small id="shotDescription1"></small></div>
   <div class="shot-field"><label for="shot2">Balloon 2</label><select id="shot2"></select><small id="shotDescription2"></small></div>
   <div class="shot-field"><label for="shot3">Balloon 3</label><select id="shot3"></select><small id="shotDescription3"></small></div>
-  <details class="shot-advanced" id="shotAdvanced"><summary>Advanced shot effect rates</summary><div class="shot-advanced-inner"><label class="field-label" for="shotRateMode">Shot effect rates</label><p class="shot-rate-help">Above 50% accuracy can turn losses into wins; below 50% can turn wins into losses. Rates control how often.</p><select id="shotRateMode"><option value="default">Default · ±5% maximum</option><option value="edit">Edit rates</option></select>
-  <div id="shotEdit" class="shot-edit hidden"><label for="shotBullMax">Bullseye max (%)</label><input id="shotBullMax" type="number" min="0" max="100" step="0.01" value="5"><label for="shotMissMax">Miss max (%)</label><input id="shotMissMax" type="number" min="0" max="100" step="0.01" value="5"></div>
-  </div></details>
+  <details class="shot-advanced" id="shotAdvanced"><summary>Shot bonus settings</summary><div class="shot-advanced-inner shot-rates"><label for="bonus1">Shot 1 bonus</label><div class="rate-pair"><select id="bonus1"></select></div><label for="bonus2">Shot 2 bonus</label><div class="rate-pair"><select id="bonus2"></select><select id="boost2" class="boost" aria-label="Shot 2 boosted chance"></select></div><label for="bonus3">Shot 3 upgrade</label><div class="rate-pair"><select id="bonus3"></select><select id="boost3" class="boost" aria-label="Shot 3 boosted chance"></select></div><label for="grandPrize">Grand prize</label><div class="rate-pair"><select id="grandPrize"></select></div><label for="missPenalty">Missed shot penalty</label><div class="rate-pair"><select id="missPenalty"></select></div><label for="bullMin">Bullseye range</label><div class="rate-pair"><select id="bullMin"></select></div><label for="noBonusMax">No-bonus range</label><div class="rate-pair"><select id="noBonusMax"></select></div></div></details>
   <p id="shotProjection" class="shot-projection">Expected shot-adjusted odds appear here.</p>
  </section>
 <div class="purchase-row"><button class="btn primary" id="buyOne" type="button">Buy one ticket · $1</button><span class="purchase-helper">Choose your shots, buy, then pop the balloons below.</span></div>
@@ -706,28 +707,67 @@ function cleanRates(raw){const s=defaultRates();if(!raw||typeof raw!=='object')r
 const doubleRate=t=>t.rates?.doubleDown?.mode==='edit'?t.rates.doubleDown.levels[t.doubleDown]:DOUBLE[t.doubleDown];
 const momentumRates=(t,level=t.momentum)=>t.rates?.momentum?.mode==='edit'?t.rates.momentum.levels[level]:MOMENTUM[level];
 const luckRates=(t,level=t.luck)=>t.rates?.luck?.mode==='edit'?t.rates.luck.levels[level]:null;
-const defaultShots=()=>({accuracy:[50,50,50],mode:'default',bullMax:5,missMax:5});
-function cleanShots(raw){const s=defaultShots();if(!raw||typeof raw!=='object')return s;s.accuracy=[0,1,2].map(i=>integer(raw.accuracy?.[i],0,100)?Number(raw.accuracy[i]):50);s.mode=raw.mode==='edit'?'edit':'default';for(const k of ['bullMax','missMax'])if(Number.isFinite(Number(raw[k]))&&Number(raw[k])>=0&&Number(raw[k])<=100)s[k]=Number(raw[k]);return s;}
-const maxBull=t=>t.shots?.mode==='edit'?t.shots.bullMax:5;
-const maxMiss=t=>t.shots?.mode==='edit'?t.shots.missMax:5;
-function shotEffect(t,i){const a=t.shots.accuracy[i];if(a===50)return 0;const steps=a===100?100:a===0?0:a;let streak=1;
- if(a===100||a===0){for(let j=i-1;j>=0&&t.shots.accuracy[j]===a;j--)streak++;}
- const raw=a>50?maxBull(t)*(steps-50)/50:-maxMiss(t)*(50-steps)/50;
- return Math.sign(raw)*Math.min(100,Math.abs(raw)*streak);
-}
+const defaultShots=()=>({accuracy:[50,50,50],bonus:[5,5,5],boost:[10,15],miss:5,bullMin:100,noBonusMax:0,grand:50});
+function cleanShots(raw){const s=defaultShots();if(!raw||typeof raw!=='object')return s;
+ const rate=v=>v!==null&&v!==''&&Number.isFinite(Number(v))&&Number(v)>=0&&Number(v)<=100;
+ s.accuracy=[0,1,2].map(i=>integer(raw.accuracy?.[i],0,100)?Number(raw.accuracy[i]):50);
+ if(Array.isArray(raw.bonus))s.bonus=s.bonus.map((d,i)=>rate(raw.bonus[i])?Number(raw.bonus[i]):d);
+ if(Array.isArray(raw.boost))s.boost=s.boost.map((d,i)=>rate(raw.boost[i])?Number(raw.boost[i]):d);
+ if(rate(raw.miss))s.miss=Number(raw.miss);
+ if(integer(raw.bullMin,1,100))s.bullMin=Number(raw.bullMin);
+ if(integer(raw.noBonusMax,0,99))s.noBonusMax=Number(raw.noBonusMax);
+ if(s.noBonusMax>=s.bullMin)s.noBonusMax=0;
+ if(Number.isFinite(Number(raw.grand))&&Number(raw.grand)>0&&Number(raw.grand)<=1e6)s.grand=Number(raw.grand);
+ return s;}
+// Accuracy zones: 0% = miss · at/above bullMin = bullseye · at/below noBonusMax = no bonus · otherwise a partial hit.
+function shotZone(s,i){const a=s.accuracy[i];if(a===0)return 'miss';if(a>=s.bullMin)return 'bull';if(a<=s.noBonusMax)return 'none';return 'partial';}
+const zoneScale=(s,i)=>{const z=shotZone(s,i);return z==='bull'?1:z==='partial'?s.accuracy[i]/100:0;};
+const clampPct=v=>Math.min(100,Math.max(0,v));
+// Bonus chance for a shot. Its own bonus is scaled by accuracy. If the previous shot's roll succeeded, its boost carries over:
+// after a successful bullseye the green box sets the boost; after a successful partial hit, that shot's chance is added.
+function bonusChance(s,i,prev){const z=shotZone(s,i);if(z!=='bull'&&z!=='partial')return 0;
+ const own=s.bonus[i]*zoneScale(s,i);let carry=0;
+ if(i>0&&prev?.success)carry=prev.zone==='bull'?Math.max(0,s.boost[i-1]-s.bonus[i]):prev.chance;
+ return clampPct(own+carry);}
+// Missed-shot penalty: one rate for every miss; back-to-back misses stack.
+function missChance(s,i){if(shotZone(s,i)!=='miss')return 0;let streak=1;for(let j=i-1;j>=0&&shotZone(s,j)==='miss';j--)streak++;return clampPct(s.miss*streak);}
+const nextLevel=(v,s)=>v===1?5:v===5?25:v===25?s.grand:v;
+const isWin=n=>n[0]>0&&n[0]===n[1]&&n[1]===n[2];
+// Applies the three shots in balloon order. roll(chancePercent) decides each roll.
+function resolveShots(original,s,roll){
+ const numbers=original.slice(),changed=[],hits=[false,false,false];let pre=null,prev=null,chain=true;
+ const set=(idx,to,kind,shot,chance)=>{if(numbers[idx]!==to){changed.push({balloon:idx+1,from:numbers[idx],to,chance,kind,shot:shot+1});numbers[idx]=to;}};
+ for(let i=0;i<3;i++){const z=shotZone(s,i);
+  if(z==='miss'){const p=missChance(s,i);if(p>0&&numbers[i]!==0&&roll(p))set(i,0,'penalty',i,p);prev={zone:z,success:false,chance:0};chain=false;continue;}
+  if(z==='none'){prev={zone:z,success:false,chance:0};chain=false;continue;}
+  if(i<2){
+   const p=bonusChance(s,i,prev),ok=p>0&&roll(p);hits[i]=ok;
+   // A bonus only ever helps: a zero becomes 1 and the next balloon becomes 1, from one roll.
+   if(ok){if(numbers[i]===0){set(i,1,'rescue',i,p);set(i+1,1,'rescue',i,p);}else set(i+1,numbers[i],'rescue',i,p);}
+   if(!(z==='bull'&&ok))chain=false;prev={zone:z,success:ok,chance:p};
+  }else if(chain&&isWin(numbers)){
+   // Shot 3: only after successful bullseyes on shots 1 and 2, and only on a winning card.
+   const p=bonusChance(s,2,prev),ok=p>0&&roll(p);hits[2]=ok;
+   if(ok){pre=numbers.slice();const up=nextLevel(numbers[0],s);for(let k=0;k<3;k++)set(k,up,'upgrade',2,p);}
+  }
+ }
+ return {numbers,changed,hits,pre};}
+// Every possible roll path with its exact probability (used for the modeled odds).
+function shotPaths(original,s){const out=[],stack=[[]];
+ while(stack.length){const script=stack.pop(),start=script.length;let k=0,prob=1;
+  const r=resolveShots(original,s,p=>{const q=p/100;if(k>=script.length)script.push(false);const v=script[k++];prob*=v?q:1-q;return v;});
+  for(let j=start;j<k;j++)stack.push(script.slice(0,j).concat(true));
+  if(prob>0)out.push({...r,prob});}
+ return out;}
 function canShoot(t){return t.id==='lucky-buck'&&isLuckyCurve(t)&&t.rows.filter(r=>r.kind!==JACKPOT).length===4;}
 function useShots(baseKind,baseAmount,t,random=Math.random){
- if(!canShoot(t)||baseKind===JACKPOT)return {numbers:null,original:null,payout:baseKind===CASH?baseAmount:0,changed:[]};
- let original=baseKind===CASH&&SHOT_VALUES.includes(baseAmount)&&baseAmount>0?[baseAmount,baseAmount,baseAmount]:BASE_LOSERS[Math.floor(random()*BASE_LOSERS.length)].slice();
+ const plain=payout=>({numbers:null,original:null,pre:null,hits:null,payout,changed:[]});
+ if(!canShoot(t)||baseKind===JACKPOT)return plain(baseKind===CASH?baseAmount:0);
  // A custom CASH prize outside Lucky Buck's balloon values is displayed and paid normally.
- if(baseKind===CASH&&!SHOT_VALUES.includes(baseAmount))return {numbers:null,original:null,payout:baseAmount,changed:[]};
- let numbers=original.slice(),changed=[];
- for(let i=0;i<2;i++){
-  const amount=shotEffect(t,i),next=i+1;
-  if(amount>0&&baseKind===LOSE&&numbers[next]!==numbers[i]&&random()<amount/100){let before=numbers[next];numbers[next]=numbers[i];changed.push({balloon:next+1,from:before,to:numbers[next],chance:amount,kind:'rescue'});}
-  if(amount<0&&baseKind===CASH&&numbers[next]===numbers[i]&&random()<(-amount)/100){let before=numbers[next];const other=[1,5,25].filter(x=>x!==before);numbers[next]=other[Math.floor(random()*other.length)];changed.push({balloon:next+1,from:before,to:numbers[next],chance:-amount,kind:'penalty'});}
- }
- return {numbers,original,payout:numbers[0]===numbers[1]&&numbers[1]===numbers[2]&&numbers[0]>0?numbers[0]:0,changed};
+ if(baseKind===CASH&&!SHOT_VALUES.includes(baseAmount))return plain(baseAmount);
+ const original=baseKind===CASH&&baseAmount>0?[baseAmount,baseAmount,baseAmount]:BASE_LOSERS[Math.floor(random()*BASE_LOSERS.length)].slice();
+ const r=resolveShots(original,t.shots,p=>random()*100<p);
+ return {numbers:r.numbers,original,pre:r.pre,hits:r.hits,payout:isWin(r.numbers)?r.numbers[0]:0,changed:r.changed};
 }
 
 const nfmt=(v,places=6)=>Number(v).toLocaleString('en-US',{maximumFractionDigits:places});
@@ -750,11 +790,12 @@ const integer=(v,min,max)=>Number.isSafeInteger(Number(v))&&Number(v)>=min&&Numb
 const validName=s=>typeof s==='string'&&s.trim().length>0&&s.trim().length<=70;
 function parseFraction(raw){const s=String(raw).trim();if(/^\d+(?:\.\d+)?(?:\/\d+(?:\.\d+)?)?$/.test(s)){if(s.includes('/')){const [a,b]=s.split('/').map(Number);return b>0?a/b:NaN}return Number(s)}return NaN}
 function cleanRun(raw){if(!raw||typeof raw!=='object')return null;const n=Number(raw.n),won=Number(raw.won);if(!integer(n,1,1000000000)||!Number.isFinite(won)||won<0)return null;return {mode:raw.mode==='single'?'single':raw.mode==='batch'?'batch':n===1?'single':'batch',n,won,wins:sane(raw.wins),best:sane(raw.best),prize:sane(raw.prize),prizeKind:[CASH,LOSE,JACKPOT].includes(raw.prizeKind)?raw.prizeKind:(Number(raw.prize)>0?CASH:LOSE),prizeLabel:String(raw.prizeLabel||'').slice(0,120),jackpots:sane(raw.jackpots),mostFrequent:String(raw.mostFrequent||'').slice(0,160),luck:clampLevel(raw.luck),at:String(raw.at||'').slice(0,80)};}
+const okNumbers=n=>Array.isArray(n)&&n.length===3&&n.every(v=>Number.isFinite(v)&&v>=0&&v<=1e6);
 function cleanRevealed(q){
  if(!q||typeof q!=='object'||!['cash','lose','jackpot'].includes(q.kind))return null;
  const payout=Number(q.payout);
  if(!Number.isFinite(payout)||payout<0||payout>1e12)return null;
- const numbers=Array.isArray(q.numbers)&&q.numbers.length===3&&q.numbers.every(n=>[0,1,5,25].includes(n))?q.numbers.slice():null;
+ const numbers=okNumbers(q.numbers)?q.numbers.slice():null;
  return {kind:q.kind,payout,label:String(q.label||'').slice(0,120),numbers};
 }
 function cleanTicket(raw){
@@ -765,7 +806,7 @@ function cleanTicket(raw){
  if(rows.filter(r=>r.kind===LOSE).length>1)throw Error('Only one Lose row is allowed.');
  if(!integer(raw.packSize,1,1000000))throw Error('Pack size must be an integer from 1 to 1,000,000.');
  const rawStats=raw.stats||{},st=stats();for(const k of Object.keys(st)){if(rawStats[k]!==undefined&&Number.isFinite(Number(rawStats[k]))&&Number(rawStats[k])>=0)st[k]=Number(rawStats[k]);}
- const cleanQueued=Array.isArray(raw.unrevealed)?raw.unrevealed.slice(0,100000).filter(q=>q&&[CASH,LOSE,JACKPOT].includes(q.kind)&&Number.isFinite(Number(q.payout))&&Number(q.payout)>=0).map(q=>({kind:q.kind,payout:Number(q.payout),label:String(q.label||'').slice(0,120),accounted:q.accounted!==false,uid:String(q.uid||'').slice(0,80),numbers:Array.isArray(q.numbers)&&q.numbers.length===3&&q.numbers.every(v=>SHOT_VALUES.includes(v))?q.numbers.slice():null,original:Array.isArray(q.original)&&q.original.length===3&&q.original.every(v=>SHOT_VALUES.includes(v))?q.original.slice():null,changed:Array.isArray(q.changed)?q.changed.slice(0,2):[]})):[];
+ const cleanQueued=Array.isArray(raw.unrevealed)?raw.unrevealed.slice(0,100000).filter(q=>q&&[CASH,LOSE,JACKPOT].includes(q.kind)&&Number.isFinite(Number(q.payout))&&Number(q.payout)>=0).map(q=>({kind:q.kind,payout:Number(q.payout),label:String(q.label||'').slice(0,120),accounted:q.accounted!==false,uid:String(q.uid||'').slice(0,80),numbers:okNumbers(q.numbers)?q.numbers.slice():null,original:okNumbers(q.original)?q.original.slice():null,pre:okNumbers(q.pre)?q.pre.slice():null,hits:Array.isArray(q.hits)?q.hits.slice(0,3).map(Boolean):null,changed:Array.isArray(q.changed)?q.changed.slice(0,8):[]})):[];
  const stage=integer(raw.stage,0,2)?Number(raw.stage):0;
  let pack=null;
  if(raw.pack&&integer(raw.pack.index,0,Number(raw.packSize))&&integer(raw.pack.serial,0,1000000000)&&Array.isArray(raw.pack.assignments)){
@@ -881,9 +922,9 @@ function singleDraw(t,random=Math.random){
   const baseAmount=row.kind===CASH?row.amount:0;
   const shot=useShots(row.kind,baseAmount,t,random);
   const kind=shot.payout>0?CASH:LOSE;
-  const doubled=kind===CASH&&shot.payout===c.highestAmount&&random()*100<doubleRate(t);
+  const doubled=kind===CASH&&shot.payout>=c.highestAmount&&random()*100<doubleRate(t);
   const payout=shot.payout*(doubled?2:1);
-  outcome={kind,payout,label:kind===CASH?usd(payout):'Lose',baseTop,doubled,numbers:shot.numbers,original:shot.original,changed:shot.changed};
+  outcome={kind,payout,label:kind===CASH?usd(payout):'Lose',baseTop,doubled,numbers:shot.numbers,original:shot.original,pre:shot.pre,hits:shot.hits,changed:shot.changed};
  }
  // Momentum tracks the UNDERLYING outcome, not any skill mutation or Double Down payout.
  if(t.momentum===0)t.stage=0;
@@ -893,7 +934,7 @@ function singleDraw(t,random=Math.random){
 }
 function record(t,r){const s=t.stats;s.count+=r.n;s.spent+=t.price*r.n;s.won+=r.won;s.wins+=r.wins;s.best=Math.max(s.best,r.best);s.jackpots+=r.jackpots||0;t.last={...r,at:new Date().toLocaleString()};t.history.unshift({...t.last});t.history=t.history.slice(0,24);}
 function buyOne(){const t=T();const c=valid(t);if(!c.valid){toast(c.error);return;}if(t.unrevealed.length>80000){toast('Reveal some tickets or export a backup before buying more.');return;}
- const p=singleDraw(t);t.unrevealed.push({kind:p.kind,payout:p.payout,label:p.label,accounted:true,numbers:p.numbers,original:p.original,changed:p.changed,uid:'t-'+(t.stats.count+1)});record(t,{mode:'single',n:1,won:p.payout,wins:p.kind===CASH&&p.payout>0?1:0,best:p.payout,prize:p.payout,prizeKind:p.kind,prizeLabel:p.label,jackpots:p.kind===JACKPOT?1:0,mostFrequent:'',luck:t.luck});if(!canShoot(t))t.lastRevealed=cleanRevealed(p);save();renderStats();refreshOdds();playPurchaseSound();if(canShoot(t))showTicket(t.unrevealed[t.unrevealed.length-1]);else{setScratch('single',p);updateRevealButton();}}
+ const p=singleDraw(t);t.unrevealed.push({kind:p.kind,payout:p.payout,label:p.label,accounted:true,numbers:p.numbers,original:p.original,pre:p.pre,hits:p.hits,changed:p.changed,uid:'t-'+(t.stats.count+1)});record(t,{mode:'single',n:1,won:p.payout,wins:p.kind===CASH&&p.payout>0?1:0,best:p.payout,prize:p.payout,prizeKind:p.kind,prizeLabel:p.label,jackpots:p.kind===JACKPOT?1:0,mostFrequent:'',luck:t.luck});if(!canShoot(t))t.lastRevealed=cleanRevealed(p);save();renderStats();refreshOdds();playPurchaseSound();if(canShoot(t))showTicket(t.unrevealed[t.unrevealed.length-1]);else{setScratch('single',p);updateRevealButton();}}
 function simulate(n){const t=T(),c=valid(t);if(!c.valid){toast(c.error);return;}if(!integer(n,1,1000000)){toast('Enter an integer batch size from 1 to 1,000,000.');return;}
  let won=0,wins=0,best=0,jackpots=0;const counts=new Map();
  for(let i=0;i<n;i++){const p=singleDraw(t);won+=p.payout;best=Math.max(best,p.payout);if(p.kind===CASH&&p.payout>0){wins++;counts.set(p.payout,(counts.get(p.payout)||0)+1);}if(p.kind===JACKPOT)jackpots++;}
@@ -929,7 +970,7 @@ function renderTicketResult(mode='ready',q=null){
   const popped=activeCard.popped.filter(Boolean).length;
   eyebrow='CURRENT TICKET';
   heading=popped?'KEEP GOING':'SCRATCH TO REVEAL';
-  numbers=[0,1,2].map(i=>activeCard.popped[i]?(activeCard.item.numbers?String(activeCard.item.numbers[i]):'★'):'?').join(' · ');
+  const shown=shownNumbers(activeCard.item,activeCard.popped);numbers=[0,1,2].map(i=>activeCard.popped[i]?(shown?String(shown[i]):'★'):'?').join(' · ');
   detail=(popped===0?'Pop balloon 1 first.':popped+'/3 revealed · Pop the next balloon.')+' The numbers stay visible after the last pop.';
  }else if(mode==='clear'){
   eyebrow='DISPLAY CLEARED';
@@ -945,13 +986,14 @@ function renderTicketResult(mode='ready',q=null){
  prev.textContent=older?'Previous ticket: '+(older.kind===JACKPOT?'ITEM JACKPOT':older.payout>0?'WIN '+usd(older.payout):'NO WIN')+(older.numbers?' · '+older.numbers.join(' · '):''):'';
 }
 function showTicket(q){window.v3ShotReadout?.(q,[false,false,false]);clearedDisplay=false;activeCard={ticketId:T().id,uid:q.uid||'',item:q,popped:[false,false,false]};$('ticketPanel').classList.remove('hidden');$('genericScratch').classList.add('hidden');$('ticketPanelMessage').textContent='Pop all three balloons to reveal your prize.';renderBalloonCover();renderTicketResult('scratching');updateRevealButton();updateNextTicketButton();}
+const shownNumbers=(item,popped)=>item?.pre&&!popped.every(Boolean)?item.pre:item?.numbers;
 function renderBalloonCover(){
  const q=activeCard;
  const previous=!q&&!clearedDisplay?T().lastRevealed:null;
  document.querySelectorAll('.balloon-target').forEach((b,i)=>{
   const storedNumber=previous?.numbers?.[i];
   const popped=q?!!q.popped[i]:storedNumber!==undefined&&storedNumber!==null;
-  const value=q?.item?.numbers?.[i]??storedNumber;
+  const value=(q?shownNumbers(q.item,q.popped)?.[i]:undefined)??storedNumber;
   b.classList.toggle('popped',popped);
   b.textContent=popped?(value!==undefined&&value!==null?String(value):'★'):'?';
   b.setAttribute('aria-label',popped?'Balloon '+(i+1)+': '+b.textContent:'Pop balloon '+(i+1));
@@ -967,7 +1009,7 @@ function popBalloon(i){if(!activeCard||activeCard.ticketId!==T().id||activeCard.
  // Reveal in order; this makes the sequential shot simulation understandable to the player.
  if(i>0&&!activeCard.popped[i-1]){$('ticketPanelMessage').textContent=`Pop Balloon ${i} first — the shot order matters.`;return;}
  activeCard.popped[i]=true;popSound();renderBalloonCover();
- const q=activeCard.item;window.v3ShotReadout?.(q,activeCard.popped);if(q.changed?.some(x=>Number(x.balloon)===i+1))playShotEffectSound();if(i===2)finishCard();else {$('ticketPanelMessage').textContent=`Balloon ${i+1}: ${q.numbers?String(q.numbers[i]):'★'} · Pop Balloon ${i+2} next.`;renderTicketResult('scratching');}
+ const q=activeCard.item;window.v3ShotReadout?.(q,activeCard.popped);if(q.hits?q.hits[i]:q.changed?.some(x=>Number(x.balloon)===i+1))playShotEffectSound();if(i===2)finishCard();else {const shownNow=shownNumbers(q,activeCard.popped);$('ticketPanelMessage').textContent=`Balloon ${i+1}: ${shownNow?String(shownNow[i]):'★'} · Pop Balloon ${i+2} next.`;renderTicketResult('scratching');}
 }
 function reveal(){const t=T();if(!t.unrevealed.length)return;if(canShoot(t))showTicket(t.unrevealed[0]);else{const p=t.unrevealed.shift();if(p.accounted===false)record(t,{mode:'single',n:1,won:p.payout,wins:p.kind===CASH&&p.payout>0?1:0,best:p.payout,prize:p.payout,prizeKind:p.kind,prizeLabel:p.label,jackpots:p.kind===JACKPOT?1:0,mostFrequent:'',luck:t.luck});t.lastRevealed=cleanRevealed(p);save();renderStats();setScratch('single',p);}}
 function setScratch(mode,p){if(mode==='clear'||mode==='empty')window.v3ShotReadout?.(null);const t=T(),icon=$('scratchIcon'),num=$('scratchNumber'),msg=$('scratchMessage');
@@ -978,48 +1020,41 @@ function setScratch(mode,p){if(mode==='clear'||mode==='empty')window.v3ShotReado
  else{icon.textContent='✦';num.textContent='? ? ?';num.className='question';msg.textContent=t.unrevealed.length?`${nfmt(t.unrevealed.length,0)} purchased ticket(s) ready to reveal.`:'Your prize is waiting.';}
  updateRevealButton();updateNextTicketButton();}
 function shotExpected(t,c){
- if(!canShoot(t)||!c.valid)return null;
- const a=shotEffect(t,0)/100,b=shotEffect(t,1)/100;
- const rescue1=Math.max(0,a),rescue2=Math.max(0,b);
- const fail1=Math.max(0,-a),fail2=Math.max(0,-b);
- const probabilities=new Map([[1,0],[5,0],[25,0]]);
- // A predetermined cash winner remains a winner unless a miss actually flips a number.
- const survive=(1-fail1)*(1-fail2);
- for(const r of c.rows){if(r.kind===CASH)probabilities.set(r.amount,(probabilities.get(r.amount)||0)+r.final/100*survive);}
- const losing=c.rows.filter(r=>r.kind===LOSE).reduce((s,r)=>s+r.final/100,0);
- // Uniform over 60 nonwinning triples; apply exact conditional changes in balloon order.
- for(const triple of BASE_LOSERS){
-  const firstChance=triple[1]!==triple[0]?rescue1:0;
-  for(const flip1 of [0,1]){
-   const p1=flip1?firstChance:1-firstChance;if(!p1)continue;
-   const x=triple.slice();if(flip1)x[1]=x[0];
-   const secondChance=x[2]!==x[1]?rescue2:0;
-   for(const flip2 of [0,1]){
-    const p2=flip2?secondChance:1-secondChance;if(!p2)continue;
-    if(flip2)x[2]=x[1];
-    if(x[0]===x[1]&&x[1]===x[2]&&x[0]>0){
-     probabilities.set(x[0],(probabilities.get(x[0])||0)+losing*p1*p2/BASE_LOSERS.length);
-    }
-   }
-  }
- }
- let payout=0,win=0,profit=0;
- const doubleChance=doubleRate(t)/100;
+ if(!canShoot(t)||!c.valid)return null;const s=t.shots,probabilities=new Map();
+ const add=(pBase,triple)=>{for(const path of shotPaths(triple,s)){const p=pBase*path.prob;if(p>0&&isWin(path.numbers))probabilities.set(path.numbers[0],(probabilities.get(path.numbers[0])||0)+p);}};
+ for(const r of c.rows)if(r.kind===CASH&&r.final>0)add(r.final/100,[r.amount,r.amount,r.amount]);
+ // Losing tickets are uniform over the 60 non-matching triples.
+ const losing=c.rows.filter(r=>r.kind===LOSE).reduce((sum,r)=>sum+r.final/100,0);
+ if(losing>0)for(const triple of BASE_LOSERS)add(losing/BASE_LOSERS.length,triple);
+ let payout=0,win=0,profit=0;const doubleChance=doubleRate(t)/100;
  for(const [amount,p] of probabilities){
-  const isTop=amount===c.highestAmount;
-  payout+=p*amount*(isTop?1+doubleChance:1);
-  win+=p;
-  if(amount>t.price)profit+=p;
-  else if(isTop&&amount*2>t.price)profit+=p*doubleChance;
+  const isTop=amount>=c.highestAmount;
+  payout+=p*amount*(isTop?1+doubleChance:1);win+=p;
+  if(amount>t.price)profit+=p;else if(isTop&&amount*2>t.price)profit+=p*doubleChance;
  }
- return {ev:payout,winPercent:100*win,losePercent:100*(1-win),profitPercent:100*profit,change:payout-c.finalEV,
-  prizes:Object.fromEntries(probabilities)};
+ return {ev:payout,winPercent:100*win,losePercent:100*(1-win),profitPercent:100*profit,change:payout-c.finalEV,prizes:Object.fromEntries(probabilities)};
 }
+function shotNote(s,i){const z=shotZone(s,i),g=v=>'<b class="shot-boost">'+pct(v)+'</b>';
+ if(z==='miss')return 'Miss · '+pct(missChance(s,i))+' to 0';
+ if(z==='none')return 'No bonus';
+ const prev=i>0?{zone:shotZone(s,i-1),success:true,chance:i>1?bonusChance(s,i-1,{zone:shotZone(s,i-2),success:true,chance:bonusChance(s,0,null)}):bonusChance(s,0,null)}:null;
+ if(i===0)return 'Bonus '+pct(bonusChance(s,0,null));
+ if(i===1){const own=bonusChance(s,1,null),okPrev=['bull','partial'].includes(prev.zone);return 'Bonus '+pct(own)+(okPrev?' · '+g(bonusChance(s,1,prev)):'');}
+ if(shotZone(s,0)!=='bull'||shotZone(s,1)!=='bull')return 'Upgrade needs bullseyes on 1 &amp; 2';
+ return 'Upgrade '+g(bonusChance(s,2,{zone:'bull',success:true,chance:0}));}
 function renderShotSettings(){const t=T(),s=t.shots;if(!s)return;const enabled=canShoot(t);$('shotCalculator').classList.toggle('hidden',!enabled);if(!enabled)return;
- for(let i=0;i<3;i++){$('shot'+(i+1)).value=String(s.accuracy[i]);const delta=shotEffect(t,i);$('shotDescription'+(i+1)).textContent=i===2?'Final balloon · no fourth number':`${delta>0?'+':''}${pct(delta)} on next balloon`;}
- $('shotRateMode').value=s.mode;$('shotEdit').classList.toggle('hidden',s.mode!=='edit');$('shotBullMax').value=String(s.bullMax);$('shotMissMax').value=String(s.missMax);
+ for(let i=0;i<3;i++){$('shot'+(i+1)).value=String(s.accuracy[i]);$('shotDescription'+(i+1)).innerHTML=shotNote(s,i);}
+ const pick=(id,v)=>{const el=$(id);if(![...el.options].some(o=>Number(o.value)===v))el.add(new Option(id==='grandPrize'?usd(v,v%1===0?0:2):pct(v),String(v)));el.value=String(v);};
+ pick('bonus1',s.bonus[0]);pick('bonus2',s.bonus[1]);pick('boost2',s.boost[0]);pick('bonus3',s.bonus[2]);pick('boost3',s.boost[1]);
+ pick('grandPrize',s.grand);pick('missPenalty',s.miss);pick('bullMin',s.bullMin);pick('noBonusMax',s.noBonusMax);
+ if(accuracyLabelsFor!==s.bullMin+':'+s.noBonusMax)buildAccuracyOptions(s);
+ for(let i=0;i<3;i++)$('shot'+(i+1)).value=String(s.accuracy[i]);
  const c=valid(t),x=shotExpected(t,c);$('shotProjection').textContent=x?`Modeled chance of paying: ${pct(x.winPercent)} · Expected payout ${usd(x.ev,4)} / ticket (${x.change>=0?'+':''}${usd(x.change,4)} vs no shots)`:'Shot calculation needs the standard Lucky Buck outcomes.';
 }
+let accuracyLabelsFor='';
+function buildAccuracyOptions(s){accuracyLabelsFor=s.bullMin+':'+s.noBonusMax;
+ const label=a=>a===0?'0% · Miss':a>=s.bullMin?a+'% · Bullseye':a<=s.noBonusMax?a+'% · No bonus':a+'%';
+ for(let i=1;i<=3;i++)$('shot'+i).innerHTML=Array.from({length:101},(_,a)=>`<option value="${a}">${label(a)}</option>`).join('');}
 
 /* Update 12 · Issue #1: selected ticket identity, with all artwork local to its own ticket. */
 function safeTicketImage(value){
@@ -1311,10 +1346,14 @@ function init(){
  $('addPrize').addEventListener('click',()=>{const t=T();if(t.rows.length>=100){toast('Maximum 100 outcome rows.');return;}const kind=$('newType').value;if(kind===LOSE&&t.rows.some(r=>r.kind===LOSE)){toast('A Lose row already exists.');return;}const amount=Number($('newAmount').value);if(kind===CASH&&(!Number.isFinite(amount)||amount<=0||amount>1e12)){toast('Enter a positive dollar amount for the cash prize.');return;}
  const r={id:t.nextRowId++,kind,amount:kind===CASH?amount:0,chance:0,mode:'rare',label:kind===JACKPOT?$('newAmount').value.trim()||'Jackpot item':''};if(kind===JACKPOT)r.chance=1;t.rows.push(r);t.stage=0;t.pack=null;$('newAmount').value='';save();renderRows();refreshOdds();});
  $('restoreOdds').addEventListener('click',()=>{const t=T();t.rows=baseRows();t.nextRowId=5;t.luckMode='luckyBuck';t.stage=0;t.pack=null;save();renderRows();refreshOdds();toast('Original $1 Lucky Buck odds restored for this ticket.');});
- for(let i=1;i<=3;i++)$('shot'+i).innerHTML=Array.from({length:101},(_,a)=>`<option value="${a}">${a===0?'0% · Miss':a===50?'50% · Neutral':a===100?'100% · Bullseye':a+'%'}</option>`).join('');
- for(let i=1;i<=3;i++)$('shot'+i).addEventListener('change',e=>{T().shots.accuracy[i-1]=Number(e.target.value);save();renderShotSettings();});
- $('shotRateMode').addEventListener('change',e=>{T().shots.mode=e.target.value==='edit'?'edit':'default';save();renderShotSettings();});
- for(const [id,key] of [['shotBullMax','bullMax'],['shotMissMax','missMax']])$(id).addEventListener('change',e=>{const v=Number(e.target.value);if(!Number.isFinite(v)||v<0||v>100){toast('Use a rate from 0% to 100%.');renderShotSettings();return;}T().shots[key]=v;save();renderShotSettings();});
+ buildAccuracyOptions(T().shots||defaultShots());
+ const pctOptions=Array.from({length:101},(_,v)=>`<option value="${v}">${v}%</option>`).join('');
+ for(const id of ['bonus1','bonus2','boost2','bonus3','boost3','missPenalty'])$(id).innerHTML=pctOptions;
+ $('grandPrize').innerHTML=[30,40,50,60,75,100,125,150,200,250,500,1000].map(v=>`<option value="${v}">$${v}</option>`).join('');
+ $('bullMin').innerHTML=Array.from({length:51},(_,k)=>100-k).map(v=>`<option value="${v}">${v===100?'100%':v+'–100%'}</option>`).join('');
+ $('noBonusMax').innerHTML=Array.from({length:50},(_,v)=>`<option value="${v}">${v===0?'Off':'1–'+v+'%'}</option>`).join('');
+ for(let i=1;i<=3;i++)$('shot'+i).addEventListener('change',e=>{T().shots.accuracy[i-1]=Number(e.target.value);save();refreshOdds();});
+ for(const [id,apply] of [['bonus1',(s,v)=>s.bonus[0]=v],['bonus2',(s,v)=>s.bonus[1]=v],['boost2',(s,v)=>s.boost[0]=v],['bonus3',(s,v)=>s.bonus[2]=v],['boost3',(s,v)=>s.boost[1]=v],['missPenalty',(s,v)=>s.miss=v],['grandPrize',(s,v)=>s.grand=v],['bullMin',(s,v)=>s.bullMin=v],['noBonusMax',(s,v)=>s.noBonusMax=v]])$(id).addEventListener('change',e=>{const v=Number(e.target.value);if(!Number.isFinite(v)||v<0)return;apply(T().shots,v);save();refreshOdds();});
  document.querySelectorAll('.balloon-target').forEach((b,i)=>{b.addEventListener('click',()=>popBalloon(i));b.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse')popBalloon(i);});});
  const art=$('pixelTicket');let pointerDragged=false;
  art.addEventListener('pointerdown',e=>{pointerDragged=true;try{art.setPointerCapture(e.pointerId);}catch{}const el=document.elementFromPoint(e.clientX,e.clientY);const target=el?.closest?.('.balloon-target');if(target)popBalloon(Number(target.dataset.balloon));});
@@ -1338,7 +1377,7 @@ function init(){
  renderAll();if(canSave)save();
  if(location.search.includes('selftest=1')){const t=freshTicket(),c=normalOdds(t);t.luck=3;const high=normalOdds(t);t.momentum=3;t.stage=1;const stage1=normalOdds(t);t.stage=2;const stage2=normalOdds(t);document.body.dataset.selftest=Math.abs(c.baseEV-2.32)<1e-8&&Math.abs(high.finalEV-3.15)<1e-8&&Math.abs(stage1.rows.find(r=>r.amount===25).final-20)<1e-8&&Math.abs(stage2.rows.find(r=>r.amount===25).final-43)<1e-8?'PASS':'FAIL';}
  // Expose read-only test helpers under the URL's opt-in selftest flag only.
- if(location.search.includes('selftest=1'))window.__LuckyBuckTest={get:()=>JSON.parse(JSON.stringify(state)),normalOdds,draw:singleDraw,freshTicket,validateRestore,defaultRows:baseRows,useShots,shotEffect,shotExpected,doubleRate,momentumRates,luckRates,baseLosers:BASE_LOSERS};
+ if(location.search.includes('selftest=1'))window.__LuckyBuckTest={get:()=>JSON.parse(JSON.stringify(state)),normalOdds,draw:singleDraw,freshTicket,validateRestore,defaultRows:baseRows,useShots,resolveShots,shotPaths,shotZone,bonusChance,missChance,shotExpected,doubleRate,momentumRates,luckRates,baseLosers:BASE_LOSERS};
 }
 init();
 loadOriginalLuckyBuckLogo();
@@ -1393,13 +1432,14 @@ if(center&&shot){
  if(title){
   title.textContent='🎯 Special Function';
   const help=document.createElement('button');help.className='v3-help';help.type='button';help.textContent='?';help.setAttribute('aria-label','Explain shot function and gray or green numbers');
-  help.dataset.help='The upper gray numbers show the original ticket draw. The lower numbers appear as you pop each balloon. Green means a shot changed that number, even when the ticket still loses. A boom plays only when the shot effect actually changes a number.';
+  help.dataset.help='Gray: the original draw. Below: numbers as you pop. Green = changed by a bonus, red = zeroed by a missed-shot penalty. Bullseye or partial hits roll a bonus: shots 1–2 make the next balloon match (a zero becomes 1). After successful bullseyes on shots 1 and 2, shot 3 can move a winner up one level, up to the Grand Prize. Green percentages are boosted chances. A shotgun sound plays when a bonus roll succeeds.';
   title.append(help);
   const read=document.createElement('div');read.className='v3-shot-readout';read.id='v3ShotReadout';title.insertAdjacentElement('afterend',read);
   window.v3ShotReadout=function(q,popped=[false,false,false]){
-   const original=Array.isArray(q?.original)?q.original:[null,null,null],final=Array.isArray(q?.numbers)?q.numbers:[null,null,null];
+   const original=Array.isArray(q?.original)?q.original:[null,null,null],shownFinal=q?.pre&&!popped.every(Boolean)?q.pre:q?.numbers,final=Array.isArray(shownFinal)?shownFinal:[null,null,null];
+   const penalty=new Set((q?.changed||[]).filter(c=>c.kind==='penalty').map(c=>Number(c.balloon)-1));
    const changed=new Set((q?.changed||[]).map(c=>Number(c.balloon)-1));
-   const line=(nums,isFinal)=>'<span class="v3-shot-line">'+nums.map((n,i)=>'<span class="v3-shot-cell'+(isFinal&&popped[i]&&changed.has(i)?' changed':'')+'">'+(isFinal&&!popped[i]?'?':n===null||n===undefined?'–':String(n))+'</span>').join('')+'</span>';
+   const line=(nums,isFinal)=>'<span class="v3-shot-line">'+nums.map((n,i)=>'<span class="v3-shot-cell'+(isFinal&&popped[i]&&changed.has(i)?(penalty.has(i)&&final[i]===0?' penalty':' changed'):'')+'">'+(isFinal&&!popped[i]?'?':n===null||n===undefined?'–':String(n))+'</span>').join('')+'</span>';
    read.innerHTML=line(original,false)+line(final,true);
    read.setAttribute('aria-label','Original draw '+original.join(', ')+'; revealed final draw '+final.map((n,i)=>popped[i]?n:'hidden').join(', ')+'. Green numbers were changed by shot effects.');
   };window.v3ShotReadout(null);

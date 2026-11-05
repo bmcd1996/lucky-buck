@@ -111,3 +111,11 @@
 - Implemented: per-shot bonus dropdowns with green boosted chances; stacking only on successful rolls; zero rule; scaled partial hits; bullseye range and no-bonus range; shot 3 upgrade to an editable Grand Prize (default $50, Double Down can make it $100); missed-shot penalty turning a balloon to 0 (red in the readout); shotgun sound on each successful bonus roll; exact modeled odds and batch simulations follow the new rules. Upgraded numbers stay hidden until the last balloon pops. All new settings live in the existing collapsed "Shot bonus settings" panel; layout and sizes otherwise unchanged.
 - Preview saves under its own keys (`quill-lucky-buck-shots-preview`, `lucky-buck-shots-preview-presets`), seeded once from the live save, so testing never touches live data.
 - Tests: 36 rule/odds checks (all owner examples, zero rule, partial hits, ranges, penalty stacking, Grand Prize, exact model vs 1.5M-ticket simulations in four scenarios incl. Double Down 3) and 16 phone-size play-through checks (carry-over of saved history, dropdowns, no-spoiler upgrade reveal, penalty display, batch, refresh, live data untouched, no page errors). Owner's real-iPhone check still needed.
+
+## v3.1 shot rules — LIVE (November 5, 2026, 17:44 Central)
+- Owner tested the preview on iPhone ("I love it") and explicitly approved making it live.
+- `index.html` is now v3.1: identical to `shots-preview.html` except it uses the real save keys (`quill-lucky-buck-v2`, `lucky-buck-setting-presets-v1`) and the badge reads v3.1.
+- Owner confirmed the partial-after-bullseye stacking rule (e.g. 3.75% + 5% boost = 8.75%).
+- **Rollback point:** branch `backup/pre-shot-rules-v3-0-2026-11-05` (live v3.0 at commit 32a5a65).
+- Tests before release: 36/36 rule and odds checks on the live build; 9/9 upgrade checks on top of v3.0 saved data (stats, history, an unscratched ticket, shot settings and presets all carried over; old waiting ticket and new tickets play; no page errors).
+- `shots-preview.html` remains as a sandbox with its own saved data.
