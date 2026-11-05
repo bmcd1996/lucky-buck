@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="dark"><title>Cardboard to Cash — Lucky Buck Simulator</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="dark"><title>Lucky Buck v3.0 Preview — Quill Productions</title>
 <style>
 
 :root{--bg:#123c87;--panel:#122721;--panel2:#17312a;--border:#305044;--text:#eef7ee;--muted:#9eb8aa;--green:#6ee2a1;--gold:#ffd481;--red:#ff8383;--shadow:0 20px 60px #0005}
@@ -343,13 +343,101 @@
  .advanced-body{padding:0 9px 9px;gap:10px}
  .advanced-body>.card{padding:12px}
 }
+
+/* v3.0 full-width column interface — enhancements layered over the preserved ticket code. */
+html,body{overflow-x:hidden}
+.wrap{max-width:1080px;margin:auto;padding:12px 12px 45px}
+.header{margin-bottom:10px}.brand h1{font-size:20px}.brand-mark{width:35px;height:35px;font-size:19px;border-radius:9px}
+.version-badge{font-size:11px}
+.v3-switch{display:flex;align-items:center;gap:8px;margin:0 0 10px}
+.v3-switch button{border:1px solid #618776;color:#e4f9e8;background:#1c4331;border-radius:10px;min-height:43px;padding:8px 12px;font-weight:750;flex:1;white-space:nowrap}
+.v3-switch button[aria-pressed="true"]{background:#f0ce85;color:#182f25;border-color:#ffe3ab}
+.v3-switch .v3-fit{flex:0 1 auto}
+.v3-rail{display:flex;width:100%;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scrollbar-width:thin;gap:0;align-items:flex-start;border-radius:16px}
+.v3-rail>.v3-column{scroll-snap-align:start;flex:0 0 100%;width:100%;min-width:0;box-sizing:border-box;padding:0 2px 10px}
+.v3-column>*{max-width:100%;min-width:0;margin-bottom:12px}
+.v3-column .card{min-width:0;padding:13px;border-radius:15px}
+.v3-column .card-top{margin-bottom:9px;gap:7px}
+.v3-column .card h3{font-size:16px}
+.v3-column .hero{padding:12px 14px;margin:0 0 10px;border-radius:15px;gap:8px}
+.hero .hero-intro p,.hero .hero-intro .eyebrow{display:none}
+.hero h2{font-size:19px!important;margin:0 0 5px}
+.hero-ticket-controls{display:flex;align-items:flex-end;gap:8px;max-width:100%}
+.hero .ticket-switcher{min-width:0;flex:1}
+.hero .ticket-switcher label{font-size:10px}
+.hero .ticket-switcher select{max-width:100%;min-height:42px}
+.hero .hero-price{display:none}
+.v3-price{display:flex;gap:5px;align-items:center;min-width:95px}
+.v3-price label{font-size:10px;color:var(--gold);font-weight:800;white-space:nowrap}
+.v3-price input{width:67px;border:1px solid #608771;border-radius:8px;padding:7px 5px;min-height:42px;background:#0e2822;color:#f8e5be;font-size:15px}
+.hero-edit{font-size:11px!important;margin-top:4px}
+.v3-column .showcase{display:flex!important;flex-direction:column!important;gap:10px!important;width:100%;margin:0!important}
+.v3-column .showcase-center,.v3-column .showcase-right,.v3-column .showcase-left{display:block!important;flex:auto!important;width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;grid-column:auto!important;grid-row:auto!important}
+.v3-column .showcase-center{order:1!important}
+.v3-column .showcase-right{order:2!important}
+.v3-column .showcase-left{order:3!important}
+.v3-column .showcase-center>.card{padding:12px!important}
+.v3-column .ticket-layout{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:8px!important;width:100%;max-width:none!important}
+.v3-column .ticket-art{display:block;margin:0 auto;max-width:350px;width:100%;height:auto}
+.v3-column .purchase-row{display:flex!important;flex-direction:row!important;align-items:center!important;gap:8px!important;margin:2px 0 0!important}
+.v3-column #buyOne{flex:1;min-width:0;min-height:50px!important;font-size:15px!important}
+.v3-column #resetTicket{flex:0 0 auto;min-height:44px;min-width:65px;font-size:12px;padding:7px 10px}
+.v3-column .purchase-helper{display:none}
+.v3-column #buyNext{display:none!important}
+.v3-column .post-actions{margin-top:6px}
+.v3-column .ticket-result{margin:0!important;max-width:none!important;width:100%;padding:11px!important}
+.v3-column .ticket-message{font-size:12px}
+.v3-column .shot-calculator{position:relative;min-width:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;padding:9px!important;margin-top:9px}
+.v3-column .shot-calculator>.shot-title{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:6px;padding:0;font-size:13px}
+.v3-column .shot-calculator>p.tiny{display:none}
+.v3-column .shot-calculator>.shot-field{min-width:0;margin:0}
+.v3-column .shot-field label{font-size:11px!important;white-space:normal}
+.v3-column .shot-field select{width:100%;font-size:12px;min-height:38px;min-width:0}
+.v3-column .shot-calculator>.shot-advanced,.v3-column .shot-calculator>.shot-projection{grid-column:1/-1}
+.v3-column .shot-projection{font-size:10px}
+.v3-shot-readout{display:flex;flex-direction:column;gap:1px;flex:0 0 auto;max-width:136px;font-size:10px}
+.v3-shot-line{display:grid;grid-template-columns:repeat(3,27px);gap:2px;justify-content:end}
+.v3-shot-cell{background:#234434;border:1px solid #47705b;border-radius:4px;color:#9fafa7;text-align:center;font-variant-numeric:tabular-nums;line-height:18px;font-weight:800}
+.v3-shot-cell.changed{color:#6ee2a1;border-color:#4c976b}
+.v3-shot-actions{display:flex;gap:4px;align-items:center}
+.v3-help{border:1px solid #648b77;background:#18392d;color:#d9e5db;border-radius:50%;font-size:10px;line-height:1;width:21px;height:21px;min-width:21px;padding:0;display:inline-grid;place-items:center;vertical-align:middle;box-shadow:none}
+.v3-help:focus-visible{outline:2px solid #ffd481;outline-offset:2px}
+.v3-help-popup{position:fixed;z-index:1000;left:12px;right:12px;bottom:20px;max-width:460px;margin:0 auto;padding:14px;border:1px solid #8da995;border-radius:13px;background:#122921;color:#eaf9ec;box-shadow:0 12px 50px #000b;display:none}
+.v3-help-popup.show{display:block}.v3-help-popup button{float:right;border:1px solid #6d9a7d;border-radius:7px;min-height:32px;background:#27503b;color:#fff;padding:4px 11px}
+.v3-column .preset-mini,.v3-column .active-mods{padding:11px;border-radius:13px;max-width:100%}
+.v3-column .mod-status{font-size:13px}
+.v3-column .simulation-tools .batch-row{display:flex;gap:8px;max-width:none}
+.v3-column .simulation-tools #batchSize{flex:1;min-width:0;min-height:47px}
+.v3-column .simulation-tools #runBatch{min-width:110px;min-height:47px}
+.v3-column .table-wrap{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.v3-column .odds-table{min-width:420px}
+.v3-column .result-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.v3-column .result-box{min-width:0;overflow-wrap:anywhere}
+.v3-column .result-box .number{font-size:21px}
+.v3-column .advanced-body{display:contents}
+.v3-column #modifierEditor{margin-top:0}
+.v3-footer-tools{margin:12px 2px 5px}.v3-footer-tools .card{padding:13px}
+.v3-column .footnote{font-size:11px}
+.v3-column .card p.subtle-notice{font-size:11px}
+.v3-column :is(button,select,input){max-width:100%}
+.v3-column .shot-advanced summary{font-size:11px}
+.v3-column .hero-ticket-controls .ticket-switcher{flex:1}
+.v3-column .ticket-select{width:100%;min-width:0}
+.v3-fitmode .v3-column{flex-basis:50%;width:50%;overflow:hidden}
+.v3-fitmode .v3-column>.hero,.v3-fitmode .v3-column>.showcase,.v3-fitmode .v3-column>.card{zoom:.57}
+.v3-fitmode{overflow-x:hidden;scroll-snap-type:none}
+.v3-fitmode .v3-column{padding:0 3px}
+.v3-fitmode .v3-column :is(button,input,select){min-width:0}
+@media (min-width:900px){.v3-rail>.v3-column{flex-basis:50%;width:50%;padding:0 8px}.v3-switch{max-width:550px;margin-inline:auto}.v3-rail{overflow:visible;scroll-snap-type:none}.v3-fitmode .v3-column{flex-basis:50%;width:50%}.v3-fitmode .v3-column>*{zoom:1}}
+@media(max-width:480px){.wrap{padding:10px 9px 45px}.v3-switch button{font-size:12px;padding:7px 8px}.header{gap:6px}.save{font-size:10px}.v3-column .hero{gap:5px;padding:10px}.hero-ticket-controls{flex-wrap:wrap}.v3-column .ticket-art{max-width:330px}.v3-column .odds-table{min-width:420px}}
+
 </style>
 </head>
 <body>
 <div class="wrap">
 <header class="header">
 <div class="brand"><div class="brand-mark">$</div><div><small>QUILL PRODUCTIONS</small><h1>Cardboard to Cash</h1></div></div>
-<div class="header-right"><span class="version-badge" title="Lucky Buck simulator version">v2.9</span><span class="save" id="saveStatus">Loading…</span></div>
+<div class="header-right"><span class="version-badge" title="Independent v3 preview — live v2.9 unchanged">v3.0 · Preview</span><span class="save" id="saveStatus">Loading…</span></div>
 </header>
 
 <section class="hero">
@@ -536,7 +624,7 @@
 
 (()=>{'use strict';
 /* Cardboard to Cash v2 — full 12-point simulator update. Vanilla JS, offline-safe. */
-const KEY='quill-lucky-buck-v2', OLD_KEY='quill-lucky-buck-v1', PRE_SHOT_BACKUP_KEY='quill-lucky-buck-v2-before-shot-update';
+const KEY='quill-lucky-buck-v3', V2_KEY='quill-lucky-buck-v2', OLD_KEY='quill-lucky-buck-v1', PRE_SHOT_BACKUP_KEY='quill-lucky-buck-v3-initial-backup';
 const $=id=>document.getElementById(id);
 const CASH='cash', LOSE='lose', JACKPOT='jackpot';
 const MOMENTUM={0:[0,0],1:[8,15],2:[14,28],3:[20,43]};
@@ -640,7 +728,7 @@ function migrateOld(old){
 }
 function validateRestore(obj){if(!obj||typeof obj!=='object')throw Error('Backup is not a valid object.');if(obj.version!==2){if(Array.isArray(obj.tiers))return migrateOld(obj);throw Error('Backup format is not recognized.');}if(!Array.isArray(obj.tickets)||obj.tickets.length<1||obj.tickets.length>100)throw Error('Backup must contain 1–100 tickets.');const tickets=obj.tickets.map(cleanTicket);const ids=new Set();for(const t of tickets){if(ids.has(t.id))throw Error('Duplicate ticket IDs in backup.');ids.add(t.id);}return {version:2,shotCalcUpdated:true,selectedId:ids.has(String(obj.selectedId))?String(obj.selectedId):tickets[0].id,nextTicketId:integer(obj.nextTicketId,1,1000000000)?Number(obj.nextTicketId):tickets.length+1,batch:obj.shotCalcUpdated===true&&integer(obj.batch,1,1000000)?Number(obj.batch):1,tickets};}
 let state,canSave=true,loadError=null;
-try{const v2=localStorage.getItem(KEY);const v1=localStorage.getItem(OLD_KEY);state=v2?validateRestore(JSON.parse(v2)):v1?migrateOld(JSON.parse(v1)):defaults();if(v2&&!localStorage.getItem(PRE_SHOT_BACKUP_KEY)){try{localStorage.setItem(PRE_SHOT_BACKUP_KEY,v2);}catch(e){loadError='Could not preserve the original saved settings. Please export a backup before editing.';canSave=false;}}}catch(e){loadError=e.message;canSave=false;state=defaults();}
+try{const v2=localStorage.getItem(KEY);const v1=localStorage.getItem(OLD_KEY);state=v2?validateRestore(JSON.parse(v2)):localStorage.getItem(V2_KEY)?validateRestore(JSON.parse(localStorage.getItem(V2_KEY))):v1?migrateOld(JSON.parse(v1)):defaults();if(v2&&!localStorage.getItem(PRE_SHOT_BACKUP_KEY)){try{localStorage.setItem(PRE_SHOT_BACKUP_KEY,v2);}catch(e){loadError='Could not preserve the original saved settings. Please export a backup before editing.';canSave=false;}}}catch(e){loadError=e.message;canSave=false;state=defaults();}
 const T=()=>state.tickets.find(t=>t.id===state.selectedId)||state.tickets[0];
 const PRESET_KEY='lucky-buck-setting-presets-v1';
 let presets={};let selectedPreset='default';
@@ -792,7 +880,7 @@ function renderTicketResult(mode='ready',q=null){
  prev.classList.toggle('hidden',!older);
  prev.textContent=older?'Previous ticket: '+(older.kind===JACKPOT?'ITEM JACKPOT':older.payout>0?'WIN '+usd(older.payout):'NO WIN')+(older.numbers?' · '+older.numbers.join(' · '):''):'';
 }
-function showTicket(q){clearedDisplay=false;activeCard={ticketId:T().id,uid:q.uid||'',item:q,popped:[false,false,false]};$('ticketPanel').classList.remove('hidden');$('genericScratch').classList.add('hidden');$('ticketPanelMessage').textContent='Pop all three balloons to reveal your prize.';renderBalloonCover();renderTicketResult('scratching');updateRevealButton();updateNextTicketButton();}
+function showTicket(q){window.v3ShotReadout?.(q);clearedDisplay=false;activeCard={ticketId:T().id,uid:q.uid||'',item:q,popped:[false,false,false]};$('ticketPanel').classList.remove('hidden');$('genericScratch').classList.add('hidden');$('ticketPanelMessage').textContent='Pop all three balloons to reveal your prize.';renderBalloonCover();renderTicketResult('scratching');updateRevealButton();updateNextTicketButton();}
 function renderBalloonCover(){
  const q=activeCard;
  const previous=!q&&!clearedDisplay?T().lastRevealed:null;
@@ -818,7 +906,7 @@ function popBalloon(i){if(!activeCard||activeCard.ticketId!==T().id||activeCard.
  const q=activeCard.item;if(i===2)finishCard();else {$('ticketPanelMessage').textContent=`Balloon ${i+1}: ${q.numbers?String(q.numbers[i]):'★'} · Pop Balloon ${i+2} next.`;renderTicketResult('scratching');}
 }
 function reveal(){const t=T();if(!t.unrevealed.length)return;if(canShoot(t))showTicket(t.unrevealed[0]);else{const p=t.unrevealed.shift();if(p.accounted===false)record(t,{mode:'single',n:1,won:p.payout,wins:p.kind===CASH&&p.payout>0?1:0,best:p.payout,prize:p.payout,prizeKind:p.kind,prizeLabel:p.label,jackpots:p.kind===JACKPOT?1:0,mostFrequent:'',luck:t.luck});t.lastRevealed=cleanRevealed(p);save();renderStats();setScratch('single',p);}}
-function setScratch(mode,p){const t=T(),icon=$('scratchIcon'),num=$('scratchNumber'),msg=$('scratchMessage');
+function setScratch(mode,p){if(mode==='clear'||mode==='empty')window.v3ShotReadout?.(null);const t=T(),icon=$('scratchIcon'),num=$('scratchNumber'),msg=$('scratchMessage');
  activeCard=null;clearedDisplay=mode==='clear';const ticket=canShoot(t);$('ticketPanel').classList.toggle('hidden',!ticket);$('genericScratch').classList.toggle('hidden',ticket);
  if(ticket){$('ticketPanelMessage').textContent=mode==='batch'?`Simulated ${nfmt(p.n,0)} tickets · ${usd(p.won)} won. Your last scratch result stays above.`:mode==='clear'?'Display cleared. Your results remain saved.':'Buy a ticket to pop the three balloons.';renderBalloonCover();renderTicketResult(mode==='clear'?'clear':'ready');}
  else if(mode==='single'){icon.textContent=p.kind===JACKPOT?'🏆':p.kind===CASH?'✨':'✕';num.textContent=p.kind===JACKPOT?'JACKPOT':p.kind===CASH?usd(p.payout):'LOSE';num.className='win';msg.textContent=p.kind===JACKPOT?`Item prize: ${p.label}`:p.kind===CASH?`Cash prize · ${usd(p.payout-t.price)} net for this ticket`:'No cash prize on this ticket.';}
@@ -877,7 +965,7 @@ function renderTicketSelector(){
  $('packSize').value=t.packSize;
  $('luckMode').value=t.luckMode;
  $('heroTicketName').textContent=t.name;
- $('heroTicketCost').textContent=usd(t.price,t.price%1===0?0:2);
+ $('heroTicketCost').textContent=usd(t.price,t.price%1===0?0:2);window.v3SyncPrice?.(t.price);
  $('scratchTitle').textContent=t.name.toUpperCase()+' • INSTANT WIN';
  $('buyOne').textContent='Buy one ticket · '+usd(t.price,t.price%1===0?0:2);
  $('evHeading').textContent='Expected cash payout per '+usd(t.price,t.price%1===0?0:2)+' ticket';
@@ -1087,6 +1175,105 @@ function init(){
 init();
 })();
 
+
+</script>
+<script>
+
+(function(){
+'use strict';
+const byId=id=>document.getElementById(id);
+const root=document.querySelector('.wrap'), header=root?.querySelector('.header');
+const hero=root?.querySelector('.hero'), showcase=root?.querySelector('.showcase');
+const main=byId('mainFlow'), stats=byId('statisticsPanel'), advanced=byId('advancedSettings');
+if(!root||!header||!hero||!showcase||!main||!stats||!advanced)return;
+const oldCards=[...advanced.querySelectorAll('.advanced-body > .card')];
+const [setupCard,modCard,oddsCard,calcCard,exportCard]=oldCards;
+const [batchCard,totalCard,historyCard]=[...stats.querySelectorAll('.results-grid > .card')];
+if(![setupCard,modCard,oddsCard,calcCard,exportCard,batchCard,totalCard,historyCard].every(Boolean))return;
+const controls=document.createElement('nav');controls.className='v3-switch';controls.setAttribute('aria-label','Calculator panels');
+controls.innerHTML='<button type="button" data-panel="0" aria-pressed="true">🎟️ Ticket &amp; Mods</button><button type="button" data-panel="1" aria-pressed="false">📊 Odds &amp; Sims</button><button type="button" class="v3-fit" id="v3Fit" aria-pressed="false">Fit Both</button>';
+const rail=document.createElement('div');rail.className='v3-rail';rail.id='v3Rail';
+rail.setAttribute('aria-label','Swipe between ticket and simulation columns');
+const left=document.createElement('section'),right=document.createElement('section');
+left.className='v3-column';right.className='v3-column';left.id='v3TicketCol';right.id='v3SimCol';
+left.setAttribute('aria-label','Ticket and modifiers');right.setAttribute('aria-label','Prize odds and simulation');
+rail.append(left,right);
+header.insertAdjacentElement('afterend',controls);controls.insertAdjacentElement('afterend',rail);
+left.append(hero,showcase,modCard,setupCard);
+right.append(oddsCard,batchCard,totalCard,calcCard,historyCard);
+const footer=document.createElement('div');footer.className='v3-footer-tools';footer.append(exportCard);
+rail.insertAdjacentElement('afterend',footer);
+main.style.display='none';
+const center=showcase.querySelector('.showcase-center'),shot=byId('shotCalculator');
+if(center&&shot){
+ const ticketPanel=byId('ticketPanel'),purchase=byId('buyOne').closest('.purchase-row'),post=byId('resetTicket').closest('.post-actions');
+ // A single purchase action sits immediately below the artwork.
+ ticketPanel.querySelector('.ticket-art').insertAdjacentElement('afterend',purchase);
+ purchase.append(byId('resetTicket'));
+ post.insertAdjacentElement('afterend',shot);
+ const generic=byId('genericScratch');
+ const movePurchase=()=>{if(ticketPanel.classList.contains('hidden'))generic.insertAdjacentElement('afterend',purchase);else ticketPanel.querySelector('.ticket-art').insertAdjacentElement('afterend',purchase);};
+ new MutationObserver(movePurchase).observe(ticketPanel,{attributes:true,attributeFilter:['class']});
+ movePurchase();
+ const title=shot.querySelector('.shot-title');
+ if(title){
+  title.textContent='🎯 Special Function';
+  const actions=document.createElement('span');actions.className='v3-shot-actions';
+  const read=document.createElement('span');read.className='v3-shot-readout';read.id='v3ShotReadout';actions.append(read);
+  title.append(actions);
+  window.v3ShotReadout=function(q){
+    const original=Array.isArray(q?.original)?q.original:[null,null,null];
+    const final=Array.isArray(q?.numbers)?q.numbers:[null,null,null];
+    const changed=new Set((q?.changed||[]).map(c=>Number(c.balloon)-1));
+    const line=(nums,isFinal)=>'<span class="v3-shot-line">'+nums.map((n,i)=>'<span class="v3-shot-cell'+(isFinal&&changed.has(i)?' changed':'')+'">'+(n===null||n===undefined?'–':String(n))+'</span>').join('')+'</span>';
+    read.innerHTML=line(original,false)+line(final,true);
+    read.setAttribute('aria-label','Original numbers '+original.join(', ')+'; final numbers '+final.join(', ')+'. Green means the shot changed a number.');
+  };
+  window.v3ShotReadout(null);
+  const help=document.createElement('button');help.className='v3-help';help.type='button';help.textContent='?';help.setAttribute('aria-label','Explain shot function and gray or green numbers');
+  help.dataset.help='The upper gray numbers are the original hidden balloon numbers. The lower row shows final numbers; green means that a shot changed that number, even when the ticket still loses. Shot accuracy and effect rates control the mechanic.';
+  actions.append(help);
+ }
+ const existingHelp=shot.querySelector('p.tiny.muted');
+ if(existingHelp)existingHelp.hidden=true;
+}
+byId('buyOne').textContent='Buy one ticket';
+byId('runBatch').textContent='Run tickets';
+byId('resetStats').textContent='Clear totals';
+byId('resetTicket').textContent='Clear';
+const priceWrap=document.createElement('div');priceWrap.className='v3-price';
+priceWrap.innerHTML='<label for="v3QuickPrice">Price $</label><input id="v3QuickPrice" type="number" inputmode="decimal" min=".01" step="any" aria-label="Ticket price">';
+hero.querySelector('.hero-ticket-controls').append(priceWrap);
+const quick=byId('v3QuickPrice'),origPrice=byId('ticketPrice');
+window.v3SyncPrice=price=>{quick.value=String(price)};
+quick.value=origPrice.value;
+quick.addEventListener('change',()=>{origPrice.value=quick.value;origPrice.dispatchEvent(new Event('change',{bubbles:true}));quick.value=origPrice.value});
+const hiddenPriceContainer=origPrice.closest('.money-field')?.parentElement;
+if(hiddenPriceContainer)hiddenPriceContainer.style.display='none';
+const info=[
+ [oddsCard.querySelector('.card-top'),'The percentages in Cash and Lose outcomes must total exactly 100%. Jackpot item odds use separate pack rules. Changing a percentage updates the live calculations.'],
+ [batchCard.querySelector('.card-top'),'Each run adds to this ticket’s saved cumulative totals. Use Clear totals only when you intentionally want to reset this ticket’s history and waiting tickets.'],
+ [modCard.querySelector('.card-top'),'Set the existing Double Down, Momentum, and Luck levels from zero to three. No individual equipment selection is needed.'],
+ [calcCard.querySelector('.card-top'),'Expected payout is an average per ticket based on the current prize odds, modifiers, and shot accuracy, not a guaranteed result.']
+];
+for(const [parent,description] of info){if(!parent)continue;const help=document.createElement('button');help.className='v3-help';help.type='button';help.textContent='?';help.dataset.help=description;help.setAttribute('aria-label','Help for '+(parent.querySelector('h3')?.textContent||'this section'));parent.append(help);}
+const popup=document.createElement('div');popup.className='v3-help-popup';popup.id='v3HelpPopup';popup.setAttribute('role','dialog');popup.setAttribute('aria-label','Explanation');
+popup.innerHTML='<button type="button" aria-label="Close explanation">Close ×</button><div id="v3HelpText"></div>';
+document.body.append(popup);
+popup.querySelector('button').addEventListener('click',()=>popup.classList.remove('show'));
+document.addEventListener('click',e=>{
+ const b=e.target.closest?.('button[data-help]');if(!b)return;
+ byId('v3HelpText').textContent=b.dataset.help;popup.classList.add('show');
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')popup.classList.remove('show')});
+let fit=false;
+const paneButtons=[...controls.querySelectorAll('[data-panel]')];
+const setActive=index=>paneButtons.forEach((b,i)=>b.setAttribute('aria-pressed',String(i===index)));
+paneButtons.forEach((b,i)=>b.addEventListener('click',()=>{if(fit){fit=false;rail.classList.remove('v3-fitmode');byId('v3Fit').setAttribute('aria-pressed','false');}rail.scrollTo({left:rail.clientWidth*i,behavior:'smooth'});setActive(i)}));
+byId('v3Fit').addEventListener('click',e=>{fit=!fit;rail.classList.toggle('v3-fitmode',fit);e.currentTarget.setAttribute('aria-pressed',String(fit));e.currentTarget.textContent=fit?'Normal size':'Fit Both';if(fit)rail.scrollTo({left:0,behavior:'instant'})});
+rail.addEventListener('scroll',()=>{if(!fit)setActive(rail.scrollLeft>=rail.clientWidth*.5?1:0)},{passive:true});
+// Never scroll the whole page horizontally or alter the existing simulator payout rules.
+})();
 
 </script>
 </body></html>
