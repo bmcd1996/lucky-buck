@@ -49,6 +49,19 @@
 - **Back-to-back misses stack:** 5%, then 10%, then 15%.
 - Example: 5, 5, 5 winner, shot 2 misses and the penalty hits → **5, 0, 5** (loser).
 
+## Popping order (owner, 17:24 Central)
+- A ticket's three numbers are generated **at purchase** and live in the player's inventory until scratched.
+- Numbers follow **popping order, not balloon position**: the first balloon popped (any of the three) shows the 1st number, the second popped shows the 2nd, the third shows the 3rd. The player doesn't need to know this.
+- "Shot 1, 2, 3" always means the order shots are fired, so all bonus rules above are unchanged.
+- The simulator keeps **left-to-right popping for now**; any-order popping comes with the future tap-to-shoot animation update. Code keeps the ticket's numbers separate from shot effects so it plugs in cleanly, and other tickets can reuse "1st revealed, 2nd revealed" the same way.
+
+## How stacked chances are calculated in the v3.1 preview (confirm with owner)
+- Each shot's own chance = its bonus × accuracy (100% for a bullseye; e.g. 75% accuracy → 75% of 5% = 3.75%).
+- After a **successful bullseye**, the next shot adds the green boost (green minus that shot's own bonus): defaults give 10% on shot 2 and 15% on shot 3.
+- After a **successful partial hit**, the next shot adds that partial chance (5% + 3.75% = 8.75%).
+- A partial hit on shot 2 after a successful shot 1 bullseye: 3.75% + 5% boost = 8.75%. Shot 3 partial at 75%: 3.75% + 10% = 13.75%.
+- Back-to-back misses stack on consecutive misses (5%, 10%, 15%) whether or not the earlier penalty roll hit.
+
 ## Double Down
 - Stacks with the shot 3 upgrade. A Grand Prize ($50) that also hits Double Down pays **$100**.
 
@@ -62,9 +75,9 @@
 - The simulator never deals 0, 0, 0, and bonuses never spread zeros, but the **miss penalty can now create zeros**. Check with the owner whether any further zero handling is wanted.
 
 ## Next steps
-1. Owner describes **how this should be displayed** in the calculator.
-2. Test the current calculator against this spec and report where it matches and where it doesn't.
-3. Only with explicit permission: build it as a **preview page**, owner tests on phone, then goes live.
+1. **Done (owner approved, 17:33):** built as a separate preview page, `shots-preview.html` (v3.1 preview). Live `index.html` untouched. The preview keeps its own saved data, copied once from the live save.
+2. Owner tests the preview on iPhone and gives feedback.
+3. Only with explicit permission: make it live.
 
 ## Known gaps in the current code (v3.0) vs this spec
 - Shots 1 and 2 share one effect rate; no separate or boosted dropdowns.
