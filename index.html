@@ -475,17 +475,23 @@ html,body{overflow-x:hidden}
 .ticket-media-note{line-height:1.35;margin:8px 0 0}
 .custom-ticket-art{display:block;max-width:100%;max-height:280px;object-fit:contain;border-radius:9px;margin-bottom:6px}
 
+
+/* Update 12 · Issue #1 — display each ticket's actual logo in the ticket-name slot. */
+.hero .ticket-logo-heading{display:flex;align-items:center;min-width:0;min-height:35px;max-width:100%}
+.hero .ticket-logo-heading img{display:block;max-width:min(100%,235px);max-height:88px;width:auto;height:auto;object-fit:contain;object-position:left center;image-rendering:pixelated}
+.hero .ticket-logo-heading h2{margin:0;max-width:100%;overflow-wrap:anywhere}
+@media(max-width:650px){.hero .ticket-logo-heading img{max-width:min(100%,190px);max-height:74px}}
 </style>
 </head>
 <body>
 <div class="wrap">
 <header class="header">
-<div class="brand"><div class="brand-mark" id="selectedTicketBrandLogo" aria-label="Selected ticket logo"><img id="selectedTicketBrandImg" class="hidden" alt=""><span id="selectedTicketBrandInitial">$</span></div><div><small>QUILL PRODUCTIONS</small><h1>Cardboard to Cash</h1></div></div>
+<div class="brand"><div class="brand-mark">$</div><div><small>QUILL PRODUCTIONS</small><h1>Cardboard to Cash</h1></div></div>
 <div class="header-right"><span class="version-badge" title="Lucky Buck simulator version">v3.0</span><span class="save" id="saveStatus">Loading…</span></div>
 </header>
 
 <section class="hero">
-<div class="hero-intro"><div class="eyebrow">SCRATCH-OFF SAGA · SIMULATOR</div><h2 id="heroTicketName">Lucky Buck</h2><p>Build the odds, equip your luck, test the economy.</p></div>
+<div class="hero-intro"><div class="eyebrow">SCRATCH-OFF SAGA · SIMULATOR</div><div class="ticket-logo-heading"><img id="heroTicketLogo" class="hidden" alt=""><h2 id="heroTicketName">Lucky Buck</h2></div><p>Build the odds, equip your luck, test the economy.</p></div>
 <div class="hero-ticket-controls"><div class="ticket-switcher"><label for="ticketSelector">YOUR TICKETS</label><select class="ticket-select" id="ticketSelector" aria-label="Switch tickets or create a new ticket"></select><button class="hero-edit" type="button" id="quickEditTicket">⚙ Edit ticket settings</button></div><div class="hero-price"><div class="ticket-cost" id="heroTicketCost">$1</div><span>PER TICKET</span></div></div>
 </section>
 <dialog id="createTicketDialog" class="ticket-dialog" aria-labelledby="createTicketTitle">
@@ -1019,13 +1025,14 @@ function renderShotSettings(){const t=T(),s=t.shots;if(!s)return;const enabled=c
 function safeTicketImage(value){
  return typeof value==='string'&&value.length<250000&&/^data:image\/(?:webp|jpeg|png);base64,[A-Za-z0-9+/]+={0,2}$/.test(value)?value:null;
 }
+let originalLuckyBuckLogo=null;
 function renderTicketIdentity(){
- const t=T(),img=$('selectedTicketBrandImg'),initial=$('selectedTicketBrandInitial');
- const luckyOriginal=$('pixelTicket').querySelector('img').getAttribute('src');
- const logo=t.logoData||(t.id==='lucky-buck'?luckyOriginal:null);
- if(logo){img.src=logo;img.alt=t.name+' logo';img.classList.remove('hidden');initial.classList.add('hidden');}
- else{img.removeAttribute('src');img.classList.add('hidden');initial.textContent=t.name.trim().split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase().slice(0,3)||'🎟';initial.classList.remove('hidden');}
- $('selectedTicketBrandLogo').title=t.name+' ticket logo';
+ const t=T(),img=$('heroTicketLogo'),title=$('heroTicketName');
+ // The graphic above the selected ticket always belongs to the selected design.
+ // Lucky Buck defaults to an exact transparent cutout of the ticket's original lettering and antlers.
+ const logo=t.logoData||(t.id==='lucky-buck'?originalLuckyBuckLogo:null);
+ if(logo){img.src=logo;img.alt=t.name+' logo';img.classList.remove('hidden');title.classList.add('hidden');}
+ else{img.classList.add('hidden');img.removeAttribute('src');title.classList.remove('hidden');}
  const preview=$('customTicketArtwork'),useCustom=t.id!=='lucky-buck'&&!!t.artData;
  if(useCustom){preview.src=t.artData;preview.alt=t.name+' ticket artwork';preview.classList.remove('hidden');}
  else{preview.classList.add('hidden');preview.removeAttribute('src');}
@@ -1055,6 +1062,39 @@ async function prepareTicketImage(file,kind){
  }
  if(!safeTicketImage(result)||result.length>cap)throw Error('Image is too detailed to save here. Choose a smaller file.');
  return result;
+}
+
+
+/* Update 12 · Issue #1: isolate original Lucky Buck lettering + horns without changing the ticket art. */
+function loadOriginalLuckyBuckLogo(){
+ const art=$('pixelTicket')?.querySelector('img');
+ if(!art)return;
+ const mask=new Image();
+ let finished=false;
+ const build=()=>{
+  if(finished||!art.complete||!art.naturalWidth||!mask.complete||!mask.naturalWidth)return;
+  finished=true;
+  try{
+   const w=360,h=186,canvas=document.createElement('canvas'),maskCanvas=document.createElement('canvas');
+   canvas.width=maskCanvas.width=w;canvas.height=maskCanvas.height=h;
+   const ctx=canvas.getContext('2d',{willReadFrequently:true}),mctx=maskCanvas.getContext('2d',{willReadFrequently:true});
+   ctx.imageSmoothingEnabled=false;
+   ctx.drawImage(art,95,28,w,h,0,0,w,h);
+   mctx.drawImage(mask,0,0);
+   const pixels=ctx.getImageData(0,0,w,h),maskPixels=mctx.getImageData(0,0,w,h);
+   for(let i=0;i<pixels.data.length;i+=4)pixels.data[i+3]=maskPixels.data[i]>127?255:0;
+   ctx.putImageData(pixels,0,0);
+   // Trim empty edges to fit the heading while preserving pixel-perfect source colors.
+   const trimmed=document.createElement('canvas');trimmed.width=334;trimmed.height=162;
+   trimmed.getContext('2d').drawImage(canvas,15,12,334,162,0,0,334,162);
+   originalLuckyBuckLogo=trimmed.toDataURL('image/png');
+   if(T().id==='lucky-buck')renderTicketIdentity();
+  }catch(err){console.warn('Lucky Buck logo extraction unavailable; ticket name will remain visible.',err);}
+ };
+ if(!art.complete)art.addEventListener('load',build,{once:true});
+ mask.onload=build;
+ mask.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAWgAAAC6AQAAAACrH+roAAAElklEQVR42u1ZvY7kRBD+um3OI7G6sXQEm81cRLrhBYjxgxBswGvAekVy4T3BaV+BjATJIJDI2JAIvARoMjy6E/TeeroIuu3pbtv9ozuyrWT883V1/XeVB3ikR4qmTet9XQj1y9XPdhb0rNEX57n1nAQAMCJzj0IOd1dk8mbIAYD/wF4YaDHZjJvysMp8tQPq8aY29yQBMOqBc+MZyXKUpDW5at5Ef5lysJfjXWmgV+rSXPqpLfHKQJcA8JnSV9MLG50b6C0AVBN1Fmxi2KKax2WOlmwGk8+uJBJgRETambsafxARvR5MT1Rr3kwwYG/xqbSrmQLhFrjcNWqvHEBrmi/7ig1RWbkKFZIRNShOkhQ9sFO33eDXllqlJeNAo+2vXJER3ajLNdUAeqDUQVFQQQSsT7w3NFKDrQqJjgSQA+eK7cXggY/MSG1QAiBghRzgypF0em+BcUVfGKbXlpBu/BgGqnU8cCdiAWDTTXzHajRjnFRK6SX6EvgarQoUbiq4EBUS6MZAIrmjDriieToSUb0mIgI42GKUnmL6UgAVanBlkM5fykoALaqpTWZp1Ru5U8es0CYHA9owujIy7cqLfCJPkvQYfLVEzMp5sNqPJ2U2Pi7ywhtVcTX6LKDoBbDFBbiqj68CBjmrUWIFDoCDLoF9uKQBAL0hImoK8tO/JCI9b26Rz2aYX6BgZGn0CgCaMm6RUsIsOQtkarmNk7uGXX4itJRJ6N6fyg5aJPHuktBxqTyg2yTeFfOhJOJSTNGDzfvoDy9R25KsvTusGgvdl94wyduU+OadhRaXn3hrld09dlGJBn3yNoFE+MbKBhbg+HlqFhvoH5PQoQCkBEk6leL7aLlrk3fuhba6jQVXSeb3zXfDex4vxtBoEa19jpQFCdVyxfCWJvsgb5E5vEPeYZaW3rImRkPyKFdaAwnR3z6524wehk7JGDkWXTn4OkaSxlS2CFVjlvUay+MdT3G879cCAI55FO8nZqb1yVns11INd28BBmSRzA9lSj3pAB57sAJtaq3KgvEK0HUFAM8V7yaKL+mk2EQdlsRT5JbaO/sodJ9Uv4c+9l2scxJ43+A09oZpjME2KWJjGp/jiBaRBozX8uWIvo9dwhDXad5tnW8ccdbWhdNLP5s5H8zjZyb6GGpiU07A0dtxaGnvnXl1vOud7tEreJ40wUh3zlx74/CYp2iZJc9S/xeaktAyCf1PEponofukWeosiffbyVSXIon/YMsdtL9G3CbJ/dyJLv8x+EYPT3zaDs3Q71VMKz0OGXeO3K23dJcO2pdp+0n1Ed5KJd4rd3yuPzBXbnn7Pnl540WTr40OTf/0mx9tu/5doFWwB437w+m6b/1aHtjTjxnbfiibWK5fk+imFdYTsQ80OaOWjp5fSTIyP4JPJBmz/ifg25ID+HNi3BktvwfqA4ixzeL3zZPvyfjDQjpPODwffmjlVCY+GYJMl987oT+V+xfzZmt7gnutGg6r6bNmXpLr3O3IhB3L3HpzdMRWKbQwBu9cQdT/KYsRy9jkVLieb+jY8P9MHJFMqSdlksHxFI/0SB+A/gO11/WdOGd1RwAAAABJRU5ErkJggg==';
+ build();
 }
 
 function renderTicketSelector(){
@@ -1301,6 +1341,7 @@ function init(){
  if(location.search.includes('selftest=1'))window.__LuckyBuckTest={get:()=>JSON.parse(JSON.stringify(state)),normalOdds,draw:singleDraw,freshTicket,validateRestore,defaultRows:baseRows,useShots,shotEffect,shotExpected,doubleRate,momentumRates,luckRates,baseLosers:BASE_LOSERS};
 }
 init();
+loadOriginalLuckyBuckLogo();
 })();
 
 
