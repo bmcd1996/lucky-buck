@@ -408,7 +408,8 @@ html,body{overflow-x:hidden}
 .v3-column .mod-status{font-size:13px}
 .v3-column .simulation-tools .batch-row{display:flex;gap:8px;max-width:none}
 .v3-column .simulation-tools #batchSize{flex:1;min-width:0;min-height:47px}
-.v3-column .simulation-tools #runBatch{min-width:110px;min-height:47px}
+.v3-column .simulation-tools #runBatch{min-width:100px;min-height:47px}
+.v3-column .simulation-tools #resetStats{min-width:75px;min-height:44px;font-size:12px;padding:7px}
 .v3-column .table-wrap{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
 .v3-column .odds-table{min-width:420px}
 .v3-column .result-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
@@ -418,6 +419,8 @@ html,body{overflow-x:hidden}
 .v3-column #modifierEditor{margin-top:0}
 .v3-footer-tools{margin:12px 2px 5px}.v3-footer-tools .card{padding:13px}
 .v3-column .footnote{font-size:11px}
+.v3-column .simulation-tools .subline,.v3-column .card .subtle-notice{display:none}
+.v3-column #resultSummary + .footnote{display:none}
 .v3-column .card p.subtle-notice{font-size:11px}
 .v3-column :is(button,select,input){max-width:100%}
 .v3-column .shot-advanced summary{font-size:11px}
@@ -967,7 +970,7 @@ function renderTicketSelector(){
  $('heroTicketName').textContent=t.name;
  $('heroTicketCost').textContent=usd(t.price,t.price%1===0?0:2);window.v3SyncPrice?.(t.price);
  $('scratchTitle').textContent=t.name.toUpperCase()+' • INSTANT WIN';
- $('buyOne').textContent='Buy one ticket · '+usd(t.price,t.price%1===0?0:2);
+ $('buyOne').textContent='Buy one ticket';
  $('evHeading').textContent='Expected cash payout per '+usd(t.price,t.price%1===0?0:2)+' ticket';
  $('ticketHint').textContent=state.tickets.length>1?'Select another ticket at the top to see its own odds, settings and past results.':'Use the ticket menu above to create another ticket. This one will remain saved.';
 }
@@ -1201,6 +1204,7 @@ rail.append(left,right);
 header.insertAdjacentElement('afterend',controls);controls.insertAdjacentElement('afterend',rail);
 left.append(hero,showcase,modCard,setupCard);
 right.append(oddsCard,batchCard,totalCard,calcCard,historyCard);
+batchCard.querySelector('.batch-row').append(byId('resetStats'));
 const footer=document.createElement('div');footer.className='v3-footer-tools';footer.append(exportCard);
 rail.insertAdjacentElement('afterend',footer);
 main.style.display='none';
