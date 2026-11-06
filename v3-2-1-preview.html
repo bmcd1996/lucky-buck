@@ -423,7 +423,7 @@ html,body{overflow-x:hidden}
 .odds-line-inner .money-field{flex:1 1 56px;min-width:0}.odds-line-inner .money-field input{width:100%;height:36px;margin:0!important;padding:6px 4px 6px 22px!important;font-size:14px;text-align:left!important}
 .odds-line-inner>input[data-field=label]{flex:1 1 90px;min-width:0;height:36px;margin:0!important;padding:6px!important;font-size:13px;text-align:left!important}
 .odds-line-inner>select[data-field=mode]{flex:0 0 auto;width:auto!important;height:36px;margin:0!important;padding:4px!important;font-size:12px}
-.odds-nopay{flex:1 1 56px;min-width:0;font-size:12px;color:var(--muted);white-space:nowrap}
+.odds-line-inner>select.odds-zero{flex:1 1 56px;min-width:0;width:auto!important;height:36px;margin:0!important;padding:6px 8px!important;font-size:14px;color:var(--gold)}
 .odds-line-inner .percent-wrap{flex:0 0 66px;width:66px;height:36px}.odds-line-inner .percent-wrap input{width:100%;padding:6px 2px!important;font-size:14px}
 .odds-line-inner .odds-cell{flex:0 0 46px;width:46px!important;padding:0!important;font-size:12px;justify-content:flex-end!important}
 .odds-line-inner .delete-row{position:static!important;flex:0 0 24px;width:24px!important;height:24px!important;margin:0!important;padding:0!important;font-size:12px!important;line-height:22px!important;border-radius:50%}
@@ -1335,7 +1335,7 @@ function renderRateSettings(t){
 }
 function rowHTML(r,t){const isJ=r.kind===JACKPOT,guaranteed=isJ&&r.mode==='guaranteed',chance=guaranteed?100:r.chance;
  const kind=`<select data-field="kind" aria-label="Outcome type"><option value="cash" ${r.kind===CASH?'selected':''}>Cash</option><option value="lose" ${r.kind===LOSE?'selected':''}>Lose</option><option value="jackpot" ${isJ?'selected':''}>Jackpot</option></select>`;
- const value=r.kind===CASH?`<div class="money-field"><span aria-hidden="true">$</span><input data-field="amount" aria-label="Cash prize amount in dollars" type="number" min="0.01" step="any" value="${esc(r.amount)}"></div>`:isJ?`<input data-field="label" aria-label="Jackpot item name" maxlength="100" value="${esc(r.label)}">`:`<span class="odds-nopay">No payout</span>`;
+ const value=r.kind===CASH?`<div class="money-field"><span aria-hidden="true">$</span><input data-field="amount" aria-label="Cash prize amount in dollars" type="number" min="0.01" step="any" value="${esc(r.amount)}"></div>`:isJ?`<input data-field="label" aria-label="Jackpot item name" maxlength="100" value="${esc(r.label)}">`:`<select class="odds-zero" aria-label="Lose payout"><option value="0" selected>$0</option></select>`;
  const mode=isJ?`<select data-field="mode" aria-label="Jackpot pack rule"><option value="rare" ${r.mode==='rare'?'selected':''}>Rare pack</option><option value="guaranteed" ${guaranteed?'selected':''}>Guaranteed</option></select>`:'';
  return `<tr data-id="${r.id}" class="odds-line"><td colspan="5"><div class="odds-line-inner${isJ?' jackpot':''}">${kind}${value}${mode}<div class="percent-wrap"><input aria-label="${isJ?'Pack':'Outcome'} percentage" data-field="chance" ${guaranteed?'disabled':''} type="text" inputmode="decimal" value="${esc(precise(chance))}"><span class="unit">%</span></div><div class="odds-cell mods" id="mod-${r.id}">—</div><span class="hidden" id="final-${r.id}"></span><button type="button" class="delete-row" aria-label="Remove outcome" data-delete="${r.id}">✕</button></div></td></tr>`;}
 function addInlineRow(){const t=T();if(t.rows.length>=100){toast('Maximum 100 outcome rows.');return;}
