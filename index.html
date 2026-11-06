@@ -785,49 +785,32 @@ function cleanShots(raw){const s=defaultShots();if(!raw||typeof raw!=='object')r
  if(s.noBonusMax>=s.bullMin)s.noBonusMax=0;
  if(Number.isFinite(Number(raw.grand))&&Number(raw.grand)>0&&Number(raw.grand)<=1e6)s.grand=Number(raw.grand);
  return s;}
-// Accuracy zones: 0% = miss · at/above bullMin = bullseye · at/below noBonusMax = no bonus · otherwise a partial hit.
-function shotZone(s,i){const a=s.accuracy[i];if(a===0)return 'miss';if(a>=s.bullMin)return 'bull';if(a<=s.noBonusMax)return 'none';return 'partial';}
-const zoneScale=(s,i)=>{const z=shotZone(s,i);return z==='bull'?1:z==='partial'?s.accuracy[i]/100:0;};
+// Rescue-bonus engine: only complete bullseyes roll; misses never harm an original ticket.
+function shotZone(s,i){const a=s.accuracy[i];if(a===0)return 'miss';return a>=s.bullMin?'bull':'none';}
 const clampPct=v=>Math.min(100,Math.max(0,v));
-// Bonus chance for a shot: its own bonus scaled by accuracy. With stacking on, a successful previous roll adds its chance.
-function bonusChance(s,i,prev){const z=shotZone(s,i);if(z!=='bull'&&z!=='partial')return 0;
- const own=s.bonus[i]*zoneScale(s,i),carry=s.stack&&i>0&&prev?.success?prev.chance:0;
- return clampPct(own+carry);}
-// Missed-shot penalty: one rate for every miss; back-to-back misses stack.
-function missChance(s,i){if(shotZone(s,i)!=='miss')return 0;let streak=1;for(let j=i-1;j>=0&&shotZone(s,j)==='miss';j--)streak++;return clampPct(s.miss*streak);}
-const nextLevel=(v,s)=>v===1?5:v===5?25:v===25?s.grand:v;
+const nextLevel=v=>v===1?5:v===5?25:v;
 const isWin=n=>n[0]>0&&n[0]===n[1]&&n[1]===n[2];
-// Applies the three shots in balloon order. roll(chancePercent) decides each roll.
 function resolveShots(original,s,roll){
- const numbers=original.slice(),changed=[],hits=[false,false,false];let pre=null,prev=null,chain=true;
+ const numbers=original.slice(),changed=[],hits=[false,false,false];let pre=null,streak=0;
  const set=(idx,to,kind,shot,chance)=>{if(numbers[idx]!==to){changed.push({balloon:idx+1,from:numbers[idx],to,chance,kind,shot:shot+1});numbers[idx]=to;}};
- for(let i=0;i<3;i++){const z=shotZone(s,i);
-  if(z==='miss'){const p=missChance(s,i);if(p>0&&numbers[i]!==0&&roll(p))set(i,0,'penalty',i,p);prev={zone:z,success:false,chance:0};chain=false;continue;}
-  if(z==='none'){prev={zone:z,success:false,chance:0};chain=false;continue;}
-  if(i<2){
-   const p=bonusChance(s,i,prev),ok=p>0&&roll(p);hits[i]=ok;
-   // A bonus only ever helps: a zero becomes 1 and the next balloon becomes 1, from one roll.
-   if(ok){if(numbers[i]===0){set(i,1,'rescue',i,p);set(i+1,1,'rescue',i,p);}else set(i+1,numbers[i],'rescue',i,p);}
-   if(!(z==='bull'&&ok))chain=false;prev={zone:z,success:ok,chance:p};
-  }else if(chain&&isWin(numbers)){
-   // Shot 3: only after successful bullseyes on shots 1 and 2, and only on a winning card.
-   const p=bonusChance(s,2,prev),ok=p>0&&roll(p);hits[2]=ok;
-   if(ok){pre=numbers.slice();const up=nextLevel(numbers[0],s);for(let k=0;k<3;k++)set(k,up,'upgrade',2,p);}
+ for(let i=0;i<3;i++){
+  if(shotZone(s,i)!=='bull'){streak=0;continue;}
+  streak++;
+  if(!isWin(numbers)){
+   const p=clampPct(s.bonus[Math.min(3,streak)-1]||0);
+   if(p>0&&roll(p)){hits[i]=true;for(let k=0;k<3;k++)set(k,1,'rescue',i,p);}
+  }
+  if(streak===3&&isWin(numbers)){
+   const p=clampPct(s.upgradeChance||0),up=nextLevel(numbers[0]);
+   if(up>numbers[0]&&p>0&&roll(p)){hits[i]=true;pre=numbers.slice();for(let k=0;k<3;k++)set(k,up,'upgrade',i,p);}
   }
  }
- return {numbers,changed,hits,pre};}
-// Every possible roll path with its exact probability (used for the modeled odds).
-function shotPaths(original,s){const out=[],stack=[[]];
- while(stack.length){const script=stack.pop(),start=script.length;let k=0,prob=1;
-  const r=resolveShots(original,s,p=>{const q=p/100;if(k>=script.length)script.push(false);const v=script[k++];prob*=v?q:1-q;return v;});
-  for(let j=start;j<k;j++)stack.push(script.slice(0,j).concat(true));
-  if(prob>0)out.push({...r,prob});}
- return out;}
+ return {numbers,changed,hits,pre};
+}
 function canShoot(t){return t.id==='lucky-buck'&&isLuckyCurve(t)&&t.rows.filter(r=>r.kind!==JACKPOT).length===4;}
-function useShots(baseKind,baseAmount,t,random=Math.random){
+function useShots(baseKind,baseAmount,t,random=Math.random,applyShots=true){
  const plain=payout=>({numbers:null,original:null,pre:null,hits:null,payout,changed:[]});
- if(!canShoot(t)||baseKind===JACKPOT)return plain(baseKind===CASH?baseAmount:0);
- // A custom CASH prize outside Lucky Buck's balloon values is displayed and paid normally.
+ if(!canShoot(t)||baseKind===JACKPOT||!applyShots)return plain(baseKind===CASH?baseAmount:0);
  if(baseKind===CASH&&!SHOT_VALUES.includes(baseAmount))return plain(baseAmount);
  const original=baseKind===CASH&&baseAmount>0?[baseAmount,baseAmount,baseAmount]:BASE_LOSERS[Math.floor(random()*BASE_LOSERS.length)].slice();
  const r=resolveShots(original,t.shots,p=>random()*100<p);
@@ -1016,7 +999,7 @@ function specialHit(t,random=Math.random){const sp=t.special;if(!sp||!sp.on||!(s
   pk=t.specialPack={x:sp.x,y:sp.y,index:0,hits:[...pool].sort((a,b)=>a-b)};}
  let set=specialSets.get(pk);if(!set){set=new Set(pk.hits);specialSets.set(pk,set);}
  return set.has(pk.index++);}
-function singleDraw(t,random=Math.random){
+function singleDraw(t,random=Math.random,applyShots=true){
  if(!t.pack||t.pack.index>=t.packSize)createPack(t);
  const position=t.pack.index++;
  const assigned=t.pack.assignments.find(a=>a.position===position);
@@ -1029,7 +1012,7 @@ function singleDraw(t,random=Math.random){
   for(const r of c.rows){if(n<r.final){row=r;break;}n-=r.final;}
   const baseTop=row.kind===CASH&&row.id===c.highestId;
   const baseAmount=row.kind===CASH?row.amount:0;
-  const shot=useShots(row.kind,baseAmount,t,random);
+  const shot=useShots(row.kind,baseAmount,t,random,applyShots);
   const kind=shot.payout>0?CASH:LOSE;
   const doubled=kind===CASH&&shot.payout>=c.highestAmount&&random()*100<doubleRate(t);
   const payout=shot.payout*(doubled?2:1);
@@ -1054,14 +1037,14 @@ function rollAccuracy(level,random=Math.random){const r=random(),span=(lo,hi)=>l
 function nominalChances(s,randomOn){return chainChances(randomOn?{...s,accuracy:[100,100,100]}:s);}
 function simulate(n){const t=T(),c=valid(t);if(!c.valid){toast(c.error);return;}if(!integer(n,1,1000000)){toast('Enter an integer batch size from 1 to 1,000,000.');return;}
  let won=0,wins=0,best=0,jackpots=0;const counts=new Map(),shotHits=[0,0,0],shotMisses=[0,0,0];
- const randomOn=canShoot(t)&&t.batchAccuracy.on,level=t.batchAccuracy.level,keep=t.shots.accuracy.slice();
+ const useBonus=canShoot(t)&&t.batchAccuracy.useShots,randomOn=useBonus&&t.batchAccuracy.on,level=t.batchAccuracy.level,keep=t.shots.accuracy.slice();
  try{
- for(let i=0;i<n;i++){if(randomOn)t.shots.accuracy=[rollAccuracy(level),rollAccuracy(level),rollAccuracy(level)];const p=singleDraw(t);
+ for(let i=0;i<n;i++){if(randomOn)t.shots.accuracy=[rollAccuracy(level),rollAccuracy(level),rollAccuracy(level)];const p=singleDraw(t,Math.random,useBonus);
   if(p.changed?.length){const hitShot=[false,false,false],missShot=[false,false,false];for(const ch of p.changed){const k=Number(ch.shot)-1;if(k<0||k>2)continue;if(ch.kind==='penalty')missShot[k]=true;else hitShot[k]=true;}for(let k=0;k<3;k++){if(hitShot[k])shotHits[k]++;if(missShot[k])shotMisses[k]++;}}
   won+=p.payout;best=Math.max(best,p.payout);if(p.kind===CASH&&p.payout>0){wins++;counts.set(p.payout,(counts.get(p.payout)||0)+1);}if(p.kind===JACKPOT)jackpots++;}
  }finally{t.shots.accuracy=keep;}
  let most='No paying cash prizes';if(counts.size){const maximum=Math.max(...counts.values());const ties=[...counts].filter(x=>x[1]===maximum).map(x=>x[0]).sort((a,b)=>a-b);most=ties.length===1?usd(ties[0]):'Tie: '+ties.map(v=>usd(v)).join(' / ');}
- if(canShoot(t))t.batchShots={n,chances:nominalChances(t.shots,randomOn),hits:shotHits,misses:shotMisses,random:randomOn?level:''};
+ if(canShoot(t))t.batchShots={n,chances:useBonus?nominalChances(t.shots,randomOn):[0,0,0],hits:shotHits,misses:shotMisses,random:randomOn?level:''};
  record(t,{mode:'batch',n,won,wins,best,prize:0,prizeKind:LOSE,prizeLabel:'',jackpots,mostFrequent:most,luck:t.luck});save();renderStats();refreshOdds();setScratch('batch',{n,won,wins,jackpots,net:won-n*t.price});
  if(t.batchShots)window.v3BatchReadout?.(t.batchShots);}
 let activeCard=null;
