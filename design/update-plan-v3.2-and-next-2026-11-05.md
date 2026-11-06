@@ -3,7 +3,7 @@
 **Status: NOTES ONLY. Nothing here is built yet.** Owner said "not yet" to building; Claude may choose the build order when the owner says go.
 **Rules:** never change calculator code without the owner's explicit go-ahead; build as a preview page first; live only after the owner approves. Follow `CLAUDE.md` versioning. Current live: **v3.1.1**.
 
-## v3.2.0 (owner agreed to the version number; ready to build on "go")
+## v3.2.0 — DONE, live November 5, 2026 (see ledger for the extra owner tweaks made during preview)
 
 1. **Logo fix.** The Lucky Buck heading logo is cut out of the ticket art at load; on iPhone it sometimes comes out as a black silhouette (art not decoded yet). Wait until the art is fully ready before cutting it out; if the cutout is still blank, show the "Lucky Buck" name instead. Owner wants this fixed even though a refresh clears it.
 

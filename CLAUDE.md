@@ -10,6 +10,6 @@ Use three-part version numbers for the Lucky Buck calculator: **major.minor.patc
 
 For app releases, update the **visible version badge** so that it matches the release version. Always determine the current version before incrementing it. Keep tiny fixes narrowly scoped; do not alter shot odds, ticket mechanics, calculations, artwork, or unrelated UI for a text-only patch. Do not change the app's visible version solely because this instruction document changes.
 
-**Current baseline:** `v3.1.1` — the three main accuracy control labels were renamed from “Balloon 1/2/3” to “Shot 1/2/3”, with no mechanic changes.
+**Current baseline:** `v3.2.0` — released November 5, 2026 (plan items 1–7: logo fix, settings gear pop-up, one dropdown per shot + Enable stacking, batch readout, random accuracy, one buy button with result labels and shooting lines, Trusty Shotgun special item). Rollback branch: `backup/pre-v3-2-0-2026-11-05`.
 
 These are the owner's versioning rules for future Lucky Buck updates.

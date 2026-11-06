@@ -132,3 +132,11 @@
 - Owner request (22:48): before the first pop, the button shows a random line from 23 owner-approved shooting lines (e.g. "Shoot the balloons!", "Oh deer, better start shooting!") instead of ? · ? · ?; numbers appear after the first pop. Added featured line "Take 'em out." (22:51): 10% chance on every ticket; otherwise one of the 23 at random.
 - Labels (23:00): dropdowns read "Shot 1/2/3 accuracy"; notes under shots 1–2 read "Accuracy bonus x%".
 - Tests: 40/40 rule/label/special-item/random-accuracy/odds checks (incl. exact model vs 1M-ticket simulations in four scenarios) and 34/34 phone play-through checks (carry-over, gear, special item, stacking math, buy states, batch readout, random accuracy restores your dropdowns, refresh, Clear totals, live data untouched, no page errors). Owner's iPhone check still needed.
+
+## v3.2.0 — LIVE (November 5, 2026, 23:11 Central)
+- Owner tested the preview on iPhone and approved ("do the upgrade for real").
+- `index.html` is now v3.2.0: identical to `v3-2-preview.html` except it uses the real save keys (`quill-lucky-buck-v2`, `lucky-buck-setting-presets-v1`) and the badge reads v3.2.0.
+- **Rollback point:** branch `backup/pre-v3-2-0-2026-11-05` (v3.1.1 at commit 64b8a15).
+- Tests before release: 42/42 rule/odds checks on the live build; 10/10 upgrade checks on v3.1.1 saved data (totals, history, shot settings, presets kept; Trusty Shotgun added; an unscratched v3.1.1 ticket resumes without a second charge; new tickets play; gear pop-up; no page errors).
+- Owner asked about frequent natural 1,1,1 / 5,5,5 draws: checked 200,000 tickets — draws match the configured odds (Lose 44%, $1 32%, $5 20%, $25 4% → 56% natural winners, ~$2.32 returned per $1). Not a bug; odds unchanged pending the owner's decision.
+- `v3-2-preview.html` remains as a sandbox with its own saved data.
