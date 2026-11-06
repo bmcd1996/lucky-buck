@@ -152,4 +152,4 @@
 - Rollback branch: `backup/pre-v3-2-1-2026-11-06` (live v3.2.0).
 
 ## Session notes saved (Nov 6, 01:00 Central)
-- Full summary of tonight, the $10 tuning results and the owner decision (max $10, keep Double Down, lock Luck/Momentum at 0/3) are in [session notes](https://github.com/bmcd1996/lucky-buck/blob/main/design/session-notes-2026-11-05-to-06.md). Nothing pending is built. Live v3.2.0; v3.2.1 is preview only.
+- Full summary of tonight, the $10 tuning results and the owner decision (max $10, keep Double Down, lock Luck/Momentum at 0/3) are in [session notes](https://github.com/bmcd1996/lucky-buck/blob/main/design/session-notes-2026-11-05-to-06.md). Nothing pending is built. Live is v3.2.1.
