@@ -119,3 +119,7 @@
 - **Rollback point:** branch `backup/pre-shot-rules-v3-0-2026-11-05` (live v3.0 at commit 32a5a65).
 - Tests before release: 36/36 rule and odds checks on the live build; 9/9 upgrade checks on top of v3.0 saved data (stats, history, an unscratched ticket, shot settings and presets all carried over; old waiting ticket and new tickets play; no page errors).
 - `shots-preview.html` remains as a sandbox with its own saved data.
+
+## Planned: v3.2.0 and the next update (November 5, 2026, 21:59 Central) — NOTES ONLY
+- Owner-approved list saved in [update plan](https://github.com/bmcd1996/lucky-buck/blob/main/design/update-plan-v3.2-and-next-2026-11-05.md): items 1–7 for v3.2.0 (logo fix, settings gear, one dropdown per shot + Enable stacking, batch readout, random accuracy, one buy button with result labels, special item setting) and items 8–11 for the following update.
+- Nothing built yet; waiting for the owner's go-ahead. Live is v3.1.1.
