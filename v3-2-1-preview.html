@@ -436,6 +436,18 @@ html,body{overflow-x:hidden}
 .odds-line-inner.special>select[data-special=type]{flex:0 0 74px;width:74px!important;height:36px;margin:0!important;padding:4px!important;font-size:12px}
 .special-toggle{display:flex!important;align-items:center;gap:6px;cursor:pointer}.special-toggle input{width:auto;min-height:0;margin:0;accent-color:#6ee2a1}
 .special-item-setting.special-off .special-row,.special-item-setting.special-off #specialHint{opacity:.5}
+.showcase-center>.card{position:relative}
+#ticketPanelMessage{display:none!important}
+.shot-settings-pop{position:absolute;left:12px;right:12px;z-index:30;box-sizing:border-box;background:#16302a;border:1px solid #4c976b;border-radius:14px;box-shadow:0 14px 34px #000b;padding:7px 8px 8px;display:flex;flex-direction:column;gap:5px}
+.shot-settings-pop.hidden{display:none}
+.ssp-head{display:flex;align-items:center;gap:10px;padding-right:30px;flex-wrap:wrap}.ssp-head strong{font-size:13px;color:#ffd481}.ssp-head .stack-toggle{font-size:12px!important;margin:0!important}
+.ssp-close{top:6px!important;right:6px!important;width:22px!important;height:22px!important}
+.ssp-shots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+.ssp-box{background:#1c3a2c;border:1px solid #345a47;border-radius:10px;padding:5px 5px;display:flex;flex-direction:column;gap:3px;min-width:0}
+.ssp-box label,.ssp-misc label{font-size:10px;font-weight:750;color:#e6f6e6;margin:0;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.shot-settings-pop select{width:100%!important;min-width:0;min-height:28px;height:28px;padding:3px 4px!important;font-size:12px;margin:0!important}
+.ssp-box .stack-math{font-size:10px;color:#d5eeda;white-space:nowrap;line-height:1.1}.ssp-box .stack-math.hidden{display:none}
+.ssp-misc{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}.ssp-misc>div{display:flex;flex-direction:column;gap:2px;min-width:0}
 
 .setup-modal{position:fixed;inset:0;z-index:1000;background:#0009;display:flex;align-items:flex-start;justify-content:center;padding:max(18px,env(safe-area-inset-top)) 12px 24px;overflow-y:auto;-webkit-overflow-scrolling:touch}.setup-modal.hidden{display:none}
 .setup-modal-box{position:relative;width:100%;max-width:560px;margin:0 auto}.setup-modal-box>.card{margin:0;box-shadow:0 18px 50px #000a}.setup-modal-box .card-top{padding-right:30px}
@@ -574,7 +586,7 @@ body.setup-open{overflow:hidden}.card-top .ticket-gear+h3{margin-right:auto}
   <div class="shot-field"><label for="shot1">Shot 1 accuracy</label><select id="shot1"></select><small id="shotDescription1"></small></div>
   <div class="shot-field"><label for="shot2">Shot 2 accuracy</label><select id="shot2"></select><small id="shotDescription2"></small></div>
   <div class="shot-field"><label for="shot3">Shot 3 accuracy</label><select id="shot3"></select><small id="shotDescription3"></small></div>
-  <details class="shot-advanced" id="shotAdvanced"><summary>Shot bonus settings</summary><div class="shot-advanced-inner shot-rates"><label class="stack-toggle"><input type="checkbox" id="stackShots"> Enable stacking</label><label for="bonus1">Shot 1 bonus</label><div class="rate-pair"><select id="bonus1"></select></div><label for="bonus2">Shot 2 bonus</label><div class="rate-pair"><select id="bonus2"></select><span class="stack-math hidden" id="stackMath2"></span></div><label for="bonus3">Shot 3 upgrade</label><div class="rate-pair"><select id="bonus3"></select><span class="stack-math hidden" id="stackMath3"></span></div><label for="grandPrize">Grand prize</label><div class="rate-pair"><select id="grandPrize"></select></div><label for="missPenalty">Missed shot penalty</label><div class="rate-pair"><select id="missPenalty"></select></div><label for="bullMin">Bullseye range</label><div class="rate-pair"><select id="bullMin"></select></div><label for="noBonusMax">No-bonus range</label><div class="rate-pair"><select id="noBonusMax"></select></div></div></details>
+  <details class="shot-advanced" id="shotAdvanced"><summary>Shot bonus settings</summary></details>
   <p id="shotProjection" class="shot-projection">Expected shot-adjusted odds appear here.</p>
  </section>
 <div class="purchase-row"><button class="btn primary" id="buyOne" type="button">Buy one ticket · $1</button><span class="purchase-helper">Choose your shots, buy, then pop the balloons below.</span></div>
@@ -598,6 +610,7 @@ body.setup-open{overflow:hidden}.card-top .ticket-gear+h3{margin-right:auto}
  <button class="btn ghost hidden" id="revealBtn" type="button">Show waiting ticket</button>
  <button class="btn mini ghost" id="resetTicket" type="button">Clear display</button>
 </div>
+<div class="shot-settings-pop hidden" id="shotSettingsPop" role="dialog" aria-label="Shot bonus settings"><div class="ssp-head"><strong>Shot bonus settings</strong><label class="stack-toggle"><input type="checkbox" id="stackShots"> Enable stacking</label><button type="button" class="setup-close ssp-close" id="shotSettingsClose" aria-label="Close shot bonus settings">✕</button></div><div class="ssp-shots"><div class="ssp-box"><label for="bonus1">Shot 1 bonus</label><select id="bonus1"></select></div><div class="ssp-box"><label for="bonus2">Shot 2 bonus</label><select id="bonus2"></select><span class="stack-math hidden" id="stackMath2"></span></div><div class="ssp-box"><label for="bonus3">Shot 3 upgrade</label><select id="bonus3"></select><span class="stack-math hidden" id="stackMath3"></span></div></div><div class="ssp-misc"><div><label for="grandPrize">Grand prize</label><select id="grandPrize"></select></div><div><label for="missPenalty">Miss penalty</label><select id="missPenalty"></select></div><div><label for="bullMin">Bullseye</label><select id="bullMin"></select></div><div><label for="noBonusMax">No bonus</label><select id="noBonusMax"></select></div></div></div>
 </section></div>
  <aside class="showcase-right">
   <section class="active-mods" aria-label="Active modifiers">
@@ -1530,6 +1543,16 @@ function init(){
  $('bullMin').innerHTML=Array.from({length:51},(_,k)=>100-k).map(v=>`<option value="${v}">${v===100?'100%':v+'–100%'}</option>`).join('');
  $('noBonusMax').innerHTML=Array.from({length:50},(_,v)=>`<option value="${v}">${v===0?'Off':'1–'+v+'%'}</option>`).join('');
  for(let i=1;i<=3;i++)$('shot'+i).addEventListener('change',e=>{T().shots.accuracy[i-1]=Number(e.target.value);save();refreshOdds();});
+ // Open/close the shot settings pop-up: it covers the area from the buy button to the bottom of the ticket section.
+ const shotPop=$('shotSettingsPop'),openShotPop=open=>{if(open){const card=shotPop.parentElement,c=card.getBoundingClientRect(),b=$('buyOne').getBoundingClientRect(),top=Math.max(8,Math.round(b.top-c.top));
+   shotPop.style.top=top+'px';shotPop.style.minHeight=Math.max(0,Math.round(c.bottom-b.top-10))+'px';}
+  shotPop.classList.toggle('hidden',!open);$('shotAdvanced').open=false;
+  // If it needs more room than the space under the buy button, slide it up so it still ends at the bottom of the ticket section.
+  if(open){const card=shotPop.parentElement,ch=card.clientHeight,h=shotPop.offsetHeight,t=parseFloat(shotPop.style.top);if(t+h>ch-10){shotPop.style.top=Math.max(8,ch-10-h)+'px';}}};
+ $('stackShots').addEventListener('change',()=>{if(!shotPop.classList.contains('hidden'))setTimeout(()=>openShotPop(true),0);});
+ $('shotAdvanced').querySelector('summary').addEventListener('click',e=>{e.preventDefault();openShotPop(shotPop.classList.contains('hidden'));});
+ $('shotSettingsClose').addEventListener('click',()=>openShotPop(false));
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!shotPop.classList.contains('hidden'))openShotPop(false);});
  $('stackShots').addEventListener('change',e=>{T().shots.stack=e.target.checked;save();refreshOdds();});
  for(const [id,apply] of [['bonus1',(s,v)=>s.bonus[0]=v],['bonus2',(s,v)=>s.bonus[1]=v],['bonus3',(s,v)=>s.bonus[2]=v],['missPenalty',(s,v)=>s.miss=v],['grandPrize',(s,v)=>s.grand=v],['bullMin',(s,v)=>s.bullMin=v],['noBonusMax',(s,v)=>s.noBonusMax=v]])$(id).addEventListener('change',e=>{const v=Number(e.target.value);if(!Number.isFinite(v)||v<0)return;apply(T().shots,v);save();refreshOdds();});
  document.querySelectorAll('.balloon-target').forEach((b,i)=>{b.addEventListener('click',()=>popBalloon(i));b.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse')popBalloon(i);});});
