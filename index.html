@@ -554,7 +554,7 @@ body.setup-open{overflow:hidden}.card-top .ticket-gear+h3{margin-right:auto}
 <div class="wrap">
 <header class="header">
 <div class="brand"><div class="brand-mark">$</div><div><small>QUILL PRODUCTIONS</small><h1>Cardboard to Cash</h1></div></div>
-<div class="header-right"><span class="version-badge" title="Lucky Buck simulator version">v3.2.1</span><span class="save" id="saveStatus">Loading…</span></div>
+<div class="header-right"><span class="version-badge" title="Lucky Buck simulator version">v3.2.2</span><span class="save" id="saveStatus">Loading…</span></div>
 </header>
 
 <section class="hero">
@@ -574,7 +574,7 @@ body.setup-open{overflow:hidden}.card-top .ticket-gear+h3{margin-right:auto}
  <aside class="showcase-left">
   <section class="preset-mini" aria-label="Saved setting presets">
    <label class="preset-caption" for="presetSelect">SAVED PRESET</label>
-   <select id="presetSelect" aria-label="Saved preset"><option value="default">Default</option><option value="custom1">Custom 1</option><option value="custom2">Custom 2</option><option value="custom3">Custom 3</option></select>
+   <select id="presetSelect" aria-label="Saved preset"><option value="default">Default</option><option value="custom1">Shooter Bonus</option><option value="custom2">Custom 2</option><option value="custom3">Custom 3</option></select>
    <button type="button" class="preset-load" id="presetLoad">Load selected</button>
    <details class="preset-more"><summary>Manage presets</summary><div class="preset-buttons"><button type="button" id="presetSave">Save to slot</button><button type="button" id="presetReset">Factory default</button></div><p class="preset-hint" id="presetHint">Selecting a slot does not load it.</p></details>
   </section>
@@ -908,17 +908,56 @@ let state,canSave=true,loadError=null;
 try{const v2=localStorage.getItem(KEY);const v1=localStorage.getItem(OLD_KEY);state=v2?validateRestore(JSON.parse(v2)):v1?migrateOld(JSON.parse(v1)):defaults();if(v2&&!localStorage.getItem(PRE_SHOT_BACKUP_KEY)){try{localStorage.setItem(PRE_SHOT_BACKUP_KEY,v2);}catch(e){loadError='Could not preserve the original saved settings. Please export a backup before editing.';canSave=false;}}}catch(e){loadError=e.message;canSave=false;state=defaults();}
 const T=()=>state.tickets.find(t=>t.id===state.selectedId)||state.tickets[0];
 const PRESET_KEY='lucky-buck-setting-presets-v1';
+const SHOOTER_BONUS_INSTALLED='lucky-buck-shooter-bonus-preset-installed-v1';
+const CUSTOM1_BEFORE_SHOOTER='lucky-buck-custom1-pre-shooter-bonus-v1';
 let presets={};let selectedPreset='default';
 try{const stored=JSON.parse(localStorage.getItem(PRESET_KEY)||'{}');if(stored&&typeof stored==='object'&&!Array.isArray(stored))presets=stored;}catch(e){presets={};}
-function presetSnapshot(){const t=T();return {ticket:{name:t.name,price:t.price,rows:t.rows,denominator:t.denominator,packSize:t.packSize,luckMode:t.luckMode,luck:t.luck,momentum:t.momentum,doubleDown:t.doubleDown,shots:t.shots,rates:t.rates,nextRowId:t.nextRowId},batch:state.batch};}
+// Owner-approved Nov 6 tuning. One-time preset slot migration; does not touch active ticket or run history.
+function shooterBonusPreset(){
+ const t=freshTicket();
+ t.rows=[
+  {id:1,kind:LOSE,amount:0,chance:76},
+  {id:2,kind:CASH,amount:1,chance:21},
+  {id:3,kind:CASH,amount:5,chance:2.5},
+  {id:4,kind:CASH,amount:25,chance:0.5}
+ ];
+ t.luck=1;t.momentum=1;t.doubleDown=2;
+ t.shots={...t.shots,accuracy:[70,75,65],bonus:[18,25,50],stack:true,miss:8,bullMin:95,noBonusMax:25,grand:30};
+ t.rates.momentum={mode:'edit',levels:[[0,0],[12,25],[15,30],[18,36]]};
+ t.rates.luck={mode:'edit',levels:[null,[74,23,2.5,0.5],[72,25,2.5,0.5],[70,27,2.5,0.5]]};
+ return {ticket:{
+  name:t.name,price:t.price,rows:t.rows,denominator:t.denominator,packSize:t.packSize,
+  luckMode:t.luckMode,luck:t.luck,momentum:t.momentum,doubleDown:t.doubleDown,
+  shots:t.shots,rates:t.rates,nextRowId:t.nextRowId,special:t.special
+ },batch:1};
+}
+function presetName(key){return key==='custom1'?'Shooter Bonus':key==='default'?'Default':'Custom '+key.replace('custom','');}
+try{
+ if(localStorage.getItem(SHOOTER_BONUS_INSTALLED)!=='yes'){
+  // Preserve the user's previous Custom 1 data separately before explicitly replacing its slot.
+  if(presets.custom1&&!localStorage.getItem(CUSTOM1_BEFORE_SHOOTER))
+   localStorage.setItem(CUSTOM1_BEFORE_SHOOTER,JSON.stringify(presets.custom1));
+  const next={...presets,custom1:shooterBonusPreset()};
+  localStorage.setItem(PRESET_KEY,JSON.stringify(next));
+  localStorage.setItem(SHOOTER_BONUS_INSTALLED,'yes');
+  presets=next;
+ }
+}catch(e){
+ // If storage is unavailable, allow this session to load the preset without wiping other slots.
+ presets={...presets,custom1:shooterBonusPreset()};
+}
+function presetSnapshot(){const t=T();return {ticket:{name:t.name,price:t.price,rows:t.rows,denominator:t.denominator,packSize:t.packSize,luckMode:t.luckMode,luck:t.luck,momentum:t.momentum,doubleDown:t.doubleDown,shots:t.shots,rates:t.rates,nextRowId:t.nextRowId,special:t.special},batch:state.batch};}
 function applyPreset(p){
  if(!p||!p.ticket||typeof p.ticket!=='object')throw Error('Saved preset is missing or invalid.');
  const t=T(),candidate=structuredClone(state),target=candidate.tickets.find(x=>x.id===t.id);
  const keys=['name','price','rows','denominator','packSize','luckMode','luck','momentum','doubleDown','shots','rates','nextRowId'];
  for(const k of keys){if(!(k in p.ticket))throw Error('Preset is missing '+k);target[k]=structuredClone(p.ticket[k]);}
+ // Older presets without a special item remain compatible.
+ if('special' in p.ticket)target.special=structuredClone(p.ticket.special);
  candidate.batch=p.batch;
  const checked=validateRestore(candidate),clean=checked.tickets.find(x=>x.id===t.id);
  for(const k of keys)t[k]=structuredClone(clean[k]);
+ if('special' in p.ticket){t.special=structuredClone(clean.special);t.specialPack=null;}
  state.batch=checked.batch;
  t.stage=0;t.pack=null;
  // Never erase earned statistics, run history or waiting purchased tickets by loading a preset.
@@ -1420,17 +1459,17 @@ function init(){
   const factory={name:def.name,price:def.price,rows:def.rows,denominator:def.denominator,packSize:def.packSize,luckMode:def.luckMode,luck:def.luck,momentum:def.momentum,doubleDown:def.doubleDown,shots:def.shots,rates:def.rates,nextRowId:def.nextRowId};
   const preset=choice==='default'?{ticket:factory,batch:1}:presets[choice];
   if(!preset){toast('Empty preset slot. Save settings first.');return;}
-  if(!confirm('Load '+(choice==='default'?'factory defaults':choice.replace('custom','Custom '))+' onto '+T().name+'? The configuration changes, but purchased tickets, statistics and history are kept.'))return;
+  if(!confirm('Load '+(choice==='default'?'factory defaults':presetName(choice))+' onto '+T().name+'? The configuration changes, but purchased tickets, statistics and history are kept.'))return;
   try{const persisted=applyPreset(preset);toast(persisted?'Preset loaded. Results and waiting tickets were kept.':'Settings loaded, but browser save failed. Export JSON.');}
   catch(err){toast('Could not load preset: '+err.message);}
  });
  $('presetSave').addEventListener('click',()=>{
   if(selectedPreset==='default'||!canSave)return;
-  if(presets[selectedPreset]&&!confirm('Overwrite '+selectedPreset.replace('custom','Custom ')+' with this ticket’s settings?'))return;
+  if(presets[selectedPreset]&&!confirm('Overwrite '+presetName(selectedPreset)+' with this ticket’s settings?'))return;
   try{
    const next={...presets,[selectedPreset]:structuredClone(presetSnapshot())};
    localStorage.setItem(PRESET_KEY,JSON.stringify(next));
-   presets=next;renderPresets();toast(selectedPreset.replace('custom','Custom ')+' saved!');
+   presets=next;renderPresets();toast(presetName(selectedPreset)+' saved!');
   }catch(e){toast('Preset could not be saved · Browser storage unavailable.');}
  });
  $('presetReset').addEventListener('click',()=>{selectedPreset='default';$('presetSelect').value='default';renderPresets();$('presetLoad').click();});
