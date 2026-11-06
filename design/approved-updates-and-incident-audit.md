@@ -150,3 +150,6 @@
 - `index.html` now matches the tested `v3-2-1-preview.html` (as of the 00:34 Luck/Momentum parentheses change) with the live save keys (`quill-lucky-buck-v2`, `lucky-buck-setting-presets-v1`) and badge `v3.2.1`. Existing live saves load unchanged.
 - Check before release: page loads with no errors, badge reads v3.2.1, only live save keys used.
 - Rollback branch: `backup/pre-v3-2-1-2026-11-06` (live v3.2.0).
+
+## Session notes saved (Nov 6, 01:00 Central)
+- Full summary of tonight, the $10 tuning results and the owner decision (max $10, keep Double Down, lock Luck/Momentum at 0/3) are in [session notes](https://github.com/bmcd1996/lucky-buck/blob/main/design/session-notes-2026-11-05-to-06.md). Nothing pending is built. Live v3.2.0; v3.2.1 is preview only.
