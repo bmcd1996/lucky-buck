@@ -1153,48 +1153,55 @@ function setScratch(mode,p){if(mode==='clear'||mode==='empty')window.v3ShotReado
  else{icon.textContent='✦';num.textContent='? ? ?';num.className='question';msg.textContent=t.unrevealed.length?`${nfmt(t.unrevealed.length,0)} purchased ticket(s) ready to reveal.`:'Your prize is waiting.';}
  updateRevealButton();updateNextTicketButton();}
 function shotExpected(t,c){
- if(!canShoot(t)||!c.valid)return null;const s=t.shots,probabilities=new Map();
- const add=(pBase,triple)=>{for(const path of shotPaths(triple,s)){const p=pBase*path.prob;if(p>0&&isWin(path.numbers))probabilities.set(path.numbers[0],(probabilities.get(path.numbers[0])||0)+p);}};
- for(const r of c.rows)if(r.kind===CASH&&r.final>0)add(r.final/100,[r.amount,r.amount,r.amount]);
- // Losing tickets are uniform over the 60 non-matching triples.
- const losing=c.rows.filter(r=>r.kind===LOSE).reduce((sum,r)=>sum+r.final/100,0);
- if(losing>0)for(const triple of BASE_LOSERS)add(losing/BASE_LOSERS.length,triple);
- let payout=0,win=0,profit=0;const doubleChance=doubleRate(t)/100;
- for(const [amount,p] of probabilities){
-  const isTop=amount>=c.highestAmount;
-  payout+=p*amount*(isTop?1+doubleChance:1);win+=p;
-  if(amount>t.price)profit+=p;else if(isTop&&amount*2>t.price)profit+=p*doubleChance;
+ if(!canShoot(t)||!c.valid)return null;
+ const s=t.shots,rows=c.rows.filter(r=>r.kind===CASH),pLose=c.rows.filter(r=>r.kind===LOSE).reduce((a,r)=>a+r.final/100,0);
+ let pRescueFail=1,streak=0,triple=false;
+ for(let i=0;i<3;i++){
+  if(shotZone(s,i)!=='bull'){streak=0;continue;}
+  streak++;
+  pRescueFail*=1-clampPct(s.bonus[Math.min(3,streak)-1]||0)/100;
+  if(streak===3)triple=true;
  }
- return {ev:payout,winPercent:100*win,losePercent:100*(1-win),profitPercent:100*profit,change:payout-c.finalEV,prizes:Object.fromEntries(probabilities)};
+ const rescue=pLose*(1-pRescueFail),u=triple?clampPct(s.upgradeChance||0)/100:0,prizes={};
+ for(const r of rows)prizes[r.amount]=(prizes[r.amount]||0)+r.final/100;
+ prizes[1]=(prizes[1]||0)+rescue;
+ if(u>0){
+  const amount1=prizes[1]||0,amount5=prizes[5]||0;
+  prizes[1]=amount1*(1-u);
+  prizes[5]=amount5*(1-u)+amount1*u;
+  prizes[25]=(prizes[25]||0)+amount5*u;
+ }
+ let payout=0,win=0,profit=0;const dd=doubleRate(t)/100;
+ for(const [a,p] of Object.entries(prizes)){
+  const amount=Number(a),doubled=amount>=c.highestAmount;
+  payout+=p*amount*(doubled?1+dd:1);win+=p;
+  if(amount>t.price)profit+=p;else if(doubled&&amount*2>t.price)profit+=p*dd;
+ }
+ return {ev:payout,winPercent:100*win,losePercent:100*(1-win),profitPercent:100*profit,change:payout-c.finalEV,prizes};
 }
-// Chance each shot would have if every earlier shot's roll succeeded at the current accuracy settings.
-function chainChances(s){const c0=bonusChance(s,0,null),p0={zone:shotZone(s,0),success:['bull','partial'].includes(shotZone(s,0)),chance:c0};
- const c1=bonusChance(s,1,p0),p1={zone:shotZone(s,1),success:['bull','partial'].includes(shotZone(s,1)),chance:c1};
- return [c0,c1,bonusChance(s,2,p1)];}
-function shotNote(s,i){const z=shotZone(s,i),g=v=>'<b class="shot-boost">'+pct(v)+'</b>',chain=chainChances(s);
- if(z==='miss')return 'Miss · '+pct(missChance(s,i))+' to 0';
- if(z==='none')return 'No bonus';
- if(i===0)return 'Accuracy bonus '+pct(chain[0]);
- if(i===1){const own=bonusChance(s,1,null);return 'Accuracy bonus '+pct(own)+(s.stack&&chain[1]>own?' · '+g(chain[1]):'');}
- if(shotZone(s,0)!=='bull'||shotZone(s,1)!=='bull')return 'Upgrade needs bullseyes on 1 &amp; 2';
- return 'Upgrade '+(s.stack?g(chain[2]):pct(chain[2]));}
-// Bullseye math shown beside shots 2 and 3 when stacking is on: own bonus + previous shot's bullseye chance.
-function stackMath(s){const b=s.bonus,two=clampPct(b[1]+b[0]),three=clampPct(b[2]+two);return [[b[0],two],[two,three]];}
-function renderShotSettings(){const t=T(),s=t.shots;if(!s)return;const enabled=canShoot(t);$('shotCalculator').classList.toggle('hidden',!enabled);if(!enabled)return;
- for(let i=0;i<3;i++){$('shot'+(i+1)).value=String(s.accuracy[i]);$('shotDescription'+(i+1)).innerHTML=shotNote(s,i);}
- const pick=(id,v)=>{const el=$(id);if(![...el.options].some(o=>Number(o.value)===v))el.add(new Option(id==='grandPrize'?usd(v,v%1===0?0:2):pct(v),String(v)));el.value=String(v);};
- pick('bonus1',s.bonus[0]);pick('bonus2',s.bonus[1]);pick('bonus3',s.bonus[2]);
- pick('grandPrize',s.grand);pick('missPenalty',s.miss);pick('bullMin',s.bullMin);pick('noBonusMax',s.noBonusMax);
- $('stackShots').checked=!!s.stack;const m=stackMath(s);
- for(const [id,[add,total]] of [['stackMath2',m[0]],['stackMath3',m[1]]]){const el=$(id);el.classList.toggle('hidden',!s.stack);el.innerHTML='+'+pct(add)+'=<b class="shot-boost">'+pct(total)+'</b>';}
+function chainChances(s){
+ let streak=0;return [0,1,2].map(i=>{streak=shotZone(s,i)==='bull'?streak+1:0;return streak?clampPct(s.bonus[streak-1]||0):0;});
+}
+function shotNote(s,i){
+ const z=shotZone(s,i);
+ if(z==='miss')return 'Miss · base prize unchanged';
+ if(z!=='bull')return 'No bullseye · normal odds';
+ const ch=chainChances(s);
+ return 'Bullseye · '+pct(ch[i])+' rescue chance'+(i===2&&s.accuracy.every(a=>a>=s.bullMin)?' · '+pct(s.upgradeChance)+' triple upgrade':'');
+}
+function renderShotSettings(){
+ const t=T(),s=t.shots;if(!s)return;const enabled=canShoot(t);
+ $('shotCalculator').classList.toggle('hidden',!enabled);if(!enabled)return;
  if(accuracyLabelsFor!==s.bullMin+':'+s.noBonusMax)buildAccuracyOptions(s);
- for(let i=0;i<3;i++)$('shot'+(i+1)).value=String(s.accuracy[i]);
- const c=valid(t),x=shotExpected(t,c);$('shotProjection').textContent=x?`Modeled chance of paying: ${pct(x.winPercent)} · Expected payout ${usd(x.ev,4)} / ticket (${x.change>=0?'+':''}${usd(x.change,4)} vs no shots)`:'Shot calculation needs the standard Lucky Buck outcomes.';
+ for(let i=0;i<3;i++){$('shot'+(i+1)).value=String(s.accuracy[i]);$('shotDescription'+(i+1)).innerHTML=shotNote(s,i);}
+ for(const [id,v] of [['bonus1',s.bonus[0]],['bonus2',s.bonus[1]],['bonus3',s.bonus[2]],['upgradeChance',s.upgradeChance],['bullMin',s.bullMin]])$(id).value=String(v);
+ const c=valid(t),x=shotExpected(t,c);
+ $('shotProjection').textContent=x?'Cash-win chance '+pct(x.winPercent)+' · Expected '+usd(x.ev,4)+'/ticket · Rescue change '+(x.change>=0?'+':'')+usd(x.change,4):'Rescue estimate needs standard Lucky Buck outcomes.';
  updateBuyButton();
 }
 let accuracyLabelsFor='';
 function buildAccuracyOptions(s){accuracyLabelsFor=s.bullMin+':'+s.noBonusMax;
- const label=a=>a===0?'0% · Miss':a>=s.bullMin?a+'% · Bullseye':a<=s.noBonusMax?a+'% · No bonus':a+'%';
+ const label=a=>a===0?'0% · Miss':a>=s.bullMin?a+'% · Bullseye':a+'% · No rescue';
  for(let i=1;i<=3;i++)$('shot'+i).innerHTML=Array.from({length:101},(_,a)=>`<option value="${a}">${label(a)}</option>`).join('');}
 
 /* Update 12 · Issue #1: selected ticket identity, with all artwork local to its own ticket. */
@@ -1415,7 +1422,7 @@ function renderStats(){const t=T(),s=t.stats,last=t.last;$('count').textContent=
  $('lastDetail').textContent=!last?'No tickets played yet':last.mode==='single'?(last.prizeKind===JACKPOT?last.prizeLabel:'Most recent individual purchase'):`Most recent batch · ${nfmt(last.n,0)} tickets`;
  $('mostFrequent').textContent=last?.mode==='batch'?last.mostFrequent||'No paying cash prizes':'—';
  $('history').innerHTML=t.history.length?t.history.map(h=>`<div class="history-item"><div><strong>${nfmt(h.n,0)} ${h.n===1?'ticket':'tickets'}</strong><div class="sub">Luck ${h.luck}/3 · ${esc(h.at)}</div></div><div style="text-align:right"><strong>${usd(h.won)} cash won</strong><div class="sub">${usd(h.won-h.n*t.price)} net · ${nfmt(h.jackpots||0,0)} items</div></div></div>`).join(''):'<div class="empty">Your runs will show here.</div>';}
-function renderBatchAccuracy(){const t=T(),ba=t.batchAccuracy,ok=canShoot(t);$('randomAccuracyRow').classList.toggle('hidden',!ok);$('randomAccuracy').checked=ba.on;$('accuracyLevel').value=ba.level;$('accuracyLevel').classList.toggle('hidden',!ba.on);}
+function renderBatchAccuracy(){const t=T(),ba=t.batchAccuracy,ok=canShoot(t);$('randomAccuracyRow').classList.toggle('hidden',!ok);$('batchUseShots').checked=!!ba.useShots;$('batchUseShots').disabled=!ok;$('randomAccuracy').checked=ba.on;$('accuracyLevel').value=ba.level;$('accuracyLevel').classList.toggle('hidden',!ba.on);}
 window.__luckyBuckBatchShots=()=>{try{const t=T();return canShoot(t)?t.batchShots:null;}catch{return null;}};
 function renderAll(){renderPresets();renderTicketSelector();renderRows();refreshOdds();renderStats();setScratch('empty');renderShotSettings();renderBatchAccuracy();$('batchSize').value=String(state.batch);if(T().batchShots&&canShoot(T()))window.v3BatchReadout?.(T().batchShots);if(canShoot(T())&&T().unrevealed.length)showTicket(T().unrevealed[0]);}
 function download(filename,data,type){const blob=new Blob([data],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);}
@@ -1544,7 +1551,7 @@ function init(){
  $('restoreOdds').addEventListener('click',()=>{const t=T();t.rows=baseRows();t.nextRowId=5;t.luckMode='luckyBuck';t.stage=0;t.pack=null;save();renderRows();refreshOdds();toast('Original $1 Lucky Buck odds restored for this ticket.');});
  buildAccuracyOptions(T().shots||defaultShots());
  const pctOptions=Array.from({length:101},(_,v)=>`<option value="${v}">${v}%</option>`).join('');
- for(const id of ['bonus1','bonus2','bonus3','missPenalty'])$(id).innerHTML=pctOptions;
+ for(const id of ['bonus1','bonus2','bonus3','upgradeChance','missPenalty'])$(id).innerHTML=pctOptions;
  $('grandPrize').innerHTML=[30,40,50,60,75,100,125,150,200,250,500,1000].map(v=>`<option value="${v}">$${v}</option>`).join('');
  $('bullMin').innerHTML=Array.from({length:51},(_,k)=>100-k).map(v=>`<option value="${v}">${v===100?'100%':v+'–100%'}</option>`).join('');
  $('noBonusMax').innerHTML=Array.from({length:50},(_,v)=>`<option value="${v}">${v===0?'Off':'1–'+v+'%'}</option>`).join('');
@@ -1560,7 +1567,7 @@ function init(){
  $('shotSettingsClose').addEventListener('click',()=>openShotPop(false));
  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!shotPop.classList.contains('hidden'))openShotPop(false);});
  $('stackShots').addEventListener('change',e=>{T().shots.stack=e.target.checked;save();refreshOdds();});
- for(const [id,apply] of [['bonus1',(s,v)=>s.bonus[0]=v],['bonus2',(s,v)=>s.bonus[1]=v],['bonus3',(s,v)=>s.bonus[2]=v],['missPenalty',(s,v)=>s.miss=v],['grandPrize',(s,v)=>s.grand=v],['bullMin',(s,v)=>s.bullMin=v],['noBonusMax',(s,v)=>s.noBonusMax=v]])$(id).addEventListener('change',e=>{const v=Number(e.target.value);if(!Number.isFinite(v)||v<0)return;apply(T().shots,v);save();refreshOdds();});
+ for(const [id,apply] of [['bonus1',(s,v)=>s.bonus[0]=v],['bonus2',(s,v)=>s.bonus[1]=v],['bonus3',(s,v)=>s.bonus[2]=v],['upgradeChance',(s,v)=>s.upgradeChance=v],['missPenalty',(s,v)=>s.miss=v],['grandPrize',(s,v)=>s.grand=v],['bullMin',(s,v)=>s.bullMin=v],['noBonusMax',(s,v)=>s.noBonusMax=v]])$(id).addEventListener('change',e=>{const v=Number(e.target.value);if(!Number.isFinite(v)||v<0)return;apply(T().shots,v);save();refreshOdds();});
  document.querySelectorAll('.balloon-target').forEach((b,i)=>{b.addEventListener('click',()=>popBalloon(i));b.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse')popBalloon(i);});});
  const art=$('pixelTicket');let pointerDragged=false;
  art.addEventListener('pointerdown',e=>{pointerDragged=true;try{art.setPointerCapture(e.pointerId);}catch{}const el=document.elementFromPoint(e.clientX,e.clientY);const target=el?.closest?.('.balloon-target');if(target)popBalloon(Number(target.dataset.balloon));});
@@ -1575,7 +1582,8 @@ function init(){
  }));
  $('batchSize').addEventListener('change',e=>{if(!integer(e.target.value,1,1000000)){toast('Batch must be 1–1,000,000 whole tickets.');e.target.value=state.batch;return;}state.batch=Number(e.target.value);save();});
  $('buyOne').addEventListener('click',buyOne);$('revealBtn').addEventListener('click',reveal);
- $('randomAccuracy').addEventListener('change',e=>{T().batchAccuracy.on=e.target.checked;save();renderBatchAccuracy();});
+ $('batchUseShots').addEventListener('change',e=>{T().batchAccuracy.useShots=e.target.checked;if(!e.target.checked)T().batchAccuracy.on=false;save();renderBatchAccuracy();});
+ $('randomAccuracy').addEventListener('change',e=>{T().batchAccuracy.on=e.target.checked;if(e.target.checked)T().batchAccuracy.useShots=true;save();renderBatchAccuracy();});
  $('accuracyLevel').addEventListener('change',e=>{T().batchAccuracy.level=ACCURACY_LEVELS.includes(e.target.value)?e.target.value:'random';save();renderBatchAccuracy();});
  $('runBatch').addEventListener('click',()=>{const n=Number($('batchSize').value);if(!integer(n,1,1000000)){toast('Batch must be 1–1,000,000 whole tickets.');return;}state.batch=n;simulate(n);});
  $('resetTicket').addEventListener('click',()=>setScratch('clear'));
@@ -1644,7 +1652,7 @@ if(center&&shot){
  if(title){
   title.textContent='🎯 Special Function';
   const help=document.createElement('button');help.className='v3-help';help.type='button';help.textContent='?';help.setAttribute('aria-label','Explain shot function and gray or green numbers');
-  help.dataset.help='Gray: the original draw. Below: numbers as you pop. Green = changed by a bonus, red = zeroed by a missed-shot penalty. Bullseye or partial hits roll a bonus: shots 1–2 make the next balloon match (a zero becomes 1). After successful bullseyes on shots 1 and 2, shot 3 can move a winner up one level, up to the Grand Prize. With Enable stacking on, a successful roll adds its chance to the next shot (green totals). A shotgun sound plays when a bonus roll succeeds. After a batch run this area shows each shot\'s chance (green), how many times it changed a number, and how many times a miss turned a balloon to 0 (red).';
+  help.dataset.help='Gray: originally drawn numbers. Green: numbers rescued or upgraded by bullseyes. Each consecutive bullseye offers an adjustable chance to rescue a losing ticket to $1. Three bullseyes also unlock a separate prize upgrade. Misses and auto-scratch do not penalize base odds. To run ordinary auto-scratch batches, leave Apply shooting bonuses unchecked.';
   title.append(help);
   const read=document.createElement('div');read.className='v3-shot-readout';read.id='v3ShotReadout';title.insertAdjacentElement('afterend',read);
   window.v3ShotReadout=function(q,popped=[false,false,false]){
@@ -1659,7 +1667,7 @@ if(center&&shot){
   window.v3BatchReadout=function(b){if(!b)return;const pc=v=>(Math.round(v*100)/100)+'%';
    const row=(vals,cls,fmt)=>'<span class="v3-shot-line">'+vals.map(v=>'<span class="v3-shot-cell '+cls+'">'+fmt(v)+'</span>').join('')+'</span>';
    read.innerHTML='<div class="v3-batch-caption">'+compact(b.n)+' tickets'+(b.random?' · '+b.random+' aim':'')+'</div>'+row(b.chances,'chance',pc)+row(b.hits,'',compact)+row(b.misses,'miss',compact);
-   read.setAttribute('aria-label','Last batch of '+b.n+' tickets. Shot chances '+b.chances.map(pc).join(', ')+'. Times each shot changed a number: '+b.hits.join(', ')+'. Times a miss turned a balloon to 0: '+b.misses.join(', ')+'.');};
+   read.setAttribute('aria-label','Last batch of '+b.n+' tickets. Rescue chances '+b.chances.map(pc).join(', ')+'. Times each shot changed a number: '+b.hits.join(', ')+'. Unused miss-penalty count: '+b.misses.join(', ')+'.');};
   { const t0=window.__luckyBuckBatchShots?.();if(t0)window.v3BatchReadout(t0); }
  }
  const oldHelp=shot.querySelector('p.tiny.muted');if(oldHelp)oldHelp.hidden=true;
