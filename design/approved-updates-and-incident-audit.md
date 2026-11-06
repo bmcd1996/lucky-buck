@@ -140,3 +140,8 @@
 - Tests before release: 42/42 rule/odds checks on the live build; 10/10 upgrade checks on v3.1.1 saved data (totals, history, shot settings, presets kept; Trusty Shotgun added; an unscratched v3.1.1 ticket resumes without a second charge; new tickets play; gear pop-up; no page errors).
 - Owner asked about frequent natural 1,1,1 / 5,5,5 draws: checked 200,000 tickets — draws match the configured odds (Lose 44%, $1 32%, $5 20%, $25 4% → 56% natural winners, ~$2.32 returned per $1). Not a bug; odds unchanged pending the owner's decision.
 - `v3-2-preview.html` remains as a sandbox with its own saved data.
+
+## v3.2.1 — PREVIEW ONLY (November 5, 2026, 23:16 Central go-ahead)
+- Page: `v3-2-1-preview.html` → https://bmcd1996.github.io/lucky-buck/v3-2-1-preview.html. **Live `index.html` (v3.2.0) unchanged.** Own saves (`quill-lucky-buck-v3-2-1-preview`, `lucky-buck-v3-2-1-preview-presets`), copied once from the live save.
+- Patch version under CLAUDE.md rules (layout cleanup, no mechanic or odds changes). Built plan items 8–11: compact one-row modifiers (☑ name ? [level] [Default]) with description + level details in the ? popup; checkboxes replace the Active Mods box (unchecked = grayed and off, level remembered per ticket in `modOff`); summary line above the ticket removed; Prize odds editor as straight rows ([type] [$amount] [%] modifier ✕) without the /600 column; Run multiple tickets moved above the Prize odds editor.
+- Tests: 20/20 (live calculations identical to v3.2.0 for the same settings; off/on restores the level and odds; off state survives refresh; ? popup content; column order; one-line rows; editing, adding and deleting odds rows; buying still works; live data untouched; no page errors).
