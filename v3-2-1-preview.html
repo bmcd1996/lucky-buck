@@ -431,6 +431,10 @@ html,body{overflow-x:hidden}
 .type-config #newType,.type-config .new-amount-field,.type-config #addPrize{display:none!important}
 .odds-table tbody tr.odds-add{height:auto!important}.odds-table tr.odds-add td{padding:0!important}.odds-add-btn{min-height:34px;padding:6px 12px;font-size:13px}
 .ticket-config>div:has(#packSize){display:none!important}
+.odds-line-inner.special>select[data-special=kind]{flex:1 1 auto;min-width:0;height:36px;margin:0!important;padding:6px 4px!important;font-size:13px;color:var(--gold)}
+.odds-line-inner.special>select[data-special=type]{flex:0 0 74px;width:74px!important;height:36px;margin:0!important;padding:4px!important;font-size:12px}
+.special-toggle{display:flex!important;align-items:center;gap:6px;cursor:pointer}.special-toggle input{width:auto;min-height:0;margin:0;accent-color:#6ee2a1}
+.special-item-setting.special-off .special-row,.special-item-setting.special-off #specialHint{opacity:.5}
 
 .setup-modal{position:fixed;inset:0;z-index:1000;background:#0009;display:flex;align-items:flex-start;justify-content:center;padding:max(18px,env(safe-area-inset-top)) 12px 24px;overflow-y:auto;-webkit-overflow-scrolling:touch}.setup-modal.hidden{display:none}
 .setup-modal-box{position:relative;width:100%;max-width:560px;margin:0 auto}.setup-modal-box>.card{margin:0;box-shadow:0 18px 50px #000a}.setup-modal-box .card-top{padding-right:30px}
@@ -655,7 +659,7 @@ body.setup-open{overflow:hidden}.card-top .ticket-gear+h3{margin-right:auto}
 <div><label class="field-label" for="ticketName">Ticket name</label><input id="ticketName" maxlength="70" type="text"/></div>
 <div><label class="field-label" for="ticketPrice">Price</label><div class="money-field"><span aria-hidden="true">$</span><input id="ticketPrice" inputmode="decimal" max="1000000" min="0.01" step="any" type="number"/></div></div>
 <div><label class="field-label" for="packSize">Tickets in item-jackpot pack</label><input id="packSize" inputmode="numeric" max="1000000" min="1" step="1" type="number"/></div>
-<div class="wide special-item-setting"><label class="field-label" for="specialName">Special item</label><div class="special-row"><input id="specialName" maxlength="60" type="text" aria-label="Special item name"><span class="special-odds"><input id="specialX" inputmode="numeric" type="number" min="0" step="1" aria-label="Special item odds, count"><span>in</span><input id="specialY" inputmode="numeric" type="number" min="1" max="1000000" step="1" aria-label="Special item odds, out of tickets"></span><select id="specialType" aria-label="Special item odds type"><option value="pack">Pack</option><option value="random">Random chance</option></select></div><small class="tiny muted" id="specialHint"></small></div><div><label class="field-label" for="luckMode">Luck curve for this ticket</label><select id="luckMode"><option value="luckyBuck">Lucky Buck $1 formula</option><option value="none">Not yet configured</option></select></div>
+<div class="wide special-item-setting"><label class="field-label special-toggle"><input type="checkbox" id="specialOn" aria-label="Special item on"> Special item</label><div class="special-row"><input id="specialName" maxlength="60" type="text" aria-label="Special item name"><span class="special-odds"><input id="specialX" inputmode="numeric" type="number" min="0" step="1" aria-label="Special item odds, count"><span>in</span><input id="specialY" inputmode="numeric" type="number" min="1" max="1000000" step="1" aria-label="Special item odds, out of tickets"></span><select id="specialType" aria-label="Special item odds type"><option value="pack">Pack</option><option value="random">Random chance</option></select></div><small class="tiny muted" id="specialHint"></small></div><div><label class="field-label" for="luckMode">Luck curve for this ticket</label><select id="luckMode"><option value="luckyBuck">Lucky Buck $1 formula</option><option value="none">Not yet configured</option></select></div>
 </div>
 <div class="ticket-create-hint" id="ticketHint">Switch tickets with the menu above. Each one keeps its own settings and history.</div>
 </section>
@@ -832,10 +836,10 @@ const baseRows=()=>[
  {id:4,kind:CASH,amount:25,chance:4}
 ];
 function freshTicket(id='lucky-buck',name='Lucky Buck',price=1){return {id,name,price,rows:baseRows(),luck:0,momentum:0,doubleDown:0,luckMode:'luckyBuck',denominator:600,packSize:600,pack:null,stage:0,stats:stats(),history:[],last:null,lastRevealed:null,unrevealed:[],nextRowId:5,legacyLuck:null,shots:defaultShots(),rates:defaultRates(),logoData:null,artData:null,special:defaultSpecial(id),specialPack:null,modOff:{},batchAccuracy:{on:false,level:'random'},batchShots:null}}
-const defaultSpecial=id=>id==='lucky-buck'?{name:'Trusty Shotgun',x:1,y:600,type:'pack'}:{name:'Special item',x:0,y:600,type:'pack'};
+const defaultSpecial=id=>id==='lucky-buck'?{name:'Trusty Shotgun',x:1,y:600,type:'pack',on:true}:{name:'Special item',x:1,y:600,type:'pack',on:false};
 function cleanSpecial(raw,id){const d=defaultSpecial(id);if(!raw||typeof raw!=='object')return d;
  const y=integer(raw.y,1,1000000)?Number(raw.y):d.y,x=integer(raw.x,0,y)?Number(raw.x):Math.min(d.x,y);
- return {name:typeof raw.name==='string'&&raw.name.trim()?raw.name.trim().slice(0,60):d.name,x,y,type:raw.type==='random'?'random':'pack'};}
+ return {name:typeof raw.name==='string'&&raw.name.trim()?raw.name.trim().slice(0,60):d.name,x,y,type:raw.type==='random'?'random':'pack',on:raw.on===true||(raw.on===undefined&&x>0)};}
 function cleanSpecialPack(raw,sp){if(!raw||typeof raw!=='object'||raw.x!==sp.x||raw.y!==sp.y||!integer(raw.index,0,sp.y)||!Array.isArray(raw.hits))return null;
  const hits=raw.hits.filter(p=>integer(p,0,sp.y-1));return new Set(hits).size===hits.length&&hits.length===sp.x?{x:sp.x,y:sp.y,index:Number(raw.index),hits}:null;}
 const ACCURACY_LEVELS=['random','good','medium','poor'];
@@ -967,7 +971,7 @@ function createPack(t){const oldSerial=t.pack?.serial||0;const selected=[];const
 }
 const specialSets=new WeakMap();
 // Special item: Pack = exactly x per y tickets (shuffled positions); Random chance = each ticket x in y.
-function specialHit(t,random=Math.random){const sp=t.special;if(!sp||!(sp.x>0)||!(sp.y>=1))return false;
+function specialHit(t,random=Math.random){const sp=t.special;if(!sp||!sp.on||!(sp.x>0)||!(sp.y>=1))return false;
  if(sp.type==='random')return random()<sp.x/sp.y;
  let pk=t.specialPack;
  if(!pk||pk.x!==sp.x||pk.y!==sp.y||pk.index>=sp.y){const take=Math.min(sp.x,sp.y),pool=new Set();
@@ -1256,7 +1260,8 @@ function loadOriginalLuckyBuckLogo(){
 }
 
 function renderSpecial(){const sp=T().special;$('specialName').value=sp.name;$('specialX').value=String(sp.x);$('specialY').value=String(sp.y);$('specialType').value=sp.type;
- $('specialHint').textContent=sp.x===0?'Off · set the first number above 0 to turn it on.':sp.type==='pack'?`Exactly ${nfmt(sp.x,0)} in every ${nfmt(sp.y,0)} tickets, shuffled.`:`Each ticket has a ${nfmt(sp.x,0)} in ${nfmt(sp.y,0)} chance; streaks and droughts can happen.`;}
+ $('specialOn').checked=!!sp.on;for(const id of ['specialName','specialX','specialY','specialType'])$(id).disabled=!sp.on;$('specialOn').closest('.special-item-setting').classList.toggle('special-off',!sp.on);
+ $('specialHint').textContent=!sp.on?'Off · check the box to turn it on (it also returns to the Prize odds editor).':sp.x===0?'Set the first number above 0 so it can appear.':sp.type==='pack'?`Exactly ${nfmt(sp.x,0)} in every ${nfmt(sp.y,0)} tickets, shuffled.`:`Each ticket has a ${nfmt(sp.x,0)} in ${nfmt(sp.y,0)} chance; streaks and droughts can happen.`;}
 function renderTicketSelector(){
  const t=T();
  $('ticketSelector').innerHTML=state.tickets.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.name)+' · '+usd(x.price,x.price%1===0?0:2)+'</option>').join('')+'<option value="__create__">＋ Create New Ticket…</option>';
@@ -1335,7 +1340,7 @@ function renderRateSettings(t){
  }
 }
 function rowHTML(r,t){const isJ=r.kind===JACKPOT,guaranteed=isJ&&r.mode==='guaranteed',chance=guaranteed?100:r.chance;
- const kind=`<select data-field="kind" aria-label="Outcome type"><option value="cash" ${r.kind===CASH?'selected':''}>Cash</option><option value="lose" ${r.kind===LOSE?'selected':''}>Lose</option></select>`;
+ const kind=`<select data-field="kind" aria-label="Outcome type"><option value="cash" ${r.kind===CASH?'selected':''}>Cash</option><option value="lose" ${r.kind===LOSE?'selected':''}>Lose</option>${r.kind===CASH&&!t.special.on?'<option value="special">★ '+esc(t.special.name)+'</option>':''}</select>`;
  const value=r.kind===CASH?`<div class="money-field"><span aria-hidden="true">$</span><input data-field="amount" aria-label="Cash prize amount in dollars" type="number" min="0.01" step="any" value="${esc(r.amount)}"></div>`:isJ?`<input data-field="label" aria-label="Jackpot item name" maxlength="100" value="${esc(r.label)}">`:`<select class="odds-zero" aria-label="Lose payout"><option value="0" selected>$0</option></select>`;
  const mode=isJ?`<select data-field="mode" aria-label="Jackpot pack rule"><option value="rare" ${r.mode==='rare'?'selected':''}>Rare pack</option><option value="guaranteed" ${guaranteed?'selected':''}>Guaranteed</option></select>`:'';
  return `<tr data-id="${r.id}" class="odds-line"><td colspan="5"><div class="odds-line-inner${isJ?' jackpot':''}">${kind}${value}${mode}<div class="percent-wrap"><input aria-label="${isJ?'Pack':'Outcome'} percentage" data-field="chance" ${guaranteed?'disabled':''} type="text" inputmode="decimal" value="${esc(precise(chance))}"><span class="unit">%</span></div><div class="odds-cell mods" id="mod-${r.id}">—</div><span class="hidden" id="final-${r.id}"></span><button type="button" class="delete-row" aria-label="Remove outcome" data-delete="${r.id}">✕</button></div></td></tr>`;}
@@ -1343,9 +1348,25 @@ function addInlineRow(){const t=T();if(t.rows.length>=100){toast('Maximum 100 ou
  const top=Math.max(0,...t.rows.filter(r=>r.kind===CASH).map(r=>r.amount));
  const r={id:t.nextRowId++,kind:CASH,amount:top>0?top*2:1,chance:0,mode:'rare',label:''};t.rows.push(r);t.stage=0;t.pack=null;save();renderRows();refreshOdds();
  document.querySelector(`#oddsRows tr[data-id="${r.id}"] [data-field=amount]`)?.focus();}
-function renderRows(){const t=T();$('denominator').value=String(t.denominator);$('oddsRows').innerHTML=t.rows.map(r=>rowHTML(r,t)).join('')+'<tr class="odds-add"><td colspan="5"><button type="button" class="btn mini odds-add-btn" id="addRowInline">＋ Add row</button></td></tr>';$('addRowInline').addEventListener('click',addInlineRow);
+// Percentage shown in the odds editor, rounded to the nearest tenth (the exact X in Y is what plays).
+const specialPct=sp=>Math.round(sp.x/sp.y*1000)/10;
+function specialRowHTML(t){const sp=t.special;if(!sp?.on)return '';
+ return `<tr class="odds-line special-line"><td colspan="5"><div class="odds-line-inner special"><select data-special="kind" aria-label="Outcome type"><option value="cash">Cash</option><option value="special" selected>★ ${esc(sp.name)}</option></select>`+
+  `<div class="percent-wrap"><input data-special="pct" aria-label="${esc(sp.name)} chance per ticket" type="text" inputmode="decimal" value="${specialPct(sp)}"><span class="unit">%</span></div>`+
+  `<select data-special="type" aria-label="Special item odds type"><option value="pack" ${sp.type==='pack'?'selected':''}>Pack</option><option value="random" ${sp.type==='random'?'selected':''}>Random</option></select>`+
+  `<button type="button" class="delete-row" data-special="delete" aria-label="Remove ${esc(sp.name)}">✕</button></div></td></tr>`;}
+function bindSpecialRow(t){const row=$('oddsRows').querySelector('.special-line');if(!row)return;const q=n=>row.querySelector(`[data-special="${n}"]`);
+ const after=()=>{t.specialPack=null;save();renderSpecial();renderRows();refreshOdds();};
+ q('delete').addEventListener('click',()=>{t.special.on=false;after();});
+ q('type').addEventListener('change',e=>{t.special.type=e.target.value==='random'?'random':'pack';after();});
+ q('kind').addEventListener('change',e=>{if(e.target.value!=='cash')return;t.special.on=false;after();addInlineRow();});
+ q('pct').addEventListener('change',e=>{const v=parseFraction(e.target.value);if(!Number.isFinite(v)||v<=0||v>100){toast('Enter a percentage above 0 and up to 100.');renderRows();return;}
+  // Keep the 'in Y' number; set X to match. Very small odds switch to 1 in N.
+  let x=Math.round(v*t.special.y/100),y=t.special.y;if(x<1){x=1;y=Math.min(1000000,Math.max(1,Math.round(100/v)));}t.special.x=x;t.special.y=y;after();});}
+function renderRows(){const t=T();$('denominator').value=String(t.denominator);$('oddsRows').innerHTML=t.rows.map(r=>rowHTML(r,t)).join('')+specialRowHTML(t)+'<tr class="odds-add"><td colspan="5"><button type="button" class="btn mini odds-add-btn" id="addRowInline">＋ Add row</button></td></tr>';$('addRowInline').addEventListener('click',addInlineRow);bindSpecialRow(t);
  $('oddsRows').querySelectorAll('[data-delete]').forEach(b=>b.addEventListener('click',()=>{const id=Number(b.dataset.delete);t.rows=t.rows.filter(r=>r.id!==id);t.stage=0;t.pack=null;save();renderRows();refreshOdds();}));
  $('oddsRows').querySelectorAll('select[data-field]').forEach(el=>el.addEventListener('change',()=>{const tr=el.closest('tr'),r=t.rows.find(x=>x.id===Number(tr.dataset.id));if(!r)return;
+ if(el.dataset.field==='kind'&&el.value==='special'){t.rows=t.rows.filter(x=>x.id!==r.id);t.special.on=true;if(t.special.x===0)t.special.x=1;t.specialPack=null;t.stage=0;save();renderSpecial();renderRows();refreshOdds();return;}
  if(el.dataset.field==='kind'){if(el.value===LOSE&&t.rows.some(x=>x.kind===LOSE&&x.id!==r.id)){toast('There can be only one Lose row.');renderRows();return;}r.kind=el.value;r.amount=el.value===CASH?1:0;r.label=el.value===JACKPOT?'Jackpot item':'';r.chance=el.value===JACKPOT?1:r.chance;r.mode='rare';}
  else if(el.dataset.field==='mode'){r.mode=el.value;r.chance=el.value==='guaranteed'?100:1;}
  t.stage=0;t.pack=null;save();renderRows();refreshOdds();}));
@@ -1483,6 +1504,8 @@ function init(){
 
  $('ticketName').addEventListener('change',e=>{const name=e.target.value.trim();if(!validName(name)){toast('Enter a name from 1 to 70 characters.');e.target.value=T().name;return;}T().name=name;save();renderTicketSelector();});
  $('ticketPrice').addEventListener('change',e=>{const n=Number(e.target.value);if(!Number.isFinite(n)||n<=0||n>1000000){toast('Price must be above $0 and at most $1,000,000.');e.target.value=T().price;return;}T().price=n;save();renderTicketSelector();refreshOdds();renderStats();});
+ $('specialOn').addEventListener('change',e=>{const t=T();t.special.on=e.target.checked;if(t.special.on&&t.special.x===0)t.special.x=1;t.specialPack=null;save();renderSpecial();renderRows();refreshOdds();});
+ for(const id of ['specialName','specialX','specialY','specialType'])$(id).addEventListener('change',()=>setTimeout(renderRows,0));
  $('specialName').addEventListener('change',e=>{const v=e.target.value.trim().slice(0,60);if(!v){toast('Give the special item a name.');renderSpecial();return;}T().special.name=v;save();renderSpecial();});
  $('specialX').addEventListener('change',e=>{const t=T(),n=Number(e.target.value);if(!integer(n,0,t.special.y)){toast('The first number must be a whole number from 0 to '+nfmt(t.special.y,0)+'.');renderSpecial();return;}t.special.x=n;t.specialPack=null;save();renderSpecial();});
  $('specialY').addEventListener('change',e=>{const t=T(),n=Number(e.target.value);if(!integer(n,1,1000000)||n<t.special.x){toast('The second number must be a whole number from '+nfmt(Math.max(1,t.special.x),0)+' to 1,000,000.');renderSpecial();return;}t.special.y=n;t.specialPack=null;save();renderSpecial();});
