@@ -442,10 +442,11 @@ html,body{overflow-x:hidden}
 .shot-settings-pop.hidden{display:none}
 .ssp-head{display:flex;align-items:center;gap:10px;padding-right:30px;flex-wrap:wrap}.ssp-head strong{font-size:13px;color:#ffd481}.ssp-head .stack-toggle{font-size:12px!important;margin:0!important}
 .ssp-close{top:6px!important;right:6px!important;width:22px!important;height:22px!important}
-.ssp-shots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.ssp-shots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px}
 .ssp-box{background:#1c3a2c;border:1px solid #345a47;border-radius:10px;padding:8px;display:flex;flex-direction:column;gap:4px;min-width:0}
 .ssp-box label,.ssp-misc label{font-size:12px;font-weight:750;color:#e6f6e6;margin:0;line-height:1.3;white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:break-word}
 .ssp-box label{min-height:2.6em}
+.ssp-box label .ssp-label-line,.ssp-misc label .ssp-label-line{display:block!important;white-space:normal!important;overflow:visible!important;text-overflow:clip!important;line-height:1.3}
 .shot-settings-pop select{width:100%!important;min-width:0;min-height:36px;height:36px;padding:4px!important;font-size:13px;margin:0!important}
 .ssp-box .stack-math{font-size:10px;color:#d5eeda;white-space:nowrap;line-height:1.1}.ssp-box .stack-math.hidden{display:none}
 .ssp-misc{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.ssp-misc>div{display:flex;flex-direction:column;gap:2px;min-width:0}
@@ -555,7 +556,7 @@ body.setup-open{overflow:hidden}.card-top .ticket-gear+h3{margin-right:auto}
 <div class="wrap">
 <header class="header">
 <div class="brand"><div class="brand-mark">$</div><div><small>QUILL PRODUCTIONS</small><h1>Cardboard to Cash</h1></div></div>
-<div class="header-right"><span class="version-badge" title="Lucky Buck simulator version">v3.3.1</span><span class="save" id="saveStatus">Loading…</span></div>
+<div class="header-right"><span class="version-badge" title="Lucky Buck simulator version">v3.3.2</span><span class="save" id="saveStatus">Loading…</span></div>
 </header>
 
 <section class="hero">
@@ -612,7 +613,7 @@ body.setup-open{overflow:hidden}.card-top .ticket-gear+h3{margin-right:auto}
  <button class="btn ghost hidden" id="revealBtn" type="button">Show waiting ticket</button>
  <button class="btn mini ghost" id="resetTicket" type="button">Clear display</button>
 </div>
-<div class="shot-settings-pop hidden" id="shotSettingsPop" role="dialog" aria-label="Rescue bonus settings"><div class="ssp-head"><strong>Rescue bonus settings</strong><button type="button" class="setup-close ssp-close" id="shotSettingsClose" aria-label="Close rescue bonus settings">✕</button></div><p class="tiny muted" style="margin:6px 0">Each consecutive bullseye gets an adjustable chance to rescue a losing ticket for $1. Already-winning tickets keep their prize.</p><div class="ssp-shots"><div class="ssp-box"><label for="bonus1">First bullseye rescue</label><select id="bonus1"></select></div><div class="ssp-box"><label for="bonus2">Second consecutive rescue</label><select id="bonus2"></select></div><div class="ssp-box"><label for="bonus3">Third consecutive rescue</label><select id="bonus3"></select></div><div class="ssp-box"><label for="upgradeChance">Triple bullseye upgrade</label><select id="upgradeChance"></select></div></div><div class="ssp-misc"><div><label for="bullMin">Bullseye threshold</label><select id="bullMin"></select></div></div><p class="tiny muted">Three bullseyes also offer a separate upgrade: $1 → $5, or $5 → $25. All four bonuses start at 0% in Default.</p><div class="hidden" aria-hidden="true"><label><input type="checkbox" id="stackShots">Legacy stacking</label><select id="grandPrize"></select><select id="missPenalty"></select><select id="noBonusMax"></select><span id="stackMath2"></span><span id="stackMath3"></span></div></div>
+<div class="shot-settings-pop hidden" id="shotSettingsPop" role="dialog" aria-label="Rescue bonus settings"><div class="ssp-head"><strong>Rescue bonus settings</strong><button type="button" class="setup-close ssp-close" id="shotSettingsClose" aria-label="Close rescue bonus settings">✕</button></div><p class="tiny muted" style="margin:6px 0">Each consecutive bullseye gets an adjustable chance to rescue a losing ticket for $1. Already-winning tickets keep their prize.</p><div class="ssp-shots"><div class="ssp-box"><label for="bonus1"><span class="ssp-label-line">First bullseye</span><span class="ssp-label-line">Rescue chance</span></label><select id="bonus1"></select></div><div class="ssp-box"><label for="bonus2"><span class="ssp-label-line">Second consecutive</span><span class="ssp-label-line">Rescue chance</span></label><select id="bonus2"></select></div><div class="ssp-box"><label for="bonus3"><span class="ssp-label-line">Third consecutive</span><span class="ssp-label-line">Rescue chance</span></label><select id="bonus3"></select></div><div class="ssp-box"><label for="upgradeChance"><span class="ssp-label-line">Triple bullseye</span><span class="ssp-label-line">Prize upgrade</span></label><select id="upgradeChance"></select></div></div><div class="ssp-misc"><div><label for="bullMin"><span class="ssp-label-line">Bullseye</span><span class="ssp-label-line">Threshold</span></label><select id="bullMin"></select></div></div><p class="tiny muted">Three bullseyes also offer a separate upgrade: $1 → $5, or $5 → $25. All four bonuses start at 0% in Default.</p><div class="hidden" aria-hidden="true"><label><input type="checkbox" id="stackShots">Legacy stacking</label><select id="grandPrize"></select><select id="missPenalty"></select><select id="noBonusMax"></select><span id="stackMath2"></span><span id="stackMath3"></span></div></div>
 </section></div>
  <aside class="showcase-right">
   <section class="active-mods" aria-label="Active modifiers">
