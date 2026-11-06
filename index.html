@@ -403,6 +403,53 @@ html,body{overflow-x:hidden}
 .rate-pair .stack-math{flex:1 1 auto;min-width:0;align-self:center;font-size:9.5px;color:#d5eeda;white-space:nowrap;letter-spacing:-.2px;text-align:right}.rate-pair:has(.stack-math:not(.hidden)) select{flex:0 0 54px}
 .ticket-gear{flex:0 0 auto;width:22px;height:22px;min-height:0;padding:0;border-radius:6px;border:1px solid #47705b;background:#1c3a2c;color:#d5eeda;font-size:13px;line-height:20px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;margin-right:-2px}.ticket-gear[aria-expanded="true"]{background:#2c5a42;color:#fff1bd}
 #ticketSetupCard.setup-closed{display:none!important}
+.showcase-right .active-mods,#ticketLuck{display:none!important}
+#modifierEditor .modifier-label small,#modifierEditor .modifier-details{display:none!important}
+#modifierEditor .modifier-row{display:flex!important;flex-wrap:nowrap!important;align-items:center;gap:7px!important;padding:8px 10px!important}
+.v3-column .showcase{margin-bottom:10px!important}
+#modifierEditor .modifier-label{flex:1 1 auto;min-width:0;display:flex;align-items:center;gap:6px}
+#modifierEditor .modifier-label strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#modifierEditor .modifier-emoji{flex:0 0 auto;width:auto!important;height:auto!important;font-size:15px;background:none!important;padding:0!important}
+#modifierEditor .modifier-row select{flex:0 0 auto;width:62px!important;min-height:34px;padding:5px 4px!important;font-size:13px;margin:0!important}
+#modifierEditor .modifier-row .rate-mode{width:80px!important;margin-left:0!important}
+.mod-on{flex:0 0 auto;width:18px!important;height:18px;min-height:0;margin:0;accent-color:#6ee2a1}
+.mod-info{flex:0 0 auto;width:18px;height:18px;min-height:0;padding:0;border-radius:50%;border:1px solid #7aa88a;background:transparent;color:#d5eeda;font-size:11px;font-weight:800;line-height:16px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+#modifierEditor .modifier-row.mod-off{background:#1a2a23!important;border-color:#2c3f36!important}#modifierEditor .modifier-row.mod-off>:not(.mod-on){opacity:.42;filter:grayscale(.7)}#modifierEditor .modifier-row.mod-off .modifier-label .mod-info{opacity:1;filter:none}
+.v3-help-popup .mod-popup-desc{margin:0 0 8px}.v3-help-popup .modifier-details-line{display:flex;justify-content:space-between;gap:10px;font-size:13px;margin:3px 0}.v3-help-popup .modifier-details-header{display:block;margin-bottom:4px}.v3-help-popup .modifier-details-note{display:block;margin-top:6px;opacity:.8}
+.odds-table thead{display:none}
+.odds-table,.v3-column .odds-table{min-width:0!important;table-layout:auto!important}
+.odds-table tbody tr.odds-line{height:auto!important}.odds-table tr.odds-line td{padding:3px 0!important}
+.odds-line-inner{display:flex;align-items:center;gap:5px;flex-wrap:nowrap;min-width:0}.odds-line-inner.jackpot{flex-wrap:wrap}
+.odds-line-inner>select[data-field=kind]{flex:0 0 76px;width:76px!important;height:36px;margin:0!important;padding:6px 4px!important;font-size:13px}
+.odds-line-inner .money-field{flex:1 1 56px;min-width:0}.odds-line-inner .money-field input{width:100%;height:36px;margin:0!important;padding:6px 4px 6px 22px!important;font-size:14px;text-align:left!important}
+.odds-line-inner>input[data-field=label]{flex:1 1 90px;min-width:0;height:36px;margin:0!important;padding:6px!important;font-size:13px;text-align:left!important}
+.odds-line-inner>select[data-field=mode]{flex:0 0 auto;width:auto!important;height:36px;margin:0!important;padding:4px!important;font-size:12px}
+.odds-line-inner>select.odds-zero{flex:1 1 56px;min-width:0;width:auto!important;height:36px;margin:0!important;padding:6px 8px!important;font-size:14px;color:var(--gold)}
+.odds-line-inner .percent-wrap{flex:0 0 66px;width:66px;height:36px}.odds-line-inner .percent-wrap input{width:100%;padding:6px 2px!important;font-size:14px}
+.odds-line-inner .odds-cell{flex:0 0 46px;width:46px!important;padding:0!important;font-size:12px;justify-content:flex-end!important}
+.odds-line-inner .delete-row{position:static!important;flex:0 0 24px;width:24px!important;height:24px!important;margin:0!important;padding:0!important;font-size:12px!important;line-height:22px!important;border-radius:50%}
+.odds-table tfoot td:nth-child(n+3){display:none}.odds-table tfoot td{padding-top:10px!important}
+.type-config #newType,.type-config .new-amount-field,.type-config #addPrize{display:none!important}
+.odds-table tbody tr.odds-add{height:auto!important}.odds-table tr.odds-add td{padding:0!important}.odds-add-btn{min-height:34px;padding:6px 12px;font-size:13px}
+.ticket-config>div:has(#packSize){display:none!important}
+.odds-line-inner.special>select[data-special=kind]{flex:1 1 auto;min-width:0;height:36px;margin:0!important;padding:6px 4px!important;font-size:13px;color:var(--gold)}
+.odds-line-inner.special>select[data-special=type]{flex:0 0 74px;width:74px!important;height:36px;margin:0!important;padding:4px!important;font-size:12px}
+.special-toggle{display:flex!important;align-items:center;gap:6px;cursor:pointer}.special-toggle input{width:auto;min-height:0;margin:0;accent-color:#6ee2a1}
+.special-item-setting.special-off .special-row,.special-item-setting.special-off #specialHint{opacity:.5}
+.showcase-center>.card{position:relative}
+#ticketPanelMessage{display:none!important}
+.shot-settings-pop{position:absolute;left:12px;right:12px;z-index:30;box-sizing:border-box;background:#16302a;border:1px solid #4c976b;border-radius:14px;box-shadow:0 14px 34px #000b;padding:7px 8px 8px;display:flex;flex-direction:column;gap:5px}
+.shot-settings-pop.hidden{display:none}
+.ssp-head{display:flex;align-items:center;gap:10px;padding-right:30px;flex-wrap:wrap}.ssp-head strong{font-size:13px;color:#ffd481}.ssp-head .stack-toggle{font-size:12px!important;margin:0!important}
+.ssp-close{top:6px!important;right:6px!important;width:22px!important;height:22px!important}
+.ssp-shots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+.ssp-box{background:#1c3a2c;border:1px solid #345a47;border-radius:10px;padding:5px 5px;display:flex;flex-direction:column;gap:3px;min-width:0}
+.ssp-box label,.ssp-misc label{font-size:10px;font-weight:750;color:#e6f6e6;margin:0;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.shot-settings-pop select{width:100%!important;min-width:0;min-height:28px;height:28px;padding:3px 4px!important;font-size:12px;margin:0!important}
+.ssp-box .stack-math{font-size:10px;color:#d5eeda;white-space:nowrap;line-height:1.1}.ssp-box .stack-math.hidden{display:none}
+.ssp-misc{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}.ssp-misc>div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.odds-line-inner .odds-cell{background:none!important;border:none!important;box-shadow:none!important;flex:0 0 66px!important;width:66px!important;padding:0 2px!important;justify-content:flex-start!important;flex-direction:column;align-items:flex-start!important;gap:1px;font-size:11px!important;line-height:1.2;white-space:nowrap}
+
 .setup-modal{position:fixed;inset:0;z-index:1000;background:#0009;display:flex;align-items:flex-start;justify-content:center;padding:max(18px,env(safe-area-inset-top)) 12px 24px;overflow-y:auto;-webkit-overflow-scrolling:touch}.setup-modal.hidden{display:none}
 .setup-modal-box{position:relative;width:100%;max-width:560px;margin:0 auto}.setup-modal-box>.card{margin:0;box-shadow:0 18px 50px #000a}.setup-modal-box .card-top{padding-right:30px}
 .setup-close{position:absolute;top:10px;right:10px;z-index:2;width:24px;height:24px;min-height:0;padding:0;border:none;border-radius:50%;background:#d94f4f;color:#fff;font-size:12px;font-weight:900;line-height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 6px #0006}
@@ -507,7 +554,7 @@ body.setup-open{overflow:hidden}.card-top .ticket-gear+h3{margin-right:auto}
 <div class="wrap">
 <header class="header">
 <div class="brand"><div class="brand-mark">$</div><div><small>QUILL PRODUCTIONS</small><h1>Cardboard to Cash</h1></div></div>
-<div class="header-right"><span class="version-badge" title="Lucky Buck simulator version">v3.2.0</span><span class="save" id="saveStatus">Loading…</span></div>
+<div class="header-right"><span class="version-badge" title="Lucky Buck simulator version">v3.2.1</span><span class="save" id="saveStatus">Loading…</span></div>
 </header>
 
 <section class="hero">
@@ -540,7 +587,7 @@ body.setup-open{overflow:hidden}.card-top .ticket-gear+h3{margin-right:auto}
   <div class="shot-field"><label for="shot1">Shot 1 accuracy</label><select id="shot1"></select><small id="shotDescription1"></small></div>
   <div class="shot-field"><label for="shot2">Shot 2 accuracy</label><select id="shot2"></select><small id="shotDescription2"></small></div>
   <div class="shot-field"><label for="shot3">Shot 3 accuracy</label><select id="shot3"></select><small id="shotDescription3"></small></div>
-  <details class="shot-advanced" id="shotAdvanced"><summary>Shot bonus settings</summary><div class="shot-advanced-inner shot-rates"><label class="stack-toggle"><input type="checkbox" id="stackShots"> Enable stacking</label><label for="bonus1">Shot 1 bonus</label><div class="rate-pair"><select id="bonus1"></select></div><label for="bonus2">Shot 2 bonus</label><div class="rate-pair"><select id="bonus2"></select><span class="stack-math hidden" id="stackMath2"></span></div><label for="bonus3">Shot 3 upgrade</label><div class="rate-pair"><select id="bonus3"></select><span class="stack-math hidden" id="stackMath3"></span></div><label for="grandPrize">Grand prize</label><div class="rate-pair"><select id="grandPrize"></select></div><label for="missPenalty">Missed shot penalty</label><div class="rate-pair"><select id="missPenalty"></select></div><label for="bullMin">Bullseye range</label><div class="rate-pair"><select id="bullMin"></select></div><label for="noBonusMax">No-bonus range</label><div class="rate-pair"><select id="noBonusMax"></select></div></div></details>
+  <details class="shot-advanced" id="shotAdvanced"><summary>Shot bonus settings</summary></details>
   <p id="shotProjection" class="shot-projection">Expected shot-adjusted odds appear here.</p>
  </section>
 <div class="purchase-row"><button class="btn primary" id="buyOne" type="button">Buy one ticket · $1</button><span class="purchase-helper">Choose your shots, buy, then pop the balloons below.</span></div>
@@ -564,6 +611,7 @@ body.setup-open{overflow:hidden}.card-top .ticket-gear+h3{margin-right:auto}
  <button class="btn ghost hidden" id="revealBtn" type="button">Show waiting ticket</button>
  <button class="btn mini ghost" id="resetTicket" type="button">Clear display</button>
 </div>
+<div class="shot-settings-pop hidden" id="shotSettingsPop" role="dialog" aria-label="Shot bonus settings"><div class="ssp-head"><strong>Shot bonus settings</strong><label class="stack-toggle"><input type="checkbox" id="stackShots"> Enable stacking</label><button type="button" class="setup-close ssp-close" id="shotSettingsClose" aria-label="Close shot bonus settings">✕</button></div><div class="ssp-shots"><div class="ssp-box"><label for="bonus1">Shot 1 bonus</label><select id="bonus1"></select></div><div class="ssp-box"><label for="bonus2">Shot 2 bonus</label><select id="bonus2"></select><span class="stack-math hidden" id="stackMath2"></span></div><div class="ssp-box"><label for="bonus3">Shot 3 upgrade</label><select id="bonus3"></select><span class="stack-math hidden" id="stackMath3"></span></div></div><div class="ssp-misc"><div><label for="grandPrize">Grand prize</label><select id="grandPrize"></select></div><div><label for="missPenalty">Miss penalty</label><select id="missPenalty"></select></div><div><label for="bullMin">Bullseye</label><select id="bullMin"></select></div><div><label for="noBonusMax">No bonus</label><select id="noBonusMax"></select></div></div></div>
 </section></div>
  <aside class="showcase-right">
   <section class="active-mods" aria-label="Active modifiers">
@@ -626,14 +674,14 @@ body.setup-open{overflow:hidden}.card-top .ticket-gear+h3{margin-right:auto}
 <div><label class="field-label" for="ticketName">Ticket name</label><input id="ticketName" maxlength="70" type="text"/></div>
 <div><label class="field-label" for="ticketPrice">Price</label><div class="money-field"><span aria-hidden="true">$</span><input id="ticketPrice" inputmode="decimal" max="1000000" min="0.01" step="any" type="number"/></div></div>
 <div><label class="field-label" for="packSize">Tickets in item-jackpot pack</label><input id="packSize" inputmode="numeric" max="1000000" min="1" step="1" type="number"/></div>
-<div class="wide special-item-setting"><label class="field-label" for="specialName">Special item</label><div class="special-row"><input id="specialName" maxlength="60" type="text" aria-label="Special item name"><span class="special-odds"><input id="specialX" inputmode="numeric" type="number" min="0" step="1" aria-label="Special item odds, count"><span>in</span><input id="specialY" inputmode="numeric" type="number" min="1" max="1000000" step="1" aria-label="Special item odds, out of tickets"></span><select id="specialType" aria-label="Special item odds type"><option value="pack">Pack</option><option value="random">Random chance</option></select></div><small class="tiny muted" id="specialHint"></small></div><div><label class="field-label" for="luckMode">Luck curve for this ticket</label><select id="luckMode"><option value="luckyBuck">Lucky Buck $1 formula</option><option value="none">Not yet configured</option></select></div>
+<div class="wide special-item-setting"><label class="field-label special-toggle"><input type="checkbox" id="specialOn" aria-label="Special item on"> Special item</label><div class="special-row"><input id="specialName" maxlength="60" type="text" aria-label="Special item name"><span class="special-odds"><input id="specialX" inputmode="numeric" type="number" min="0" step="1" aria-label="Special item odds, count"><span>in</span><input id="specialY" inputmode="numeric" type="number" min="1" max="1000000" step="1" aria-label="Special item odds, out of tickets"></span><select id="specialType" aria-label="Special item odds type"><option value="pack">Pack</option><option value="random">Random chance</option></select></div><small class="tiny muted" id="specialHint"></small></div><div><label class="field-label" for="luckMode">Luck curve for this ticket</label><select id="luckMode"><option value="luckyBuck">Lucky Buck $1 formula</option><option value="none">Not yet configured</option></select></div>
 </div>
 <div class="ticket-create-hint" id="ticketHint">Switch tickets with the menu above. Each one keeps its own settings and history.</div>
 </section>
     <section class="card" id="modifierEditor">
 <div class="card-top"><h3>Equipped modifiers</h3><span class="muted tiny">Default presets · Levels 0–3</span></div>
 <div class="modifier-list">
-<div class="modifier-row"><span aria-hidden="true" class="modifier-emoji">＄</span><div class="modifier-label"><strong>Double Down</strong><small id="doubleDescription">When you win the highest cash prize, you have a chance to double your winnings.</small></div><select aria-label="Double Down level" id="doubleLevel"></select><select class="rate-mode" aria-label="Double Down rate mode" id="doubleRateMode"><option value="default">Default</option><option value="edit">Edit</option></select></div><div class="modifier-details" aria-live="polite">
+<div class="modifier-row" id="doubleRow"><input type="checkbox" class="mod-on" id="doubleOn" aria-label="Double Down on" checked><span aria-hidden="true" class="modifier-emoji">＄</span><div class="modifier-label"><strong>Double Down</strong><button type="button" class="mod-info" data-mod="double" aria-label="About Double Down">?</button><small id="doubleDescription">When you win the highest cash prize, you have a chance to double your winnings.</small></div><select aria-label="Double Down level" id="doubleLevel"></select><select class="rate-mode" aria-label="Double Down rate mode" id="doubleRateMode"><option value="default">Default</option><option value="edit">Edit</option></select></div><div class="modifier-details" aria-live="polite">
   <strong class="modifier-details-header" id="doubleDetailsHeader">💰 Double Down — Level 0</strong>
   <div class="modifier-details-summary" id="doubleDetailsSummary">Select a level to see your double-prize chance.</div>
   <div id="doubleDetailsRates" class="modifier-details-rates hidden">
@@ -643,7 +691,7 @@ body.setup-open{overflow:hidden}.card-top .ticket-gear+h3{margin-right:auto}
   </div>
 </div>
 <div class="rate-editor hidden" id="doubleEdit"><strong>Double Down custom rates (%)</strong><div class="rates-grid"><span>Level</span><span>Double chance</span><label>1/3</label><input data-rate="1" data-level="1" data-column="0" type="number" step="0.01" min="0" max="100" aria-label="Double Down level 1 rate"><label>2/3</label><input data-rate="1" data-level="2" data-column="0" type="number" step="0.01" min="0" max="100" aria-label="Double Down level 2 rate"><label>3/3</label><input data-rate="1" data-level="3" data-column="0" type="number" step="0.01" min="0" max="100" aria-label="Double Down level 3 rate"></div></div>
-<div class="modifier-row"><span aria-hidden="true" class="modifier-emoji">🍀</span><div class="modifier-label"><strong>Momentum</strong><small id="momentumDescription">Winning the highest cash prize increases your chance of hitting it again on the next ticket. Win twice in a row for an even bigger boost! Any other result breaks your streak.</small></div><select aria-label="Momentum level" id="momentumLevel"></select><select class="rate-mode" aria-label="Momentum rate mode" id="momentumRateMode"><option value="default">Default</option><option value="edit">Edit</option></select></div><div class="modifier-details" aria-live="polite">
+<div class="modifier-row" id="momentumRow"><input type="checkbox" class="mod-on" id="momentumOn" aria-label="Momentum on" checked><span aria-hidden="true" class="modifier-emoji">🍀</span><div class="modifier-label"><strong>Momentum</strong><button type="button" class="mod-info" data-mod="momentum" aria-label="About Momentum">?</button><small id="momentumDescription">Winning the highest cash prize increases your chance of hitting it again on the next ticket. Win twice in a row for an even bigger boost! Any other result breaks your streak.</small></div><select aria-label="Momentum level" id="momentumLevel"></select><select class="rate-mode" aria-label="Momentum rate mode" id="momentumRateMode"><option value="default">Default</option><option value="edit">Edit</option></select></div><div class="modifier-details" aria-live="polite">
   <strong class="modifier-details-header" id="momentumDetailsHeader">🍀 Momentum — Level 0</strong>
   <div class="modifier-details-summary" id="momentumDetailsSummary">Select a Momentum level to see your streak bonuses.</div>
   <div id="momentumDetailsRates" class="modifier-details-rates hidden">
@@ -653,7 +701,7 @@ body.setup-open{overflow:hidden}.card-top .ticket-gear+h3{margin-right:auto}
   </div>
 </div>
 <div class="rate-editor hidden" id="momentumEdit"><strong>Momentum custom rates (%)</strong><div class="rates-grid rates-grid-3"><span>Level</span><span>After 1 win (%)</span><span>After 2 wins (%)</span><label>1/3</label><input data-rate="1" data-level="1" data-column="0" type="number" step="0.01" min="0" max="100" aria-label="Momentum 1 first chance"><input data-rate="1" data-level="1" data-column="1" type="number" step="0.01" min="0" max="100" aria-label="Momentum 1 second chance"><label>2/3</label><input data-rate="1" data-level="2" data-column="0" type="number" step="0.01" min="0" max="100" aria-label="Momentum 2 first chance"><input data-rate="1" data-level="2" data-column="1" type="number" step="0.01" min="0" max="100" aria-label="Momentum 2 second chance"><label>3/3</label><input data-rate="1" data-level="3" data-column="0" type="number" step="0.01" min="0" max="100" aria-label="Momentum 3 first chance"><input data-rate="1" data-level="3" data-column="1" type="number" step="0.01" min="0" max="100" aria-label="Momentum 3 second chance"></div></div>
-<div class="modifier-row"><span aria-hidden="true" class="modifier-emoji">🐇</span><div class="modifier-label"><strong>Luck</strong><small id="luckDescription">Improves your chances of winning by taking probability away from losing tickets and adding it to cash prizes. Higher levels provide bigger bonuses.</small></div><select aria-label="Luck level" id="luckLevel"></select><select class="rate-mode" aria-label="Luck rate mode" id="luckRateMode"><option value="default">Default</option><option value="edit">Edit</option></select></div><div class="modifier-details" aria-live="polite">
+<div class="modifier-row" id="luckRow"><input type="checkbox" class="mod-on" id="luckOn" aria-label="Luck on" checked><span aria-hidden="true" class="modifier-emoji">🐇</span><div class="modifier-label"><strong>Luck</strong><button type="button" class="mod-info" data-mod="luck" aria-label="About Luck">?</button><small id="luckDescription">Improves your chances of winning by taking probability away from losing tickets and adding it to cash prizes. Higher levels provide bigger bonuses.</small></div><select aria-label="Luck level" id="luckLevel"></select><select class="rate-mode" aria-label="Luck rate mode" id="luckRateMode"><option value="default">Default</option><option value="edit">Edit</option></select></div><div class="modifier-details" aria-live="polite">
   <strong class="modifier-details-header" id="luckDetailsHeader">🐇 Luck — Level 0</strong>
   <div class="modifier-details-summary" id="luckDetailsSummary">Select a level to see how the prize odds change.</div>
   <div id="luckDetailsRates" class="modifier-details-rates hidden">
@@ -676,8 +724,8 @@ body.setup-open{overflow:hidden}.card-top .ticket-gear+h3{margin-right:auto}
         </table></div>
 <div class="warning" id="warning" role="alert"></div>
 <div class="explain hidden" id="overflowNote"></div>
-<div class="type-config"><select aria-label="New prize type" id="newType"><option value="cash">Cash</option><option value="lose">Lose</option><option value="jackpot">Jackpot</option></select><div class="money-field new-amount-field"><span id="newAmountCurrency" aria-hidden="true">$</span><input aria-label="New cash prize amount or jackpot item name" id="newAmount" placeholder="Dollar amount" type="text"/></div><button class="btn mini" id="addPrize">＋ Add row</button><button class="btn mini ghost" id="restoreOdds">↺ Restore original odds</button></div>
-<p class="subtle-notice">Cash and Lose represent mutually exclusive outcomes per normal scratch. Jackpot item rows follow independent pack rules; their percentages represent chance per entire pack, not extra cash odds. Changing the denominator alters only the displayed ratio.</p>
+<div class="type-config"><select aria-label="New prize type" id="newType"><option value="cash">Cash</option><option value="lose">Lose</option></select><div class="money-field new-amount-field"><span id="newAmountCurrency" aria-hidden="true">$</span><input aria-label="New cash prize amount or jackpot item name" id="newAmount" placeholder="Dollar amount" type="text"/></div><button class="btn mini" id="addPrize">＋ Add row</button><button class="btn mini ghost" id="restoreOdds">↺ Restore original odds</button></div>
+<p class="subtle-notice">Cash and Lose represent mutually exclusive outcomes per normal scratch. Item jackpots (like the Trusty Shotgun) are set in ⚙ Ticket settings under Special item.</p>
 </section>
     <section class="card">
 <div class="card-top"><h3>Live calculations</h3><span class="tag" id="chanceTag">100% allocated</span></div>
@@ -799,11 +847,11 @@ const baseRows=()=>[
  {id:3,kind:CASH,amount:5,chance:20},
  {id:4,kind:CASH,amount:25,chance:4}
 ];
-function freshTicket(id='lucky-buck',name='Lucky Buck',price=1){return {id,name,price,rows:baseRows(),luck:0,momentum:0,doubleDown:0,luckMode:'luckyBuck',denominator:600,packSize:600,pack:null,stage:0,stats:stats(),history:[],last:null,lastRevealed:null,unrevealed:[],nextRowId:5,legacyLuck:null,shots:defaultShots(),rates:defaultRates(),logoData:null,artData:null,special:defaultSpecial(id),specialPack:null,batchAccuracy:{on:false,level:'random'},batchShots:null}}
-const defaultSpecial=id=>id==='lucky-buck'?{name:'Trusty Shotgun',x:1,y:600,type:'pack'}:{name:'Special item',x:0,y:600,type:'pack'};
+function freshTicket(id='lucky-buck',name='Lucky Buck',price=1){return {id,name,price,rows:baseRows(),luck:0,momentum:0,doubleDown:0,luckMode:'luckyBuck',denominator:600,packSize:600,pack:null,stage:0,stats:stats(),history:[],last:null,lastRevealed:null,unrevealed:[],nextRowId:5,legacyLuck:null,shots:defaultShots(),rates:defaultRates(),logoData:null,artData:null,special:defaultSpecial(id),specialPack:null,modOff:{},batchAccuracy:{on:false,level:'random'},batchShots:null}}
+const defaultSpecial=id=>id==='lucky-buck'?{name:'Trusty Shotgun',x:1,y:600,type:'pack',on:true}:{name:'Special item',x:1,y:600,type:'pack',on:false};
 function cleanSpecial(raw,id){const d=defaultSpecial(id);if(!raw||typeof raw!=='object')return d;
  const y=integer(raw.y,1,1000000)?Number(raw.y):d.y,x=integer(raw.x,0,y)?Number(raw.x):Math.min(d.x,y);
- return {name:typeof raw.name==='string'&&raw.name.trim()?raw.name.trim().slice(0,60):d.name,x,y,type:raw.type==='random'?'random':'pack'};}
+ return {name:typeof raw.name==='string'&&raw.name.trim()?raw.name.trim().slice(0,60):d.name,x,y,type:raw.type==='random'?'random':'pack',on:raw.on===true||(raw.on===undefined&&x>0)};}
 function cleanSpecialPack(raw,sp){if(!raw||typeof raw!=='object'||raw.x!==sp.x||raw.y!==sp.y||!integer(raw.index,0,sp.y)||!Array.isArray(raw.hits))return null;
  const hits=raw.hits.filter(p=>integer(p,0,sp.y-1));return new Set(hits).size===hits.length&&hits.length===sp.x?{x:sp.x,y:sp.y,index:Number(raw.index),hits}:null;}
 const ACCURACY_LEVELS=['random','good','medium','poor'];
@@ -826,7 +874,7 @@ function cleanTicket(raw){
  if(!raw||typeof raw!=='object'||!validName(raw.name)||!Number.isFinite(Number(raw.price))||Number(raw.price)<=0||Number(raw.price)>1e6)throw Error('Ticket name or price is invalid.');
  if(!Array.isArray(raw.rows)||raw.rows.length<1||raw.rows.length>100)throw Error('A ticket needs between 1 and 100 outcome rows.');
  const ids=new Set();let next=0;
- const rows=raw.rows.map((r,i)=>{const kind=[CASH,LOSE,JACKPOT].includes(r.kind)?r.kind:null;if(!kind)throw Error('Unknown outcome type.');const amount=kind===CASH?Number(r.amount):0;if(kind===CASH&&(!Number.isFinite(amount)||amount<=0||amount>1e12))throw Error('Cash prize must be positive.');const chance=kind===JACKPOT&&r.mode==='guaranteed'?100:Number(r.chance);if(!Number.isFinite(chance)||chance<0||chance>100)throw Error('Odds must be between 0% and 100%.');let id=Number(r.id);if(!integer(id,1,100000000)||ids.has(id))id=i+1;while(ids.has(id))id++;ids.add(id);next=Math.max(next,id);return {id,kind,amount,chance,mode:kind===JACKPOT&&r.mode==='guaranteed'?'guaranteed':'rare',label:kind===JACKPOT?String(r.label||'Jackpot item').slice(0,100):''}});
+ const rows=raw.rows.filter(r=>r&&r.kind!==JACKPOT).map((r,i)=>{const kind=[CASH,LOSE,JACKPOT].includes(r.kind)?r.kind:null;if(!kind)throw Error('Unknown outcome type.');const amount=kind===CASH?Number(r.amount):0;if(kind===CASH&&(!Number.isFinite(amount)||amount<=0||amount>1e12))throw Error('Cash prize must be positive.');const chance=kind===JACKPOT&&r.mode==='guaranteed'?100:Number(r.chance);if(!Number.isFinite(chance)||chance<0||chance>100)throw Error('Odds must be between 0% and 100%.');let id=Number(r.id);if(!integer(id,1,100000000)||ids.has(id))id=i+1;while(ids.has(id))id++;ids.add(id);next=Math.max(next,id);return {id,kind,amount,chance,mode:kind===JACKPOT&&r.mode==='guaranteed'?'guaranteed':'rare',label:kind===JACKPOT?String(r.label||'Jackpot item').slice(0,100):''}});
  if(rows.filter(r=>r.kind===LOSE).length>1)throw Error('Only one Lose row is allowed.');
  if(!integer(raw.packSize,1,1000000))throw Error('Pack size must be an integer from 1 to 1,000,000.');
  const rawStats=raw.stats||{},st=stats();for(const k of Object.keys(st)){if(rawStats[k]!==undefined&&Number.isFinite(Number(rawStats[k]))&&Number(rawStats[k])>=0)st[k]=Number(rawStats[k]);}
@@ -837,7 +885,8 @@ function cleanTicket(raw){
   const assignments=raw.pack.assignments.filter(a=>a&&integer(a.position,0,Number(raw.packSize)-1)&&rows.some(r=>r.id===Number(a.id)&&r.kind===JACKPOT)).map(a=>({id:Number(a.id),position:Number(a.position)}));
   if(new Set(assignments.map(a=>a.position)).size===assignments.length)pack={index:Number(raw.pack.index),serial:Number(raw.pack.serial),assignments};
  }
- return {id:String(raw.id||'ticket').slice(0,100),name:raw.name.trim(),price:Number(raw.price),rows,luck:clampLevel(raw.luck),momentum:clampLevel(raw.momentum),doubleDown:clampLevel(raw.doubleDown),luckMode:raw.luckMode==='luckyBuck'?'luckyBuck':'none',denominator:integer(raw.denominator,1,600)?Number(raw.denominator):600,packSize:Number(raw.packSize),pack,stage,stats:st,history:Array.isArray(raw.history)?raw.history.slice(0,24).map(cleanRun).filter(Boolean):[],last:cleanRun(raw.last),lastRevealed:cleanRevealed(raw.lastRevealed),unrevealed:cleanQueued,nextRowId:Math.max(next+1,integer(raw.nextRowId,1,1000000000)?Number(raw.nextRowId):1),legacyLuck:raw.legacyLuck??null,shots:cleanShots(raw.shots),rates:cleanRates(raw.rates),logoData:safeTicketImage(raw.logoData),artData:safeTicketImage(raw.artData),...(()=>{const id=String(raw.id||'ticket').slice(0,100),special=cleanSpecial(raw.special,id);return {special,specialPack:cleanSpecialPack(raw.specialPack,special),batchAccuracy:{on:raw.batchAccuracy?.on===true,level:ACCURACY_LEVELS.includes(raw.batchAccuracy?.level)?raw.batchAccuracy.level:'random'},batchShots:cleanBatchShots(raw.batchShots)};})()};
+ return {id:String(raw.id||'ticket').slice(0,100),name:raw.name.trim(),price:Number(raw.price),rows,luck:clampLevel(raw.luck),momentum:clampLevel(raw.momentum),doubleDown:clampLevel(raw.doubleDown),luckMode:raw.luckMode==='luckyBuck'?'luckyBuck':'none',denominator:integer(raw.denominator,1,600)?Number(raw.denominator):600,packSize:Number(raw.packSize),pack,stage,stats:st,history:Array.isArray(raw.history)?raw.history.slice(0,24).map(cleanRun).filter(Boolean):[],last:cleanRun(raw.last),lastRevealed:cleanRevealed(raw.lastRevealed),unrevealed:cleanQueued,nextRowId:Math.max(next+1,integer(raw.nextRowId,1,1000000000)?Number(raw.nextRowId):1),legacyLuck:raw.legacyLuck??null,shots:cleanShots(raw.shots),rates:cleanRates(raw.rates),logoData:safeTicketImage(raw.logoData),artData:safeTicketImage(raw.artData),...(()=>{const id=String(raw.id||'ticket').slice(0,100),special=cleanSpecial(raw.special,id);const modOff={};for(const k of ['doubleDown','momentum','luck'])if(raw.modOff&&integer(raw.modOff[k],0,3)&&!(Number(raw[k])>0))modOff[k]=Number(raw.modOff[k]);
+return {modOff,special,specialPack:cleanSpecialPack(raw.specialPack,special),batchAccuracy:{on:raw.batchAccuracy?.on===true,level:ACCURACY_LEVELS.includes(raw.batchAccuracy?.level)?raw.batchAccuracy.level:'random'},batchShots:cleanBatchShots(raw.batchShots)};})()};
 }
 function migrateOld(old){
  if(!old||!Array.isArray(old.tiers)||old.tiers.length<1)throw Error('Older save has no prize rows.');
@@ -934,7 +983,7 @@ function createPack(t){const oldSerial=t.pack?.serial||0;const selected=[];const
 }
 const specialSets=new WeakMap();
 // Special item: Pack = exactly x per y tickets (shuffled positions); Random chance = each ticket x in y.
-function specialHit(t,random=Math.random){const sp=t.special;if(!sp||!(sp.x>0)||!(sp.y>=1))return false;
+function specialHit(t,random=Math.random){const sp=t.special;if(!sp||!sp.on||!(sp.x>0)||!(sp.y>=1))return false;
  if(sp.type==='random')return random()<sp.x/sp.y;
  let pk=t.specialPack;
  if(!pk||pk.x!==sp.x||pk.y!==sp.y||pk.index>=sp.y){const take=Math.min(sp.x,sp.y),pool=new Set();
@@ -1223,7 +1272,8 @@ function loadOriginalLuckyBuckLogo(){
 }
 
 function renderSpecial(){const sp=T().special;$('specialName').value=sp.name;$('specialX').value=String(sp.x);$('specialY').value=String(sp.y);$('specialType').value=sp.type;
- $('specialHint').textContent=sp.x===0?'Off · set the first number above 0 to turn it on.':sp.type==='pack'?`Exactly ${nfmt(sp.x,0)} in every ${nfmt(sp.y,0)} tickets, shuffled.`:`Each ticket has a ${nfmt(sp.x,0)} in ${nfmt(sp.y,0)} chance; streaks and droughts can happen.`;}
+ $('specialOn').checked=!!sp.on;for(const id of ['specialName','specialX','specialY','specialType'])$(id).disabled=!sp.on;$('specialOn').closest('.special-item-setting').classList.toggle('special-off',!sp.on);
+ $('specialHint').textContent=!sp.on?'Off · check the box to turn it on (it also returns to the Prize odds editor).':sp.x===0?'Set the first number above 0 so it can appear.':sp.type==='pack'?`Exactly ${nfmt(sp.x,0)} in every ${nfmt(sp.y,0)} tickets, shuffled.`:`Each ticket has a ${nfmt(sp.x,0)} in ${nfmt(sp.y,0)} chance; streaks and droughts can happen.`;}
 function renderTicketSelector(){
  const t=T();
  $('ticketSelector').innerHTML=state.tickets.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.name)+' · '+usd(x.price,x.price%1===0?0:2)+'</option>').join('')+'<option value="__create__">＋ Create New Ticket…</option>';
@@ -1244,6 +1294,9 @@ function renderTicketSelector(){
 function renderModifiers(){
  const t=T();
  for(const [id,v] of [['doubleLevel',t.doubleDown],['momentumLevel',t.momentum],['luckLevel',t.luck]]){$(id).value=String(v);}
+ t.modOff??={};for(const [key,p] of [['doubleDown','double'],['momentum','momentum'],['luck','luck']]){
+  if(t[key]>0)delete t.modOff[key];const off=t.modOff[key]!==undefined;
+  $(p+'On').checked=!off;$(p+'Row').classList.toggle('mod-off',off);$(p+'Level').disabled=off;$(p+'RateMode').disabled=off;if(off)$(p+'Level').value=String(t.modOff[key]);}
  $('activeDouble').textContent=t.doubleDown+'/3';$('activeMomentum').textContent=t.momentum+'/3';$('activeLuck').textContent=t.luck+'/3';
  $('doubleDescription').textContent='When you win the highest cash prize, you have a chance to double your winnings.';
  $('momentumDescription').textContent='Winning the highest cash prize increases your chance of hitting it again on the next ticket. Win twice in a row for an even bigger boost! Any other result breaks your streak.';
@@ -1298,15 +1351,34 @@ function renderRateSettings(t){
   }
  }
 }
-function rowHTML(r,t){const isJ=r.kind===JACKPOT,guaranteed=isJ&&r.mode==='guaranteed',chance=guaranteed?100:r.chance,den=t.denominator;const numerator=precise(chance*den/100);const extra=isJ?`<div><select data-field="mode" aria-label="Jackpot pack rule"><option value="rare" ${r.mode==='rare'?'selected':''}>Rare pack</option><option value="guaranteed" ${guaranteed?'selected':''}>Guaranteed</option></select><small class="muted">${guaranteed?'One per pack':'Pack-level inclusion'}</small></div>`:'';
- const value=r.kind===CASH?`<div class="money-field"><span aria-hidden="true">$</span><input data-field="amount" aria-label="Cash prize amount in dollars" type="number" min="0.01" step="any" value="${esc(r.amount)}"></div>`:isJ?`<input data-field="label" aria-label="Jackpot item name" maxlength="100" value="${esc(r.label)}">`:`<small class="muted">No payout</small>`;
- return `<tr data-id="${r.id}"><td><div class="row-name"><button type="button" class="delete-row" aria-label="Remove outcome" data-delete="${r.id}">×</button><select data-field="kind" aria-label="Outcome type"><option value="cash" ${r.kind===CASH?'selected':''}>Cash</option><option value="lose" ${r.kind===LOSE?'selected':''}>Lose</option><option value="jackpot" ${isJ?'selected':''}>Jackpot</option></select>${value}${extra}</div></td>
- <td><div class="percent-wrap"><input aria-label="${isJ?'Pack':'Outcome'} percentage" data-field="chance" ${guaranteed?'disabled':''} type="text" inputmode="decimal" value="${esc(precise(chance))}"><span class="unit">%</span></div>${isJ?'<span class="type-hint">Per full pack</span>':''}</td>
- <td><div class="ratio-wrap"><input aria-label="Probability numerator" data-field="numerator" ${guaranteed?'disabled':''} type="text" inputmode="decimal" value="${esc(numerator)}"><span>/${den}</span></div>${isJ?'<span class="type-hint">Pack chance ratio</span>':''}</td>
- <td><div class="odds-cell mods" id="mod-${r.id}">—</div></td><td><div class="odds-cell final row-final" id="final-${r.id}">—</div></td></tr>`;}
-function renderRows(){const t=T();$('denominator').value=String(t.denominator);$('oddsRows').innerHTML=t.rows.map(r=>rowHTML(r,t)).join('');
+function rowHTML(r,t){const isJ=r.kind===JACKPOT,guaranteed=isJ&&r.mode==='guaranteed',chance=guaranteed?100:r.chance;
+ const kind=`<select data-field="kind" aria-label="Outcome type"><option value="cash" ${r.kind===CASH?'selected':''}>Cash</option><option value="lose" ${r.kind===LOSE?'selected':''}>Lose</option>${r.kind===CASH&&!t.special.on?'<option value="special">★ '+esc(t.special.name)+'</option>':''}</select>`;
+ const value=r.kind===CASH?`<div class="money-field"><span aria-hidden="true">$</span><input data-field="amount" aria-label="Cash prize amount in dollars" type="number" min="0.01" step="any" value="${esc(r.amount)}"></div>`:isJ?`<input data-field="label" aria-label="Jackpot item name" maxlength="100" value="${esc(r.label)}">`:`<select class="odds-zero" aria-label="Lose payout"><option value="0" selected>$0</option></select>`;
+ const mode=isJ?`<select data-field="mode" aria-label="Jackpot pack rule"><option value="rare" ${r.mode==='rare'?'selected':''}>Rare pack</option><option value="guaranteed" ${guaranteed?'selected':''}>Guaranteed</option></select>`:'';
+ return `<tr data-id="${r.id}" class="odds-line"><td colspan="5"><div class="odds-line-inner${isJ?' jackpot':''}">${kind}${value}${mode}<div class="percent-wrap"><input aria-label="${isJ?'Pack':'Outcome'} percentage" data-field="chance" ${guaranteed?'disabled':''} type="text" inputmode="decimal" value="${esc(precise(chance))}"><span class="unit">%</span></div><div class="odds-cell mods" id="mod-${r.id}">—</div><span class="hidden" id="final-${r.id}"></span><button type="button" class="delete-row" aria-label="Remove outcome" data-delete="${r.id}">✕</button></div></td></tr>`;}
+function addInlineRow(){const t=T();if(t.rows.length>=100){toast('Maximum 100 outcome rows.');return;}
+ const top=Math.max(0,...t.rows.filter(r=>r.kind===CASH).map(r=>r.amount));
+ const r={id:t.nextRowId++,kind:CASH,amount:top>0?top*2:1,chance:0,mode:'rare',label:''};t.rows.push(r);t.stage=0;t.pack=null;save();renderRows();refreshOdds();
+ document.querySelector(`#oddsRows tr[data-id="${r.id}"] [data-field=amount]`)?.focus();}
+// Percentage shown in the odds editor, rounded to the nearest tenth (the exact X in Y is what plays).
+const specialPct=sp=>Math.round(sp.x/sp.y*1000)/10;
+function specialRowHTML(t){const sp=t.special;if(!sp?.on)return '';
+ return `<tr class="odds-line special-line"><td colspan="5"><div class="odds-line-inner special"><select data-special="kind" aria-label="Outcome type"><option value="cash">Cash</option><option value="special" selected>★ ${esc(sp.name)}</option></select>`+
+  `<div class="percent-wrap"><input data-special="pct" aria-label="${esc(sp.name)} chance per ticket" type="text" inputmode="decimal" value="${specialPct(sp)}"><span class="unit">%</span></div>`+
+  `<select data-special="type" aria-label="Special item odds type"><option value="pack" ${sp.type==='pack'?'selected':''}>Pack</option><option value="random" ${sp.type==='random'?'selected':''}>Random</option></select>`+
+  `<button type="button" class="delete-row" data-special="delete" aria-label="Remove ${esc(sp.name)}">✕</button></div></td></tr>`;}
+function bindSpecialRow(t){const row=$('oddsRows').querySelector('.special-line');if(!row)return;const q=n=>row.querySelector(`[data-special="${n}"]`);
+ const after=()=>{t.specialPack=null;save();renderSpecial();renderRows();refreshOdds();};
+ q('delete').addEventListener('click',()=>{t.special.on=false;after();});
+ q('type').addEventListener('change',e=>{t.special.type=e.target.value==='random'?'random':'pack';after();});
+ q('kind').addEventListener('change',e=>{if(e.target.value!=='cash')return;t.special.on=false;after();addInlineRow();});
+ q('pct').addEventListener('change',e=>{const v=parseFraction(e.target.value);if(!Number.isFinite(v)||v<=0||v>100){toast('Enter a percentage above 0 and up to 100.');renderRows();return;}
+  // Keep the 'in Y' number; set X to match. Very small odds switch to 1 in N.
+  let x=Math.round(v*t.special.y/100),y=t.special.y;if(x<1){x=1;y=Math.min(1000000,Math.max(1,Math.round(100/v)));}t.special.x=x;t.special.y=y;after();});}
+function renderRows(){const t=T();$('denominator').value=String(t.denominator);$('oddsRows').innerHTML=t.rows.map(r=>rowHTML(r,t)).join('')+specialRowHTML(t)+'<tr class="odds-add"><td colspan="5"><button type="button" class="btn mini odds-add-btn" id="addRowInline">＋ Add row</button></td></tr>';$('addRowInline').addEventListener('click',addInlineRow);bindSpecialRow(t);
  $('oddsRows').querySelectorAll('[data-delete]').forEach(b=>b.addEventListener('click',()=>{const id=Number(b.dataset.delete);t.rows=t.rows.filter(r=>r.id!==id);t.stage=0;t.pack=null;save();renderRows();refreshOdds();}));
  $('oddsRows').querySelectorAll('select[data-field]').forEach(el=>el.addEventListener('change',()=>{const tr=el.closest('tr'),r=t.rows.find(x=>x.id===Number(tr.dataset.id));if(!r)return;
+ if(el.dataset.field==='kind'&&el.value==='special'){t.rows=t.rows.filter(x=>x.id!==r.id);t.special.on=true;if(t.special.x===0)t.special.x=1;t.specialPack=null;t.stage=0;save();renderSpecial();renderRows();refreshOdds();return;}
  if(el.dataset.field==='kind'){if(el.value===LOSE&&t.rows.some(x=>x.kind===LOSE&&x.id!==r.id)){toast('There can be only one Lose row.');renderRows();return;}r.kind=el.value;r.amount=el.value===CASH?1:0;r.label=el.value===JACKPOT?'Jackpot item':'';r.chance=el.value===JACKPOT?1:r.chance;r.mode='rare';}
  else if(el.dataset.field==='mode'){r.mode=el.value;r.chance=el.value==='guaranteed'?100:1;}
  t.stage=0;t.pack=null;save();renderRows();refreshOdds();}));
@@ -1320,10 +1392,11 @@ function renderRows(){const t=T();$('denominator').value=String(t.denominator);$
  el.setCustomValidity('');t.stage=0;t.pack=null;save();refreshOdds();};
  el.addEventListener('input',handler);el.addEventListener('blur',()=>{if(!el.validity.valid){renderRows();refreshOdds();}});});}
 function refreshOdds(){const t=T(),c=valid(t);
- renderModifiers();const rowById=new Map((c.rows||[]).map(r=>[r.id,r]));
+ renderModifiers();const rowById=new Map((c.rows||[]).map(r=>[r.id,r]));const c0=c.valid&&t.stage>0?normalOdds(t,0):c,luckById=new Map((c0.rows||[]).map(r=>[r.id,r]));
+ const modBit=(v,sym,label)=>Math.abs(v)<1e-9?'':`<span class="${v>0?'pos':'neg'}" title="${label}">(${v>0?'+':''}${pct(v)} ${sym})</span>`;
  for(const r of t.rows){const m=$('mod-'+r.id),f=$('final-'+r.id);if(!m||!f)continue;
  if(r.kind===JACKPOT){m.innerHTML=`<small>${r.mode==='guaranteed'?'1 item / pack':'Rare inclusion'}</small>`;f.textContent=pct((r.mode==='guaranteed'?100:r.chance)/t.packSize)+' avg / ticket';}
- else{const x=rowById.get(r.id);m.innerHTML=x&&c.valid?`<span class="${x.modifier>=0?'pos':'neg'}">${x.modifier>=0?'+':''}${pct(x.modifier)}</span>`:'—';f.textContent=x&&c.valid?pct(x.final):'—';}}
+ else{const x=rowById.get(r.id);{const luck=c0.valid?(luckById.get(r.id)?.modifier||0):0;m.innerHTML=x&&c.valid?modBit(luck,'🐇','Luck')+modBit(x.modifier-luck,'🍀','Momentum'):'';}f.textContent=x&&c.valid?pct(x.final):'—';}}
  $('baseTotal').textContent=pct(t.rows.filter(r=>r.kind!==JACKPOT).reduce((s,r)=>s+r.chance,0));$('effectiveTotal').textContent=c.valid?pct(c.total):'—';$('effectiveTotal').style.color=c.valid?'var(--green)':'var(--red)';
  $('warning').style.display=c.valid&&canSave?'none':'block';$('warning').textContent=!canSave?'An existing save could not load safely. The original browser data has NOT been overwritten; download your existing backup before editing. '+(loadError||''):c.error||'';
  const unsupported=t.luck>0&&!isLuckyCurve(t);$('overflowNote').classList.toggle('hidden',!unsupported);if(unsupported)$('overflowNote').textContent='No Luck curve is defined for this ticket’s prize set. Luck level is saved, but does not change outcomes. The approved $1 Lucky Buck formula only applies to Lose / $1 / $5 / $25.';
@@ -1444,6 +1517,8 @@ function init(){
 
  $('ticketName').addEventListener('change',e=>{const name=e.target.value.trim();if(!validName(name)){toast('Enter a name from 1 to 70 characters.');e.target.value=T().name;return;}T().name=name;save();renderTicketSelector();});
  $('ticketPrice').addEventListener('change',e=>{const n=Number(e.target.value);if(!Number.isFinite(n)||n<=0||n>1000000){toast('Price must be above $0 and at most $1,000,000.');e.target.value=T().price;return;}T().price=n;save();renderTicketSelector();refreshOdds();renderStats();});
+ $('specialOn').addEventListener('change',e=>{const t=T();t.special.on=e.target.checked;if(t.special.on&&t.special.x===0)t.special.x=1;t.specialPack=null;save();renderSpecial();renderRows();refreshOdds();});
+ for(const id of ['specialName','specialX','specialY','specialType'])$(id).addEventListener('change',()=>setTimeout(renderRows,0));
  $('specialName').addEventListener('change',e=>{const v=e.target.value.trim().slice(0,60);if(!v){toast('Give the special item a name.');renderSpecial();return;}T().special.name=v;save();renderSpecial();});
  $('specialX').addEventListener('change',e=>{const t=T(),n=Number(e.target.value);if(!integer(n,0,t.special.y)){toast('The first number must be a whole number from 0 to '+nfmt(t.special.y,0)+'.');renderSpecial();return;}t.special.x=n;t.specialPack=null;save();renderSpecial();});
  $('specialY').addEventListener('change',e=>{const t=T(),n=Number(e.target.value);if(!integer(n,1,1000000)||n<t.special.x){toast('The second number must be a whole number from '+nfmt(Math.max(1,t.special.x),0)+' to 1,000,000.');renderSpecial();return;}t.special.y=n;t.specialPack=null;save();renderSpecial();});
@@ -1451,6 +1526,10 @@ function init(){
  $('packSize').addEventListener('change',e=>{const n=Number(e.target.value);if(!integer(n,1,1000000)){toast('Pack size must be an integer from 1 to 1,000,000.');e.target.value=T().packSize;return;}T().packSize=n;T().pack=null;T().stage=0;save();refreshOdds();});
  $('luckMode').addEventListener('change',e=>{T().luckMode=e.target.value;T().stage=0;save();refreshOdds();});
  for(const [id,key] of [['doubleLevel','doubleDown'],['momentumLevel','momentum'],['luckLevel','luck']])$(id).addEventListener('change',e=>{T()[key]=clampLevel(e.target.value);T().stage=0;save();refreshOdds();});
+ // Checkbox off = modifier off (level remembered); on = back at the remembered level.
+ for(const [key,p] of [['doubleDown','double'],['momentum','momentum'],['luck','luck']])$(p+'On').addEventListener('change',e=>{const t=T();t.modOff??={};
+  if(e.target.checked){if(t.modOff[key]!==undefined){t[key]=t.modOff[key];delete t.modOff[key];}}else{t.modOff[key]=t[key];t[key]=0;}
+  t.stage=0;save();refreshOdds();});
  $('denominator').addEventListener('change',e=>{T().denominator=Number(e.target.value);save();renderRows();refreshOdds();});
  $('newType').addEventListener('change',e=>{$('newAmount').placeholder=e.target.value===JACKPOT?'Item name':e.target.value===LOSE?'No amount':'Dollar amount';$('newAmount').disabled=e.target.value===LOSE;$('newAmountCurrency').classList.toggle('hidden',e.target.value!==CASH);});
  $('addPrize').addEventListener('click',()=>{const t=T();if(t.rows.length>=100){toast('Maximum 100 outcome rows.');return;}const kind=$('newType').value;if(kind===LOSE&&t.rows.some(r=>r.kind===LOSE)){toast('A Lose row already exists.');return;}const amount=Number($('newAmount').value);if(kind===CASH&&(!Number.isFinite(amount)||amount<=0||amount>1e12)){toast('Enter a positive dollar amount for the cash prize.');return;}
@@ -1463,6 +1542,16 @@ function init(){
  $('bullMin').innerHTML=Array.from({length:51},(_,k)=>100-k).map(v=>`<option value="${v}">${v===100?'100%':v+'–100%'}</option>`).join('');
  $('noBonusMax').innerHTML=Array.from({length:50},(_,v)=>`<option value="${v}">${v===0?'Off':'1–'+v+'%'}</option>`).join('');
  for(let i=1;i<=3;i++)$('shot'+i).addEventListener('change',e=>{T().shots.accuracy[i-1]=Number(e.target.value);save();refreshOdds();});
+ // Open/close the shot settings pop-up: it covers the area from the buy button to the bottom of the ticket section.
+ const shotPop=$('shotSettingsPop'),openShotPop=open=>{if(open){const card=shotPop.parentElement,c=card.getBoundingClientRect(),b=$('buyOne').getBoundingClientRect(),top=Math.max(8,Math.round(b.top-c.top));
+   shotPop.style.top=top+'px';shotPop.style.minHeight=Math.max(0,Math.round(c.bottom-b.top-10))+'px';}
+  shotPop.classList.toggle('hidden',!open);$('shotAdvanced').open=false;
+  // If it needs more room than the space under the buy button, slide it up so it still ends at the bottom of the ticket section.
+  if(open){const card=shotPop.parentElement,ch=card.clientHeight,h=shotPop.offsetHeight,t=parseFloat(shotPop.style.top);if(t+h>ch-10){shotPop.style.top=Math.max(8,ch-10-h)+'px';}}};
+ $('stackShots').addEventListener('change',()=>{if(!shotPop.classList.contains('hidden'))setTimeout(()=>openShotPop(true),0);});
+ $('shotAdvanced').querySelector('summary').addEventListener('click',e=>{e.preventDefault();openShotPop(shotPop.classList.contains('hidden'));});
+ $('shotSettingsClose').addEventListener('click',()=>openShotPop(false));
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!shotPop.classList.contains('hidden'))openShotPop(false);});
  $('stackShots').addEventListener('change',e=>{T().shots.stack=e.target.checked;save();refreshOdds();});
  for(const [id,apply] of [['bonus1',(s,v)=>s.bonus[0]=v],['bonus2',(s,v)=>s.bonus[1]=v],['bonus3',(s,v)=>s.bonus[2]=v],['missPenalty',(s,v)=>s.miss=v],['grandPrize',(s,v)=>s.grand=v],['bullMin',(s,v)=>s.bullMin=v],['noBonusMax',(s,v)=>s.noBonusMax=v]])$(id).addEventListener('change',e=>{const v=Number(e.target.value);if(!Number.isFinite(v)||v<0)return;apply(T().shots,v);save();refreshOdds();});
  document.querySelectorAll('.balloon-target').forEach((b,i)=>{b.addEventListener('click',()=>popBalloon(i));b.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse')popBalloon(i);});});
@@ -1521,7 +1610,10 @@ left.setAttribute('aria-label','Ticket and modifiers');right.setAttribute('aria-
 rail.append(left,right);
 header.insertAdjacentElement('afterend',controls);controls.insertAdjacentElement('afterend',rail);
 left.append(hero,showcase,setupCard,modCard);
-right.append(oddsCard,batchCard,totalCard,calcCard,historyCard);
+// Owner swap: Run multiple tickets takes the Saved preset spot under the ticket; Saved preset moves to the top of Odds & Sims.
+const presetBox=showcase.querySelector('.preset-mini'),presetHome=presetBox?.parentElement;
+right.append(...(presetBox?[presetBox]:[]),oddsCard,totalCard,calcCard);left.append(historyCard);
+if(presetHome)presetHome.append(batchCard);else left.append(batchCard);
 batchCard.querySelector('.batch-row').append(byId('resetStats'));
 const footer=document.createElement('div');footer.className='v3-footer-tools';footer.append(exportCard);
 rail.insertAdjacentElement('afterend',footer);
@@ -1579,7 +1671,7 @@ quick.addEventListener('change',()=>{origPrice.value=quick.value;origPrice.dispa
 const hiddenPriceContainer=origPrice.closest('.money-field')?.parentElement;
 if(hiddenPriceContainer)hiddenPriceContainer.style.display='none';
 const info=[
- [oddsCard.querySelector('.card-top'),'The percentages in Cash and Lose outcomes must total exactly 100%. Jackpot item odds use separate pack rules. Changing a percentage updates the live calculations.'],
+ [oddsCard.querySelector('.card-top'),'The percentages in Cash and Lose outcomes must total exactly 100%. Item jackpots are set in ⚙ Ticket settings under Special item. Changing a percentage updates the live calculations.'],
  [batchCard.querySelector('.card-top'),'Each run adds to this ticket’s saved cumulative totals. Use Clear totals only when you intentionally want to reset this ticket’s history and waiting tickets.'],
  [modCard.querySelector('.card-top'),'Set the existing Double Down, Momentum, and Luck levels from zero to three. No individual equipment selection is needed.'],
  [calcCard.querySelector('.card-top'),'Expected payout is an average per ticket based on the current prize odds, modifiers, and shot accuracy, not a guaranteed result.']
@@ -1594,6 +1686,10 @@ document.addEventListener('click',e=>{
  byId('v3HelpText').textContent=b.dataset.help;popup.classList.add('show');
 });
 document.addEventListener('keydown',e=>{if(e.key==='Escape')popup.classList.remove('show')});
+document.addEventListener('click',e=>{const b=e.target.closest?.('.mod-info');if(!b)return;const p=b.dataset.mod,box=byId('v3HelpText');box.textContent='';
+ const d=document.createElement('p');d.className='mod-popup-desc';d.textContent=byId(p+'Description')?.textContent||'';box.append(d);
+ const det=byId(p+'Row')?.nextElementSibling;if(det?.classList.contains('modifier-details')){const c=det.cloneNode(true);c.removeAttribute('aria-live');c.querySelectorAll('[id]').forEach(n=>n.removeAttribute('id'));c.style.display='block';box.append(c);}
+ popup.classList.add('show');});
 let fit=false;
 const paneButtons=[...controls.querySelectorAll('[data-panel]')];
 const setActive=index=>paneButtons.forEach((b,i)=>b.setAttribute('aria-pressed',String(i===index)));

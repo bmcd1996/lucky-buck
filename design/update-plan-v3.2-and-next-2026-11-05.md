@@ -1,7 +1,7 @@
 # Lucky Buck — planned updates (owner-approved list, November 5, 2026)
 
 **Status: NOTES ONLY. Nothing here is built yet.** Owner said "not yet" to building; Claude may choose the build order when the owner says go.
-**Rules:** never change calculator code without the owner's explicit go-ahead; build as a preview page first; live only after the owner approves. Follow `CLAUDE.md` versioning. Current live: **v3.1.1**.
+**Rules:** never change calculator code without the owner's explicit go-ahead; build as a preview page first; live only after the owner approves. Follow `CLAUDE.md` versioning. Current live: **v3.2.1** (items 1–11 done).
 
 ## v3.2.0 — DONE, live November 5, 2026 (see ledger for the extra owner tweaks made during preview)
 
