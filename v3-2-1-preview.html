@@ -1587,7 +1587,10 @@ left.setAttribute('aria-label','Ticket and modifiers');right.setAttribute('aria-
 rail.append(left,right);
 header.insertAdjacentElement('afterend',controls);controls.insertAdjacentElement('afterend',rail);
 left.append(hero,showcase,setupCard,modCard);
-right.append(batchCard,oddsCard,totalCard,calcCard,historyCard);
+// Owner swap: Run multiple tickets takes the Saved preset spot under the ticket; Saved preset moves to the top of Odds & Sims.
+const presetBox=showcase.querySelector('.preset-mini'),presetHome=presetBox?.parentElement;
+right.append(...(presetBox?[presetBox]:[]),oddsCard,totalCard,calcCard,historyCard);
+if(presetHome)presetHome.append(batchCard);else left.append(batchCard);
 batchCard.querySelector('.batch-row').append(byId('resetStats'));
 const footer=document.createElement('div');footer.className='v3-footer-tools';footer.append(exportCard);
 rail.insertAdjacentElement('afterend',footer);
