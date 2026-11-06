@@ -428,6 +428,8 @@ html,body{overflow-x:hidden}
 .odds-line-inner .odds-cell{flex:0 0 46px;width:46px!important;padding:0!important;font-size:12px;justify-content:flex-end!important}
 .odds-line-inner .delete-row{position:static!important;flex:0 0 24px;width:24px!important;height:24px!important;margin:0!important;padding:0!important;font-size:12px!important;line-height:22px!important;border-radius:50%}
 .odds-table tfoot td:nth-child(n+3){display:none}.odds-table tfoot td{padding-top:10px!important}
+.type-config #newType,.type-config .new-amount-field,.type-config #addPrize{display:none!important}
+.odds-table tbody tr.odds-add{height:auto!important}.odds-table tr.odds-add td{padding:0!important}.odds-add-btn{min-height:34px;padding:6px 12px;font-size:13px}
 
 .setup-modal{position:fixed;inset:0;z-index:1000;background:#0009;display:flex;align-items:flex-start;justify-content:center;padding:max(18px,env(safe-area-inset-top)) 12px 24px;overflow-y:auto;-webkit-overflow-scrolling:touch}.setup-modal.hidden{display:none}
 .setup-modal-box{position:relative;width:100%;max-width:560px;margin:0 auto}.setup-modal-box>.card{margin:0;box-shadow:0 18px 50px #000a}.setup-modal-box .card-top{padding-right:30px}
@@ -1336,7 +1338,11 @@ function rowHTML(r,t){const isJ=r.kind===JACKPOT,guaranteed=isJ&&r.mode==='guara
  const value=r.kind===CASH?`<div class="money-field"><span aria-hidden="true">$</span><input data-field="amount" aria-label="Cash prize amount in dollars" type="number" min="0.01" step="any" value="${esc(r.amount)}"></div>`:isJ?`<input data-field="label" aria-label="Jackpot item name" maxlength="100" value="${esc(r.label)}">`:`<span class="odds-nopay">No payout</span>`;
  const mode=isJ?`<select data-field="mode" aria-label="Jackpot pack rule"><option value="rare" ${r.mode==='rare'?'selected':''}>Rare pack</option><option value="guaranteed" ${guaranteed?'selected':''}>Guaranteed</option></select>`:'';
  return `<tr data-id="${r.id}" class="odds-line"><td colspan="5"><div class="odds-line-inner${isJ?' jackpot':''}">${kind}${value}${mode}<div class="percent-wrap"><input aria-label="${isJ?'Pack':'Outcome'} percentage" data-field="chance" ${guaranteed?'disabled':''} type="text" inputmode="decimal" value="${esc(precise(chance))}"><span class="unit">%</span></div><div class="odds-cell mods" id="mod-${r.id}">—</div><span class="hidden" id="final-${r.id}"></span><button type="button" class="delete-row" aria-label="Remove outcome" data-delete="${r.id}">✕</button></div></td></tr>`;}
-function renderRows(){const t=T();$('denominator').value=String(t.denominator);$('oddsRows').innerHTML=t.rows.map(r=>rowHTML(r,t)).join('');
+function addInlineRow(){const t=T();if(t.rows.length>=100){toast('Maximum 100 outcome rows.');return;}
+ const top=Math.max(0,...t.rows.filter(r=>r.kind===CASH).map(r=>r.amount));
+ const r={id:t.nextRowId++,kind:CASH,amount:top>0?top*2:1,chance:0,mode:'rare',label:''};t.rows.push(r);t.stage=0;t.pack=null;save();renderRows();refreshOdds();
+ document.querySelector(`#oddsRows tr[data-id="${r.id}"] [data-field=amount]`)?.focus();}
+function renderRows(){const t=T();$('denominator').value=String(t.denominator);$('oddsRows').innerHTML=t.rows.map(r=>rowHTML(r,t)).join('')+'<tr class="odds-add"><td colspan="5"><button type="button" class="btn mini odds-add-btn" id="addRowInline">＋ Add row</button></td></tr>';$('addRowInline').addEventListener('click',addInlineRow);
  $('oddsRows').querySelectorAll('[data-delete]').forEach(b=>b.addEventListener('click',()=>{const id=Number(b.dataset.delete);t.rows=t.rows.filter(r=>r.id!==id);t.stage=0;t.pack=null;save();renderRows();refreshOdds();}));
  $('oddsRows').querySelectorAll('select[data-field]').forEach(el=>el.addEventListener('change',()=>{const tr=el.closest('tr'),r=t.rows.find(x=>x.id===Number(tr.dataset.id));if(!r)return;
  if(el.dataset.field==='kind'){if(el.value===LOSE&&t.rows.some(x=>x.kind===LOSE&&x.id!==r.id)){toast('There can be only one Lose row.');renderRows();return;}r.kind=el.value;r.amount=el.value===CASH?1:0;r.label=el.value===JACKPOT?'Jackpot item':'';r.chance=el.value===JACKPOT?1:r.chance;r.mode='rare';}
