@@ -402,7 +402,11 @@ html,body{overflow-x:hidden}
 .stack-toggle{display:flex!important;align-items:center;gap:5px;font-size:10px!important;font-weight:750;color:#e6f6e6;margin:3px 0 1px!important;cursor:pointer}.stack-toggle input{width:auto;min-height:0;margin:0;accent-color:#6ee2a1}
 .rate-pair .stack-math{flex:1 1 auto;min-width:0;align-self:center;font-size:9.5px;color:#d5eeda;white-space:nowrap;letter-spacing:-.2px;text-align:right}.rate-pair:has(.stack-math:not(.hidden)) select{flex:0 0 54px}
 .ticket-gear{flex:0 0 auto;width:22px;height:22px;min-height:0;padding:0;border-radius:6px;border:1px solid #47705b;background:#1c3a2c;color:#d5eeda;font-size:13px;line-height:20px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;margin-right:-2px}.ticket-gear[aria-expanded="true"]{background:#2c5a42;color:#fff1bd}
-#ticketSetupCard.setup-closed{display:none!important}.card-top .ticket-gear+h3{margin-right:auto}
+#ticketSetupCard.setup-closed{display:none!important}
+.setup-modal{position:fixed;inset:0;z-index:1000;background:#0009;display:flex;align-items:flex-start;justify-content:center;padding:max(18px,env(safe-area-inset-top)) 12px 24px;overflow-y:auto;-webkit-overflow-scrolling:touch}.setup-modal.hidden{display:none}
+.setup-modal-box{position:relative;width:100%;max-width:560px;margin:0 auto}.setup-modal-box>.card{margin:0;box-shadow:0 18px 50px #000a}.setup-modal-box .card-top{padding-right:30px}
+.setup-close{position:absolute;top:10px;right:10px;z-index:2;width:24px;height:24px;min-height:0;padding:0;border:none;border-radius:50%;background:#d94f4f;color:#fff;font-size:12px;font-weight:900;line-height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 6px #0006}
+body.setup-open{overflow:hidden}.card-top .ticket-gear+h3{margin-right:auto}
 #resetTicket,#buyNext,#ticketResult{display:none!important}
 #buyOne.buy-state-progress{background:#17312a;color:#e6f6e6;border:1px solid #47705b;opacity:1;font-variant-numeric:tabular-nums;letter-spacing:.5px}
 #buyOne.buy-state-win,#buyOne.buy-state-jackpot{background:linear-gradient(#5fd394,#33a865);color:#06210f;border-color:#2b8a53}
@@ -1392,7 +1396,15 @@ function init(){
   toast(persisted?name+' created. Switch back anytime from the ticket menu.':'Ticket made in memory, but browser save failed. Export JSON now.');
  });
  $('editModifiers').addEventListener('click',()=>{$('advancedSettings').open=true;$('modifierEditor').scrollIntoView({behavior:'smooth',block:'start'});});
- const openTicketSetup=show=>{const card=$('ticketSetupCard'),open=show??card.classList.contains('setup-closed');card.classList.toggle('setup-closed',!open);$('ticketGear').setAttribute('aria-expanded',String(open));if(open){$('advancedSettings').open=true;card.scrollIntoView({behavior:'smooth',block:'start'});}};
+ // Ticket settings pop up in a box in front of everything; the red X closes it.
+ const setupModal=document.createElement('div');setupModal.className='setup-modal hidden';setupModal.id='ticketSetupModal';setupModal.setAttribute('role','dialog');setupModal.setAttribute('aria-modal','true');setupModal.setAttribute('aria-label','Ticket settings');
+ setupModal.innerHTML='<div class="setup-modal-box" id="ticketSetupBox"><button type="button" class="setup-close" id="ticketSetupClose" aria-label="Close ticket settings">✕</button></div>';document.body.append(setupModal);
+ const openTicketSetup=show=>{const card=$('ticketSetupCard'),open=show??setupModal.classList.contains('hidden');
+  if(open&&card.parentElement!==$('ticketSetupBox'))$('ticketSetupBox').append(card);
+  card.classList.toggle('setup-closed',!open);setupModal.classList.toggle('hidden',!open);document.body.classList.toggle('setup-open',open);$('ticketGear').setAttribute('aria-expanded',String(open));
+  if(open){setupModal.scrollTop=0;$('ticketSetupClose').focus({preventScroll:true});}else $('ticketGear').focus({preventScroll:true});};
+ $('ticketSetupClose').addEventListener('click',()=>openTicketSetup(false));
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!setupModal.classList.contains('hidden'))openTicketSetup(false);});
  $('ticketSetupCard').classList.add('setup-closed');
  $('ticketGear').addEventListener('click',()=>openTicketSetup());
  $('quickEditTicket').addEventListener('click',()=>openTicketSetup(true));
