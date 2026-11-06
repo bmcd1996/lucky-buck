@@ -130,4 +130,5 @@
 - Saved shot bonuses carry over; the old green boost boxes are dropped and stacking starts off.
 - Owner request (22:33): the "Show waiting ticket" button is removed. An unfinished, already-paid ticket (e.g. after a refresh mid-ticket) reloads into the balloons so it can be finished; it is never charged twice.
 - Owner request (22:48): before the first pop, the button shows a random line from 23 owner-approved shooting lines (e.g. "Shoot the balloons!", "Oh deer, better start shooting!") instead of ? · ? · ?; numbers appear after the first pop. Added featured line "Take 'em out." (22:51): 10% chance on every ticket; otherwise one of the 23 at random.
+- Labels (23:00): dropdowns read "Shot 1/2/3 accuracy"; notes under shots 1–2 read "Accuracy bonus x%".
 - Tests: 40/40 rule/label/special-item/random-accuracy/odds checks (incl. exact model vs 1M-ticket simulations in four scenarios) and 34/34 phone play-through checks (carry-over, gear, special item, stacking math, buy states, batch readout, random accuracy restores your dropdowns, refresh, Clear totals, live data untouched, no page errors). Owner's iPhone check still needed.
