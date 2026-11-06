@@ -1594,7 +1594,7 @@ function init(){
  renderAll();if(canSave)save();
  if(location.search.includes('selftest=1')){const t=freshTicket(),c=normalOdds(t);t.luck=3;const high=normalOdds(t);t.momentum=3;t.stage=1;const stage1=normalOdds(t);t.stage=2;const stage2=normalOdds(t);document.body.dataset.selftest=Math.abs(c.baseEV-2.32)<1e-8&&Math.abs(high.finalEV-3.15)<1e-8&&Math.abs(stage1.rows.find(r=>r.amount===25).final-20)<1e-8&&Math.abs(stage2.rows.find(r=>r.amount===25).final-43)<1e-8?'PASS':'FAIL';}
  // Expose read-only test helpers under the URL's opt-in selftest flag only.
- if(location.search.includes('selftest=1'))window.__LuckyBuckTest={get:()=>JSON.parse(JSON.stringify(state)),normalOdds,draw:singleDraw,freshTicket,validateRestore,defaultRows:baseRows,useShots,resolveShots,shotPaths,shotZone,bonusChance,missChance,shotExpected,pickShootLine,shootLines:()=>SHOOT_LINES,featuredLine:()=>FEATURED_LINE,specialHit,rollAccuracy,nominalChances,chainChances,buyResultLabel,valid,doubleRate,momentumRates,luckRates,baseLosers:BASE_LOSERS};
+ if(location.search.includes('selftest=1'))window.__LuckyBuckTest={get:()=>JSON.parse(JSON.stringify(state)),normalOdds,draw:singleDraw,freshTicket,validateRestore,defaultRows:baseRows,useShots,resolveShots,shotZone,shotExpected,pickShootLine,shootLines:()=>SHOOT_LINES,featuredLine:()=>FEATURED_LINE,specialHit,rollAccuracy,nominalChances,chainChances,buyResultLabel,valid,doubleRate,momentumRates,luckRates,baseLosers:BASE_LOSERS};
 }
 init();
 loadOriginalLuckyBuckLogo();
