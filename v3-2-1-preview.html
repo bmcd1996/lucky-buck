@@ -430,6 +430,7 @@ html,body{overflow-x:hidden}
 .odds-table tfoot td:nth-child(n+3){display:none}.odds-table tfoot td{padding-top:10px!important}
 .type-config #newType,.type-config .new-amount-field,.type-config #addPrize{display:none!important}
 .odds-table tbody tr.odds-add{height:auto!important}.odds-table tr.odds-add td{padding:0!important}.odds-add-btn{min-height:34px;padding:6px 12px;font-size:13px}
+.ticket-config>div:has(#packSize){display:none!important}
 
 .setup-modal{position:fixed;inset:0;z-index:1000;background:#0009;display:flex;align-items:flex-start;justify-content:center;padding:max(18px,env(safe-area-inset-top)) 12px 24px;overflow-y:auto;-webkit-overflow-scrolling:touch}.setup-modal.hidden{display:none}
 .setup-modal-box{position:relative;width:100%;max-width:560px;margin:0 auto}.setup-modal-box>.card{margin:0;box-shadow:0 18px 50px #000a}.setup-modal-box .card-top{padding-right:30px}
@@ -704,8 +705,8 @@ body.setup-open{overflow:hidden}.card-top .ticket-gear+h3{margin-right:auto}
         </table></div>
 <div class="warning" id="warning" role="alert"></div>
 <div class="explain hidden" id="overflowNote"></div>
-<div class="type-config"><select aria-label="New prize type" id="newType"><option value="cash">Cash</option><option value="lose">Lose</option><option value="jackpot">Jackpot</option></select><div class="money-field new-amount-field"><span id="newAmountCurrency" aria-hidden="true">$</span><input aria-label="New cash prize amount or jackpot item name" id="newAmount" placeholder="Dollar amount" type="text"/></div><button class="btn mini" id="addPrize">＋ Add row</button><button class="btn mini ghost" id="restoreOdds">↺ Restore original odds</button></div>
-<p class="subtle-notice">Cash and Lose represent mutually exclusive outcomes per normal scratch. Jackpot item rows follow independent pack rules; their percentages represent chance per entire pack, not extra cash odds.</p>
+<div class="type-config"><select aria-label="New prize type" id="newType"><option value="cash">Cash</option><option value="lose">Lose</option></select><div class="money-field new-amount-field"><span id="newAmountCurrency" aria-hidden="true">$</span><input aria-label="New cash prize amount or jackpot item name" id="newAmount" placeholder="Dollar amount" type="text"/></div><button class="btn mini" id="addPrize">＋ Add row</button><button class="btn mini ghost" id="restoreOdds">↺ Restore original odds</button></div>
+<p class="subtle-notice">Cash and Lose represent mutually exclusive outcomes per normal scratch. Item jackpots (like the Trusty Shotgun) are set in ⚙ Ticket settings under Special item.</p>
 </section>
     <section class="card">
 <div class="card-top"><h3>Live calculations</h3><span class="tag" id="chanceTag">100% allocated</span></div>
@@ -857,7 +858,7 @@ function cleanTicket(raw){
  if(!raw||typeof raw!=='object'||!validName(raw.name)||!Number.isFinite(Number(raw.price))||Number(raw.price)<=0||Number(raw.price)>1e6)throw Error('Ticket name or price is invalid.');
  if(!Array.isArray(raw.rows)||raw.rows.length<1||raw.rows.length>100)throw Error('A ticket needs between 1 and 100 outcome rows.');
  const ids=new Set();let next=0;
- const rows=raw.rows.map((r,i)=>{const kind=[CASH,LOSE,JACKPOT].includes(r.kind)?r.kind:null;if(!kind)throw Error('Unknown outcome type.');const amount=kind===CASH?Number(r.amount):0;if(kind===CASH&&(!Number.isFinite(amount)||amount<=0||amount>1e12))throw Error('Cash prize must be positive.');const chance=kind===JACKPOT&&r.mode==='guaranteed'?100:Number(r.chance);if(!Number.isFinite(chance)||chance<0||chance>100)throw Error('Odds must be between 0% and 100%.');let id=Number(r.id);if(!integer(id,1,100000000)||ids.has(id))id=i+1;while(ids.has(id))id++;ids.add(id);next=Math.max(next,id);return {id,kind,amount,chance,mode:kind===JACKPOT&&r.mode==='guaranteed'?'guaranteed':'rare',label:kind===JACKPOT?String(r.label||'Jackpot item').slice(0,100):''}});
+ const rows=raw.rows.filter(r=>r&&r.kind!==JACKPOT).map((r,i)=>{const kind=[CASH,LOSE,JACKPOT].includes(r.kind)?r.kind:null;if(!kind)throw Error('Unknown outcome type.');const amount=kind===CASH?Number(r.amount):0;if(kind===CASH&&(!Number.isFinite(amount)||amount<=0||amount>1e12))throw Error('Cash prize must be positive.');const chance=kind===JACKPOT&&r.mode==='guaranteed'?100:Number(r.chance);if(!Number.isFinite(chance)||chance<0||chance>100)throw Error('Odds must be between 0% and 100%.');let id=Number(r.id);if(!integer(id,1,100000000)||ids.has(id))id=i+1;while(ids.has(id))id++;ids.add(id);next=Math.max(next,id);return {id,kind,amount,chance,mode:kind===JACKPOT&&r.mode==='guaranteed'?'guaranteed':'rare',label:kind===JACKPOT?String(r.label||'Jackpot item').slice(0,100):''}});
  if(rows.filter(r=>r.kind===LOSE).length>1)throw Error('Only one Lose row is allowed.');
  if(!integer(raw.packSize,1,1000000))throw Error('Pack size must be an integer from 1 to 1,000,000.');
  const rawStats=raw.stats||{},st=stats();for(const k of Object.keys(st)){if(rawStats[k]!==undefined&&Number.isFinite(Number(rawStats[k]))&&Number(rawStats[k])>=0)st[k]=Number(rawStats[k]);}
@@ -1334,7 +1335,7 @@ function renderRateSettings(t){
  }
 }
 function rowHTML(r,t){const isJ=r.kind===JACKPOT,guaranteed=isJ&&r.mode==='guaranteed',chance=guaranteed?100:r.chance;
- const kind=`<select data-field="kind" aria-label="Outcome type"><option value="cash" ${r.kind===CASH?'selected':''}>Cash</option><option value="lose" ${r.kind===LOSE?'selected':''}>Lose</option><option value="jackpot" ${isJ?'selected':''}>Jackpot</option></select>`;
+ const kind=`<select data-field="kind" aria-label="Outcome type"><option value="cash" ${r.kind===CASH?'selected':''}>Cash</option><option value="lose" ${r.kind===LOSE?'selected':''}>Lose</option></select>`;
  const value=r.kind===CASH?`<div class="money-field"><span aria-hidden="true">$</span><input data-field="amount" aria-label="Cash prize amount in dollars" type="number" min="0.01" step="any" value="${esc(r.amount)}"></div>`:isJ?`<input data-field="label" aria-label="Jackpot item name" maxlength="100" value="${esc(r.label)}">`:`<select class="odds-zero" aria-label="Lose payout"><option value="0" selected>$0</option></select>`;
  const mode=isJ?`<select data-field="mode" aria-label="Jackpot pack rule"><option value="rare" ${r.mode==='rare'?'selected':''}>Rare pack</option><option value="guaranteed" ${guaranteed?'selected':''}>Guaranteed</option></select>`:'';
  return `<tr data-id="${r.id}" class="odds-line"><td colspan="5"><div class="odds-line-inner${isJ?' jackpot':''}">${kind}${value}${mode}<div class="percent-wrap"><input aria-label="${isJ?'Pack':'Outcome'} percentage" data-field="chance" ${guaranteed?'disabled':''} type="text" inputmode="decimal" value="${esc(precise(chance))}"><span class="unit">%</span></div><div class="odds-cell mods" id="mod-${r.id}">—</div><span class="hidden" id="final-${r.id}"></span><button type="button" class="delete-row" aria-label="Remove outcome" data-delete="${r.id}">✕</button></div></td></tr>`;}
@@ -1621,7 +1622,7 @@ quick.addEventListener('change',()=>{origPrice.value=quick.value;origPrice.dispa
 const hiddenPriceContainer=origPrice.closest('.money-field')?.parentElement;
 if(hiddenPriceContainer)hiddenPriceContainer.style.display='none';
 const info=[
- [oddsCard.querySelector('.card-top'),'The percentages in Cash and Lose outcomes must total exactly 100%. Jackpot item odds use separate pack rules. Changing a percentage updates the live calculations.'],
+ [oddsCard.querySelector('.card-top'),'The percentages in Cash and Lose outcomes must total exactly 100%. Item jackpots are set in ⚙ Ticket settings under Special item. Changing a percentage updates the live calculations.'],
  [batchCard.querySelector('.card-top'),'Each run adds to this ticket’s saved cumulative totals. Use Clear totals only when you intentionally want to reset this ticket’s history and waiting tickets.'],
  [modCard.querySelector('.card-top'),'Set the existing Double Down, Momentum, and Luck levels from zero to three. No individual equipment selection is needed.'],
  [calcCard.querySelector('.card-top'),'Expected payout is an average per ticket based on the current prize odds, modifiers, and shot accuracy, not a guaranteed result.']
