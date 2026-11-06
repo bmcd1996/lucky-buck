@@ -1016,10 +1016,13 @@ function buyResultLabel(t,r){if(!r)return null;
  return {cls:'win',html:'WINNER! '+amount,text:'WINNER! '+amount};}
 // Owner-approved lines shown on the button before the first pop.
 const SHOOT_LINES=['Shoot the balloons!','Take your shot, hunter!','Aim small, miss small.','Steady… steady… FIRE!','Deer season is open!',"Don't let 'em float away!",'Lock and load!','Pull the trigger, partner!','Bullseye or bust!','Quit staring and start shooting!','Breathe, aim, squeeze.','Make it rain!','Your antlers are showing. Shoot!','Ready, aim, POP!','Pop goes the payday!','Hunting for a winner?','Fire away, cowboy!','Sharpshooter time!','Those balloons are mocking you.','One shot, one pop.','Bring home the bucks!',"Get 'em, tiger!",'Oh deer, better start shooting!'];
+// Featured line: a 10% chance every ticket; otherwise a random line from the pool.
+const FEATURED_LINE="Take 'em out.";
+const pickShootLine=(random=Math.random)=>random()<.1?FEATURED_LINE:SHOOT_LINES[Math.floor(random()*SHOOT_LINES.length)];
 function updateBuyButton(){const t=T(),btn=$('buyOne');if(!btn)return;const c=valid(t);
  const scratching=activeCard&&activeCard.ticketId===t.id&&!activeCard.popped.every(Boolean);
  let cls='idle',html='Buy 1 ticket '+usd(t.price,t.price%1===0?0:2),label=html;
- if(scratching&&!activeCard.popped.some(Boolean)){activeCard.phrase??=SHOOT_LINES[Math.floor(Math.random()*SHOOT_LINES.length)];cls='progress';html=esc(activeCard.phrase);label=activeCard.phrase+' Pop the three balloons.';}
+ if(scratching&&!activeCard.popped.some(Boolean)){activeCard.phrase??=pickShootLine();cls='progress';html=esc(activeCard.phrase);label=activeCard.phrase+' Pop the three balloons.';}
  else if(scratching){const shown=shownNumbers(activeCard.item,activeCard.popped);cls='progress';html=[0,1,2].map(i=>activeCard.popped[i]?(shown?String(shown[i]):'★'):'?').join(' · ');label='Revealed so far: '+html;}
  else{const r=buyResultLabel(t,t.lastRevealed);if(r){cls=r.cls;html=r.html;label=r.text+'. Tap to buy another ticket for '+usd(t.price,t.price%1===0?0:2)+'.';}}
  btn.className='btn primary buy-state-'+cls;btn.innerHTML=html;btn.setAttribute('aria-label',label);
@@ -1490,7 +1493,7 @@ function init(){
  renderAll();if(canSave)save();
  if(location.search.includes('selftest=1')){const t=freshTicket(),c=normalOdds(t);t.luck=3;const high=normalOdds(t);t.momentum=3;t.stage=1;const stage1=normalOdds(t);t.stage=2;const stage2=normalOdds(t);document.body.dataset.selftest=Math.abs(c.baseEV-2.32)<1e-8&&Math.abs(high.finalEV-3.15)<1e-8&&Math.abs(stage1.rows.find(r=>r.amount===25).final-20)<1e-8&&Math.abs(stage2.rows.find(r=>r.amount===25).final-43)<1e-8?'PASS':'FAIL';}
  // Expose read-only test helpers under the URL's opt-in selftest flag only.
- if(location.search.includes('selftest=1'))window.__LuckyBuckTest={get:()=>JSON.parse(JSON.stringify(state)),normalOdds,draw:singleDraw,freshTicket,validateRestore,defaultRows:baseRows,useShots,resolveShots,shotPaths,shotZone,bonusChance,missChance,shotExpected,specialHit,rollAccuracy,nominalChances,chainChances,buyResultLabel,valid,doubleRate,momentumRates,luckRates,baseLosers:BASE_LOSERS};
+ if(location.search.includes('selftest=1'))window.__LuckyBuckTest={get:()=>JSON.parse(JSON.stringify(state)),normalOdds,draw:singleDraw,freshTicket,validateRestore,defaultRows:baseRows,useShots,resolveShots,shotPaths,shotZone,bonusChance,missChance,shotExpected,pickShootLine,shootLines:()=>SHOOT_LINES,featuredLine:()=>FEATURED_LINE,specialHit,rollAccuracy,nominalChances,chainChances,buyResultLabel,valid,doubleRate,momentumRates,luckRates,baseLosers:BASE_LOSERS};
 }
 init();
 loadOriginalLuckyBuckLogo();
