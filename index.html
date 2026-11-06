@@ -554,7 +554,7 @@ body.setup-open{overflow:hidden}.card-top .ticket-gear+h3{margin-right:auto}
 <div class="wrap">
 <header class="header">
 <div class="brand"><div class="brand-mark">$</div><div><small>QUILL PRODUCTIONS</small><h1>Cardboard to Cash</h1></div></div>
-<div class="header-right"><span class="version-badge" title="Lucky Buck simulator version">v3.2.2</span><span class="save" id="saveStatus">Loading…</span></div>
+<div class="header-right"><span class="version-badge" title="Lucky Buck simulator version">v3.3.0</span><span class="save" id="saveStatus">Loading…</span></div>
 </header>
 
 <section class="hero">
@@ -574,7 +574,7 @@ body.setup-open{overflow:hidden}.card-top .ticket-gear+h3{margin-right:auto}
  <aside class="showcase-left">
   <section class="preset-mini" aria-label="Saved setting presets">
    <label class="preset-caption" for="presetSelect">SAVED PRESET</label>
-   <select id="presetSelect" aria-label="Saved preset"><option value="default">Default</option><option value="custom1">Shooter Bonus</option><option value="custom2">Custom 2</option><option value="custom3">Custom 3</option></select>
+   <select id="presetSelect" aria-label="Saved preset"><option value="default">Default</option><option value="custom1">Custom 1</option><option value="custom2">Custom 2</option><option value="custom3">Custom 3</option></select>
    <button type="button" class="preset-load" id="presetLoad">Load selected</button>
    <details class="preset-more"><summary>Manage presets</summary><div class="preset-buttons"><button type="button" id="presetSave">Save to slot</button><button type="button" id="presetReset">Factory default</button></div><p class="preset-hint" id="presetHint">Selecting a slot does not load it.</p></details>
   </section>
@@ -583,12 +583,12 @@ body.setup-open{overflow:hidden}.card-top .ticket-gear+h3{margin-right:auto}
 <div class="card-top"><button type="button" class="ticket-gear" id="ticketGear" aria-label="Ticket settings" aria-expanded="false" title="Ticket settings">⚙</button><h3>🎟️ Scratch a ticket</h3><span class="tag" id="ticketLuck">Double Down 0/3 · Momentum 0/3 · Luck 0/3</span></div>
 <section class="shot-calculator" id="shotCalculator" aria-label="Shot Calculator">
   <div class="shot-title">🎯 Shot Calculator</div>
-  <p class="tiny muted" style="margin:4px 0 10px">Placement influences the next number. Shots apply in balloon order when a ticket is bought.</p>
+  <p class="tiny muted" style="margin:4px 0 10px">Every ticket starts with normal odds. Consecutive bullseyes can rescue a loss; auto-scratch needs no shooting.</p>
   <div class="shot-field"><label for="shot1">Shot 1 accuracy</label><select id="shot1"></select><small id="shotDescription1"></small></div>
   <div class="shot-field"><label for="shot2">Shot 2 accuracy</label><select id="shot2"></select><small id="shotDescription2"></small></div>
   <div class="shot-field"><label for="shot3">Shot 3 accuracy</label><select id="shot3"></select><small id="shotDescription3"></small></div>
-  <details class="shot-advanced" id="shotAdvanced"><summary>Shot bonus settings</summary></details>
-  <p id="shotProjection" class="shot-projection">Expected shot-adjusted odds appear here.</p>
+  <details class="shot-advanced" id="shotAdvanced"><summary>Rescue bonus settings</summary></details>
+  <p id="shotProjection" class="shot-projection">Rescue chance and expected payout appear here.</p>
  </section>
 <div class="purchase-row"><button class="btn primary" id="buyOne" type="button">Buy one ticket · $1</button><span class="purchase-helper">Choose your shots, buy, then pop the balloons below.</span></div>
 <div class="scratch" id="genericScratch" aria-live="polite"><img id="customTicketArtwork" class="custom-ticket-art hidden" alt=""><div class="eyebrow" id="scratchTitle">LUCKY BUCK • INSTANT WIN</div><div class="sticker" id="scratchIcon">✦</div><div class="question" id="scratchNumber">? ? ?</div><div class="secondary" id="scratchMessage">Your prize is waiting.</div></div>
@@ -611,7 +611,7 @@ body.setup-open{overflow:hidden}.card-top .ticket-gear+h3{margin-right:auto}
  <button class="btn ghost hidden" id="revealBtn" type="button">Show waiting ticket</button>
  <button class="btn mini ghost" id="resetTicket" type="button">Clear display</button>
 </div>
-<div class="shot-settings-pop hidden" id="shotSettingsPop" role="dialog" aria-label="Shot bonus settings"><div class="ssp-head"><strong>Shot bonus settings</strong><label class="stack-toggle"><input type="checkbox" id="stackShots"> Enable stacking</label><button type="button" class="setup-close ssp-close" id="shotSettingsClose" aria-label="Close shot bonus settings">✕</button></div><div class="ssp-shots"><div class="ssp-box"><label for="bonus1">Shot 1 bonus</label><select id="bonus1"></select></div><div class="ssp-box"><label for="bonus2">Shot 2 bonus</label><select id="bonus2"></select><span class="stack-math hidden" id="stackMath2"></span></div><div class="ssp-box"><label for="bonus3">Shot 3 upgrade</label><select id="bonus3"></select><span class="stack-math hidden" id="stackMath3"></span></div></div><div class="ssp-misc"><div><label for="grandPrize">Grand prize</label><select id="grandPrize"></select></div><div><label for="missPenalty">Miss penalty</label><select id="missPenalty"></select></div><div><label for="bullMin">Bullseye</label><select id="bullMin"></select></div><div><label for="noBonusMax">No bonus</label><select id="noBonusMax"></select></div></div></div>
+<div class="shot-settings-pop hidden" id="shotSettingsPop" role="dialog" aria-label="Rescue bonus settings"><div class="ssp-head"><strong>Rescue bonus settings</strong><button type="button" class="setup-close ssp-close" id="shotSettingsClose" aria-label="Close rescue bonus settings">✕</button></div><p class="tiny muted" style="margin:6px 0">Each consecutive bullseye gets an adjustable chance to rescue a losing ticket for $1. Already-winning tickets keep their prize.</p><div class="ssp-shots"><div class="ssp-box"><label for="bonus1">First bullseye rescue</label><select id="bonus1"></select></div><div class="ssp-box"><label for="bonus2">Second consecutive rescue</label><select id="bonus2"></select></div><div class="ssp-box"><label for="bonus3">Third consecutive rescue</label><select id="bonus3"></select></div><div class="ssp-box"><label for="upgradeChance">Triple bullseye upgrade</label><select id="upgradeChance"></select></div></div><div class="ssp-misc"><div><label for="bullMin">Bullseye threshold</label><select id="bullMin"></select></div></div><p class="tiny muted">Three bullseyes also offer a separate upgrade: $1 → $5, or $5 → $25. All four bonuses start at 0% in Default.</p><div class="hidden" aria-hidden="true"><label><input type="checkbox" id="stackShots">Legacy stacking</label><select id="grandPrize"></select><select id="missPenalty"></select><select id="noBonusMax"></select><span id="stackMath2"></span><span id="stackMath3"></span></div></div>
 </section></div>
  <aside class="showcase-right">
   <section class="active-mods" aria-label="Active modifiers">
@@ -629,7 +629,7 @@ body.setup-open{overflow:hidden}.card-top .ticket-gear+h3{margin-right:auto}
   <div class="results-grid">
    <section class="card simulation-tools" aria-label="Batch simulation">
  <div class="card-top"><h3>Run multiple tickets</h3><span class="muted tiny">Optional batch test</span></div>
- <label class="field-label" for="batchSize">Number of tickets to simulate</label>
+ <label class="field-label" for="batchSize">Number of tickets to simulate</label><label class="tiny muted" style="display:flex;gap:7px;align-items:center;margin:6px 0 10px"><input type="checkbox" id="batchUseShots" style="width:auto;min-width:16px"> Apply selected shooting bonuses (off = ordinary auto-scratch)</label>
  <div class="batch-row"><input id="batchSize" inputmode="numeric" max="1000000" min="1" step="1" type="number" value="1"/><button class="btn primary" id="runBatch" type="button">Simulate</button></div>
  <div class="random-accuracy" id="randomAccuracyRow"><label><input type="checkbox" id="randomAccuracy"> Random accuracy</label><select id="accuracyLevel" class="hidden" aria-label="Accuracy level"><option value="random">Random</option><option value="good">Good</option><option value="medium">Medium</option><option value="poor">Poor</option></select></div><p class="subline" id="batchHint">This runs a batch immediately. Individual purchased tickets can still be revealed separately.</p>
 </section>
@@ -772,12 +772,13 @@ function cleanRates(raw){const s=defaultRates();if(!raw||typeof raw!=='object')r
 const doubleRate=t=>t.rates?.doubleDown?.mode==='edit'?t.rates.doubleDown.levels[t.doubleDown]:DOUBLE[t.doubleDown];
 const momentumRates=(t,level=t.momentum)=>t.rates?.momentum?.mode==='edit'?t.rates.momentum.levels[level]:MOMENTUM[level];
 const luckRates=(t,level=t.luck)=>t.rates?.luck?.mode==='edit'?t.rates.luck.levels[level]:null;
-const defaultShots=()=>({accuracy:[50,50,50],bonus:[5,5,5],stack:false,miss:5,bullMin:100,noBonusMax:0,grand:50});
+const defaultShots=()=>({accuracy:[50,50,50],bonus:[0,0,0],upgradeChance:0,stack:false,miss:0,bullMin:95,noBonusMax:0,grand:25});
 function cleanShots(raw){const s=defaultShots();if(!raw||typeof raw!=='object')return s;
  const rate=v=>v!==null&&v!==''&&Number.isFinite(Number(v))&&Number(v)>=0&&Number(v)<=100;
  s.accuracy=[0,1,2].map(i=>integer(raw.accuracy?.[i],0,100)?Number(raw.accuracy[i]):50);
  if(Array.isArray(raw.bonus))s.bonus=s.bonus.map((d,i)=>rate(raw.bonus[i])?Number(raw.bonus[i]):d);
- s.stack=raw.stack===true;
+ s.upgradeChance=rate(raw.upgradeChance)?Number(raw.upgradeChance):0;
+ s.stack=false; // Obsolete stacking cannot affect new rescue mechanics.
  if(rate(raw.miss))s.miss=Number(raw.miss);
  if(integer(raw.bullMin,1,100))s.bullMin=Number(raw.bullMin);
  if(integer(raw.noBonusMax,0,99))s.noBonusMax=Number(raw.noBonusMax);
@@ -842,12 +843,12 @@ const clampLevel=v=>[0,1,2,3].includes(Number(v))?Number(v):0;
 const sane=(v,fall=0)=>Number.isFinite(Number(v))&&Number(v)>=0?Number(v):fall;
 const stats=()=>({count:0,spent:0,won:0,wins:0,best:0,jackpots:0});
 const baseRows=()=>[
- {id:1,kind:LOSE,amount:0,chance:44},
- {id:2,kind:CASH,amount:1,chance:32},
- {id:3,kind:CASH,amount:5,chance:20},
- {id:4,kind:CASH,amount:25,chance:4}
+ {id:1,kind:LOSE,amount:0,chance:75},
+ {id:2,kind:CASH,amount:1,chance:17},
+ {id:3,kind:CASH,amount:5,chance:6.5},
+ {id:4,kind:CASH,amount:25,chance:1.5}
 ];
-function freshTicket(id='lucky-buck',name='Lucky Buck',price=1){return {id,name,price,rows:baseRows(),luck:0,momentum:0,doubleDown:0,luckMode:'luckyBuck',denominator:600,packSize:600,pack:null,stage:0,stats:stats(),history:[],last:null,lastRevealed:null,unrevealed:[],nextRowId:5,legacyLuck:null,shots:defaultShots(),rates:defaultRates(),logoData:null,artData:null,special:defaultSpecial(id),specialPack:null,modOff:{},batchAccuracy:{on:false,level:'random'},batchShots:null}}
+function freshTicket(id='lucky-buck',name='Lucky Buck',price=1){return {id,name,price,rows:baseRows(),luck:0,momentum:0,doubleDown:0,luckMode:'luckyBuck',denominator:600,packSize:600,pack:null,stage:0,stats:stats(),history:[],last:null,lastRevealed:null,unrevealed:[],nextRowId:5,legacyLuck:null,shots:defaultShots(),rates:defaultRates(),logoData:null,artData:null,special:defaultSpecial(id),specialPack:null,modOff:{},batchAccuracy:{on:false,useShots:false,level:'random'},batchShots:null}}
 const defaultSpecial=id=>id==='lucky-buck'?{name:'Trusty Shotgun',x:1,y:600,type:'pack',on:true}:{name:'Special item',x:1,y:600,type:'pack',on:false};
 function cleanSpecial(raw,id){const d=defaultSpecial(id);if(!raw||typeof raw!=='object')return d;
  const y=integer(raw.y,1,1000000)?Number(raw.y):d.y,x=integer(raw.x,0,y)?Number(raw.x):Math.min(d.x,y);
@@ -857,7 +858,7 @@ function cleanSpecialPack(raw,sp){if(!raw||typeof raw!=='object'||raw.x!==sp.x||
 const ACCURACY_LEVELS=['random','good','medium','poor'];
 function cleanBatchShots(raw){if(!raw||typeof raw!=='object'||!integer(raw.n,1,1000000000))return null;const arr=a=>Array.isArray(a)&&a.length===3&&a.every(v=>Number.isFinite(Number(v))&&Number(v)>=0)?a.map(Number):null;
  const chances=arr(raw.chances),hits=arr(raw.hits),misses=arr(raw.misses);return chances&&hits&&misses?{n:Number(raw.n),chances,hits,misses,random:raw.random?String(raw.random).slice(0,10):''}:null;}
-const defaults=()=>({version:2,shotCalcUpdated:true,selectedId:'lucky-buck',nextTicketId:1,batch:1,tickets:[freshTicket()]});
+const defaults=()=>({version:2,rescueVersion:1,shotCalcUpdated:true,selectedId:'lucky-buck',nextTicketId:1,batch:1,tickets:[freshTicket()]});
 const integer=(v,min,max)=>Number.isSafeInteger(Number(v))&&Number(v)>=min&&Number(v)<=max;
 const validName=s=>typeof s==='string'&&s.trim().length>0&&s.trim().length<=70;
 function parseFraction(raw){const s=String(raw).trim();if(/^\d+(?:\.\d+)?(?:\/\d+(?:\.\d+)?)?$/.test(s)){if(s.includes('/')){const [a,b]=s.split('/').map(Number);return b>0?a/b:NaN}return Number(s)}return NaN}
@@ -886,7 +887,7 @@ function cleanTicket(raw){
   if(new Set(assignments.map(a=>a.position)).size===assignments.length)pack={index:Number(raw.pack.index),serial:Number(raw.pack.serial),assignments};
  }
  return {id:String(raw.id||'ticket').slice(0,100),name:raw.name.trim(),price:Number(raw.price),rows,luck:clampLevel(raw.luck),momentum:clampLevel(raw.momentum),doubleDown:clampLevel(raw.doubleDown),luckMode:raw.luckMode==='luckyBuck'?'luckyBuck':'none',denominator:integer(raw.denominator,1,600)?Number(raw.denominator):600,packSize:Number(raw.packSize),pack,stage,stats:st,history:Array.isArray(raw.history)?raw.history.slice(0,24).map(cleanRun).filter(Boolean):[],last:cleanRun(raw.last),lastRevealed:cleanRevealed(raw.lastRevealed),unrevealed:cleanQueued,nextRowId:Math.max(next+1,integer(raw.nextRowId,1,1000000000)?Number(raw.nextRowId):1),legacyLuck:raw.legacyLuck??null,shots:cleanShots(raw.shots),rates:cleanRates(raw.rates),logoData:safeTicketImage(raw.logoData),artData:safeTicketImage(raw.artData),...(()=>{const id=String(raw.id||'ticket').slice(0,100),special=cleanSpecial(raw.special,id);const modOff={};for(const k of ['doubleDown','momentum','luck'])if(raw.modOff&&integer(raw.modOff[k],0,3)&&!(Number(raw[k])>0))modOff[k]=Number(raw.modOff[k]);
-return {modOff,special,specialPack:cleanSpecialPack(raw.specialPack,special),batchAccuracy:{on:raw.batchAccuracy?.on===true,level:ACCURACY_LEVELS.includes(raw.batchAccuracy?.level)?raw.batchAccuracy.level:'random'},batchShots:cleanBatchShots(raw.batchShots)};})()};
+return {modOff,special,specialPack:cleanSpecialPack(raw.specialPack,special),batchAccuracy:{on:raw.batchAccuracy?.on===true,useShots:raw.batchAccuracy?.useShots===true,level:ACCURACY_LEVELS.includes(raw.batchAccuracy?.level)?raw.batchAccuracy.level:'random'},batchShots:cleanBatchShots(raw.batchShots)};})()};
 }
 function migrateOld(old){
  if(!old||!Array.isArray(old.tiers)||old.tiers.length<1)throw Error('Older save has no prize rows.');
@@ -903,49 +904,33 @@ function migrateOld(old){
  if(old.pending&&Number.isFinite(Number(old.pending.prize))&&Number(old.pending.prize)>=0)t.unrevealed.push({kind:Number(old.pending.prize)>0?CASH:LOSE,payout:Number(old.pending.prize),label:'',accounted:false});
  return {version:2,shotCalcUpdated:true,selectedId:t.id,nextTicketId:1,batch:1,tickets:[cleanTicket(t)]};
 }
-function validateRestore(obj){if(!obj||typeof obj!=='object')throw Error('Backup is not a valid object.');if(obj.version!==2){if(Array.isArray(obj.tiers))return migrateOld(obj);throw Error('Backup format is not recognized.');}if(!Array.isArray(obj.tickets)||obj.tickets.length<1||obj.tickets.length>100)throw Error('Backup must contain 1–100 tickets.');const tickets=obj.tickets.map(cleanTicket);const ids=new Set();for(const t of tickets){if(ids.has(t.id))throw Error('Duplicate ticket IDs in backup.');ids.add(t.id);}return {version:2,shotCalcUpdated:true,selectedId:ids.has(String(obj.selectedId))?String(obj.selectedId):tickets[0].id,nextTicketId:integer(obj.nextTicketId,1,1000000000)?Number(obj.nextTicketId):tickets.length+1,batch:obj.shotCalcUpdated===true&&integer(obj.batch,1,1000000)?Number(obj.batch):1,tickets};}
+function validateRestore(obj){if(!obj||typeof obj!=='object')throw Error('Backup is not a valid object.');if(obj.version!==2){if(Array.isArray(obj.tiers))return migrateOld(obj);throw Error('Backup format is not recognized.');}if(!Array.isArray(obj.tickets)||obj.tickets.length<1||obj.tickets.length>100)throw Error('Backup must contain 1–100 tickets.');const tickets=obj.tickets.map(cleanTicket);const ids=new Set();for(const t of tickets){if(ids.has(t.id))throw Error('Duplicate ticket IDs in backup.');ids.add(t.id);}return {version:2,rescueVersion:obj.rescueVersion===1?1:0,shotCalcUpdated:true,selectedId:ids.has(String(obj.selectedId))?String(obj.selectedId):tickets[0].id,nextTicketId:integer(obj.nextTicketId,1,1000000000)?Number(obj.nextTicketId):tickets.length+1,batch:obj.shotCalcUpdated===true&&integer(obj.batch,1,1000000)?Number(obj.batch):1,tickets};}
 let state,canSave=true,loadError=null;
 try{const v2=localStorage.getItem(KEY);const v1=localStorage.getItem(OLD_KEY);state=v2?validateRestore(JSON.parse(v2)):v1?migrateOld(JSON.parse(v1)):defaults();if(v2&&!localStorage.getItem(PRE_SHOT_BACKUP_KEY)){try{localStorage.setItem(PRE_SHOT_BACKUP_KEY,v2);}catch(e){loadError='Could not preserve the original saved settings. Please export a backup before editing.';canSave=false;}}}catch(e){loadError=e.message;canSave=false;state=defaults();}
+// Preserve old browser state before migrating shot controls; never erase tickets/history.
+if(canSave&&state.rescueVersion!==1){
+ try{
+  const old=localStorage.getItem(KEY);
+  if(old&&!localStorage.getItem('quill-lucky-buck-v2-pre-rescue-v3-3'))localStorage.setItem('quill-lucky-buck-v2-pre-rescue-v3-3',old);
+  for(const t of state.tickets){t.shots.bonus=[0,0,0];t.shots.upgradeChance=0;t.shots.stack=false;t.shots.miss=0;t.shots.noBonusMax=0;t.shots.bullMin=95;t.batchAccuracy.useShots=false;}
+  state.rescueVersion=1;
+  localStorage.setItem(KEY,JSON.stringify(state));
+ }catch(e){canSave=false;loadError='Could not back up previous settings for Rescue update. Export a JSON backup first.';}
+}
 const T=()=>state.tickets.find(t=>t.id===state.selectedId)||state.tickets[0];
 const PRESET_KEY='lucky-buck-setting-presets-v1';
-const SHOOTER_BONUS_INSTALLED='lucky-buck-shooter-bonus-preset-installed-v1';
-const CUSTOM1_BEFORE_SHOOTER='lucky-buck-custom1-pre-shooter-bonus-v1';
+const RESCUE_PRESETS_INSTALLED='lucky-buck-rescue-presets-reset-v1';
 let presets={};let selectedPreset='default';
-try{const stored=JSON.parse(localStorage.getItem(PRESET_KEY)||'{}');if(stored&&typeof stored==='object'&&!Array.isArray(stored))presets=stored;}catch(e){presets={};}
-// Owner-approved Nov 6 tuning. One-time preset slot migration; does not touch active ticket or run history.
-function shooterBonusPreset(){
- const t=freshTicket();
- t.rows=[
-  {id:1,kind:LOSE,amount:0,chance:76},
-  {id:2,kind:CASH,amount:1,chance:21},
-  {id:3,kind:CASH,amount:5,chance:2.5},
-  {id:4,kind:CASH,amount:25,chance:0.5}
- ];
- t.luck=1;t.momentum=1;t.doubleDown=2;
- t.shots={...t.shots,accuracy:[70,75,65],bonus:[18,25,50],stack:true,miss:8,bullMin:95,noBonusMax:25,grand:30};
- t.rates.momentum={mode:'edit',levels:[[0,0],[12,25],[15,30],[18,36]]};
- t.rates.luck={mode:'edit',levels:[null,[74,23,2.5,0.5],[72,25,2.5,0.5],[70,27,2.5,0.5]]};
- return {ticket:{
-  name:t.name,price:t.price,rows:t.rows,denominator:t.denominator,packSize:t.packSize,
-  luckMode:t.luckMode,luck:t.luck,momentum:t.momentum,doubleDown:t.doubleDown,
-  shots:t.shots,rates:t.rates,nextRowId:t.nextRowId,special:t.special
- },batch:1};
-}
-function presetName(key){return key==='custom1'?'Shooter Bonus':key==='default'?'Default':'Custom '+key.replace('custom','');}
 try{
- if(localStorage.getItem(SHOOTER_BONUS_INSTALLED)!=='yes'){
-  // Preserve the user's previous Custom 1 data separately before explicitly replacing its slot.
-  if(presets.custom1&&!localStorage.getItem(CUSTOM1_BEFORE_SHOOTER))
-   localStorage.setItem(CUSTOM1_BEFORE_SHOOTER,JSON.stringify(presets.custom1));
-  const next={...presets,custom1:shooterBonusPreset()};
-  localStorage.setItem(PRESET_KEY,JSON.stringify(next));
-  localStorage.setItem(SHOOTER_BONUS_INSTALLED,'yes');
-  presets=next;
+ const stored=JSON.parse(localStorage.getItem(PRESET_KEY)||'{}');
+ if(stored&&typeof stored==='object'&&!Array.isArray(stored))presets=stored;
+ if(canSave&&localStorage.getItem(RESCUE_PRESETS_INSTALLED)!=='yes'){
+  const old=localStorage.getItem(PRESET_KEY);
+  if(old!==null&&!localStorage.getItem('lucky-buck-presets-before-rescue-v3-3'))localStorage.setItem('lucky-buck-presets-before-rescue-v3-3',old);
+  localStorage.setItem(PRESET_KEY,'{}');localStorage.setItem(RESCUE_PRESETS_INSTALLED,'yes');presets={};
  }
-}catch(e){
- // If storage is unavailable, allow this session to load the preset without wiping other slots.
- presets={...presets,custom1:shooterBonusPreset()};
-}
+}catch(e){/* Do not delete presets when storage is unavailable. */}
+function presetName(key){return key==='default'?'Default':'Custom '+key.replace('custom','');}
 function presetSnapshot(){const t=T();return {ticket:{name:t.name,price:t.price,rows:t.rows,denominator:t.denominator,packSize:t.packSize,luckMode:t.luckMode,luck:t.luck,momentum:t.momentum,doubleDown:t.doubleDown,shots:t.shots,rates:t.rates,nextRowId:t.nextRowId,special:t.special},batch:state.batch};}
 function applyPreset(p){
  if(!p||!p.ticket||typeof p.ticket!=='object')throw Error('Saved preset is missing or invalid.');
