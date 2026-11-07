@@ -59,3 +59,8 @@
 ## Future idea (not scheduled)
 - In the game, a **set number of tickets sold across the whole world**; top jackpots dealt from that supply (Pack style), lesser jackpots possibly Random chance.
 - Tap-to-shoot balloons in any order with animation (numbers follow popping order, per the shot spec).
+
+
+## Next update notes — post-v3.3.2 (added November 6, 2026; NOTES ONLY)
+
+- **Lucky Buck Special Function / individual-ticket six-box readout:** Preserve the existing two rows of three boxes and their behavior. Add tiny, unobtrusive row labels **Original** (the three originally drawn numbers, currently shown as dashes before a ticket is available) and **Final** (the three revealed numbers, initially question marks). Green still highlights numbers changed by the rescue/upgrade mechanic. Keep the panel compact on iPhone; labels must not enlarge it significantly, overlap, or push boxes out of alignment. Do **not** replace this with the separate batch-statistics readout. This is a requested future UI improvement, **not yet implemented**. No changes to the shot rules or payout odds are requested here.
