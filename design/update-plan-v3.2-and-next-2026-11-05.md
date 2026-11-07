@@ -61,6 +61,12 @@
 - Tap-to-shoot balloons in any order with animation (numbers follow popping order, per the shot spec).
 
 
-## Next update notes — post-v3.3.2 (added November 6, 2026; NOTES ONLY)
+## v3.3.3 — RELEASED November 6, 2026 (iPhone visual check pending)
 
-- **Lucky Buck Special Function / individual-ticket six-box readout:** Preserve the existing two rows of three boxes and their behavior. Add tiny, unobtrusive row labels **Original** (the three originally drawn numbers, currently shown as dashes before a ticket is available) and **Final** (the three revealed numbers, initially question marks). Green still highlights numbers changed by the rescue/upgrade mechanic. Keep the panel compact on iPhone; labels must not enlarge it significantly, overlap, or push boxes out of alignment. Do **not** replace this with the separate batch-statistics readout. This is a requested future UI improvement, **not yet implemented**. No changes to the shot rules or payout odds are requested here.
+- **Lucky Buck Special Function / individual-ticket six-box readout:** Preserve the existing two rows of three boxes and their behavior. Add tiny, unobtrusive row labels **Original** (the three originally drawn numbers, currently shown as dashes before a ticket is available) and **Final** (the three revealed numbers, initially question marks). Green still highlights numbers changed by the rescue/upgrade mechanic. Keep the panel compact on iPhone; labels must not enlarge it significantly, overlap, or push boxes out of alignment. Do **not** replace this with the separate batch-statistics readout. This compact Original/Final labeling was implemented in **v3.3.3**, with current individual-ticket and batch behavior otherwise retained. No changes to the shot rules or payout odds are requested here.
+
+### Other v3.3.3 changes (owner approved, implemented)
+- Rename the visible **Momentum** modifier to **Hot Streak 🔥**, without renaming its `momentum` save keys or changing odds.
+- Audit and improve the existing ? popup explanations for major simulator sections and all three modifiers.
+- Add unobtrusive ? explanations for Saved Presets, Special-item Pack vs Random Chance, Random Accuracy, Bullseye Threshold, and Rescue Bonus controls.
+- See [v3.3.3 release handoff](../docs/release-notes/2026-11-06-v3.3.3-hot-streak-help.md). GitHub source updated; **Pages/iPhone rendering not independently verified**.
