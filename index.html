@@ -522,6 +522,13 @@ body.setup-open{overflow:hidden}.card-top .ticket-gear+h3{margin-right:auto}
 .v3-shot-readout{width:100%;max-width:100%!important;gap:2px;margin:3px 0}
 .v3-shot-line{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:2px!important;justify-content:stretch!important}
 .v3-shot-cell{min-width:0;line-height:17px!important;font-size:10px}
+/* v3.3.3: compact readout labels and contextual help. */
+.v3-shot-line.v3-labeled{grid-template-columns:38px repeat(3,minmax(0,1fr))!important;align-items:center}
+.v3-shot-row-label{font-size:8px;line-height:1.1;color:#b7d0bd;font-weight:750;letter-spacing:-.15px;white-space:nowrap}
+.v3-help-inline{display:flex;align-items:center;gap:6px;margin-bottom:6px;min-width:0}
+.v3-help-inline .preset-caption{margin:0}
+.v3-help.v3-help-mini{width:18px;min-width:18px;height:18px;font-size:9px;flex:0 0 18px}
+
 .v3-column .ticket-result{width:100%!important;max-width:none!important;padding:7px 10px!important;margin:7px 0!important;min-height:0!important}
 .v3-column .ticket-result .outcome-headline{font-size:clamp(20px,5vw,27px)!important}
 .v3-column .ticket-result .outcome-numbers{font-size:14px!important;margin:3px 0!important}
@@ -556,7 +563,7 @@ body.setup-open{overflow:hidden}.card-top .ticket-gear+h3{margin-right:auto}
 <div class="wrap">
 <header class="header">
 <div class="brand"><div class="brand-mark">$</div><div><small>QUILL PRODUCTIONS</small><h1>Cardboard to Cash</h1></div></div>
-<div class="header-right"><span class="version-badge" title="Lucky Buck simulator version">v3.3.2</span><span class="save" id="saveStatus">Loading…</span></div>
+<div class="header-right"><span class="version-badge" title="Lucky Buck simulator version">v3.3.3</span><span class="save" id="saveStatus">Loading…</span></div>
 </header>
 
 <section class="hero">
@@ -582,7 +589,7 @@ body.setup-open{overflow:hidden}.card-top .ticket-gear+h3{margin-right:auto}
   </section>
  </aside>
  <div class="showcase-center"><section class="card">
-<div class="card-top"><button type="button" class="ticket-gear" id="ticketGear" aria-label="Ticket settings" aria-expanded="false" title="Ticket settings">⚙</button><h3>🎟️ Scratch a ticket</h3><span class="tag" id="ticketLuck">Double Down 0/3 · Momentum 0/3 · Luck 0/3</span></div>
+<div class="card-top"><button type="button" class="ticket-gear" id="ticketGear" aria-label="Ticket settings" aria-expanded="false" title="Ticket settings">⚙</button><h3>🎟️ Scratch a ticket</h3><span class="tag" id="ticketLuck">Double Down 0/3 · Hot Streak 0/3 · Luck 0/3</span></div>
 <section class="shot-calculator" id="shotCalculator" aria-label="Shot Calculator">
   <div class="shot-title">🎯 Shot Calculator</div>
   <p class="tiny muted" style="margin:4px 0 10px">Every ticket starts with normal odds. Consecutive bullseyes can rescue a loss; auto-scratch needs no shooting.</p>
@@ -619,7 +626,7 @@ body.setup-open{overflow:hidden}.card-top .ticket-gear+h3{margin-right:auto}
   <section class="active-mods" aria-label="Active modifiers">
    <h3>Active Mods</h3>
    <div class="mod-status"><span aria-hidden="true">💰</span><span>Double Down</span><strong id="activeDouble">0/3</strong></div>
-   <div class="mod-status"><span aria-hidden="true">🍀</span><span>Momentum</span><strong id="activeMomentum">0/3</strong></div>
+   <div class="mod-status"><span aria-hidden="true">🔥</span><span>Hot Streak</span><strong id="activeMomentum">0/3</strong></div>
    <div class="mod-status"><span aria-hidden="true">✨</span><span>Luck</span><strong id="activeLuck">0/3</strong></div>
    <button class="edit-mods-btn" type="button" id="editModifiers">Edit modifiers <span aria-hidden="true">↘</span></button>
   </section>
@@ -683,7 +690,7 @@ body.setup-open{overflow:hidden}.card-top .ticket-gear+h3{margin-right:auto}
     <section class="card" id="modifierEditor">
 <div class="card-top"><h3>Equipped modifiers</h3><span class="muted tiny">Default presets · Levels 0–3</span></div>
 <div class="modifier-list">
-<div class="modifier-row" id="doubleRow"><input type="checkbox" class="mod-on" id="doubleOn" aria-label="Double Down on" checked><span aria-hidden="true" class="modifier-emoji">＄</span><div class="modifier-label"><strong>Double Down</strong><button type="button" class="mod-info" data-mod="double" aria-label="About Double Down">?</button><small id="doubleDescription">When you win the highest cash prize, you have a chance to double your winnings.</small></div><select aria-label="Double Down level" id="doubleLevel"></select><select class="rate-mode" aria-label="Double Down rate mode" id="doubleRateMode"><option value="default">Default</option><option value="edit">Edit</option></select></div><div class="modifier-details" aria-live="polite">
+<div class="modifier-row" id="doubleRow"><input type="checkbox" class="mod-on" id="doubleOn" aria-label="Double Down on" checked><span aria-hidden="true" class="modifier-emoji">＄</span><div class="modifier-label"><strong>Double Down</strong><button type="button" class="mod-info" data-mod="double" aria-label="About Double Down">?</button><small id="doubleDescription">Double Down can double a win of the highest cash prize. Higher levels improve the doubling chance, but do not increase the chance of getting a winning ticket.</small></div><select aria-label="Double Down level" id="doubleLevel"></select><select class="rate-mode" aria-label="Double Down rate mode" id="doubleRateMode"><option value="default">Default</option><option value="edit">Edit</option></select></div><div class="modifier-details" aria-live="polite">
   <strong class="modifier-details-header" id="doubleDetailsHeader">💰 Double Down — Level 0</strong>
   <div class="modifier-details-summary" id="doubleDetailsSummary">Select a level to see your double-prize chance.</div>
   <div id="doubleDetailsRates" class="modifier-details-rates hidden">
@@ -693,17 +700,17 @@ body.setup-open{overflow:hidden}.card-top .ticket-gear+h3{margin-right:auto}
   </div>
 </div>
 <div class="rate-editor hidden" id="doubleEdit"><strong>Double Down custom rates (%)</strong><div class="rates-grid"><span>Level</span><span>Double chance</span><label>1/3</label><input data-rate="1" data-level="1" data-column="0" type="number" step="0.01" min="0" max="100" aria-label="Double Down level 1 rate"><label>2/3</label><input data-rate="1" data-level="2" data-column="0" type="number" step="0.01" min="0" max="100" aria-label="Double Down level 2 rate"><label>3/3</label><input data-rate="1" data-level="3" data-column="0" type="number" step="0.01" min="0" max="100" aria-label="Double Down level 3 rate"></div></div>
-<div class="modifier-row" id="momentumRow"><input type="checkbox" class="mod-on" id="momentumOn" aria-label="Momentum on" checked><span aria-hidden="true" class="modifier-emoji">🍀</span><div class="modifier-label"><strong>Momentum</strong><button type="button" class="mod-info" data-mod="momentum" aria-label="About Momentum">?</button><small id="momentumDescription">Winning the highest cash prize increases your chance of hitting it again on the next ticket. Win twice in a row for an even bigger boost! Any other result breaks your streak.</small></div><select aria-label="Momentum level" id="momentumLevel"></select><select class="rate-mode" aria-label="Momentum rate mode" id="momentumRateMode"><option value="default">Default</option><option value="edit">Edit</option></select></div><div class="modifier-details" aria-live="polite">
-  <strong class="modifier-details-header" id="momentumDetailsHeader">🍀 Momentum — Level 0</strong>
-  <div class="modifier-details-summary" id="momentumDetailsSummary">Select a Momentum level to see your streak bonuses.</div>
+<div class="modifier-row" id="momentumRow"><input type="checkbox" class="mod-on" id="momentumOn" aria-label="Hot Streak on" checked><span aria-hidden="true" class="modifier-emoji">🔥</span><div class="modifier-label"><strong>Hot Streak</strong><button type="button" class="mod-info" data-mod="momentum" aria-label="About Hot Streak">?</button><small id="momentumDescription">When a ticket originally draws the highest cash prize, Hot Streak boosts the chance of drawing that prize again on the next ticket. Two top-prize draws in a row give a stronger boost. Any different original result, or a third top-prize draw, resets the streak. Shooting bonuses and Double Down do not count.</small></div><select aria-label="Hot Streak level" id="momentumLevel"></select><select class="rate-mode" aria-label="Hot Streak rate mode" id="momentumRateMode"><option value="default">Default</option><option value="edit">Edit</option></select></div><div class="modifier-details" aria-live="polite">
+  <strong class="modifier-details-header" id="momentumDetailsHeader">🔥 Hot Streak — Level 0</strong>
+  <div class="modifier-details-summary" id="momentumDetailsSummary">Select a Hot Streak level to see your streak bonuses.</div>
   <div id="momentumDetailsRates" class="modifier-details-rates hidden">
     <div class="modifier-details-line"><span>After 1 top-prize win</span><strong id="momentumFirstChance">—</strong></div>
     <div class="modifier-details-line"><span>After 2 consecutive top-prize wins</span><strong id="momentumSecondChance">—</strong></div>
     <small class="modifier-details-note">Your streak resets after any other result or a third consecutive top-prize win. These are minimum total chances, not bonuses added on top.</small>
   </div>
 </div>
-<div class="rate-editor hidden" id="momentumEdit"><strong>Momentum custom rates (%)</strong><div class="rates-grid rates-grid-3"><span>Level</span><span>After 1 win (%)</span><span>After 2 wins (%)</span><label>1/3</label><input data-rate="1" data-level="1" data-column="0" type="number" step="0.01" min="0" max="100" aria-label="Momentum 1 first chance"><input data-rate="1" data-level="1" data-column="1" type="number" step="0.01" min="0" max="100" aria-label="Momentum 1 second chance"><label>2/3</label><input data-rate="1" data-level="2" data-column="0" type="number" step="0.01" min="0" max="100" aria-label="Momentum 2 first chance"><input data-rate="1" data-level="2" data-column="1" type="number" step="0.01" min="0" max="100" aria-label="Momentum 2 second chance"><label>3/3</label><input data-rate="1" data-level="3" data-column="0" type="number" step="0.01" min="0" max="100" aria-label="Momentum 3 first chance"><input data-rate="1" data-level="3" data-column="1" type="number" step="0.01" min="0" max="100" aria-label="Momentum 3 second chance"></div></div>
-<div class="modifier-row" id="luckRow"><input type="checkbox" class="mod-on" id="luckOn" aria-label="Luck on" checked><span aria-hidden="true" class="modifier-emoji">🐇</span><div class="modifier-label"><strong>Luck</strong><button type="button" class="mod-info" data-mod="luck" aria-label="About Luck">?</button><small id="luckDescription">Improves your chances of winning by taking probability away from losing tickets and adding it to cash prizes. Higher levels provide bigger bonuses.</small></div><select aria-label="Luck level" id="luckLevel"></select><select class="rate-mode" aria-label="Luck rate mode" id="luckRateMode"><option value="default">Default</option><option value="edit">Edit</option></select></div><div class="modifier-details" aria-live="polite">
+<div class="rate-editor hidden" id="momentumEdit"><strong>Hot Streak custom rates (%)</strong><div class="rates-grid rates-grid-3"><span>Level</span><span>After 1 win (%)</span><span>After 2 wins (%)</span><label>1/3</label><input data-rate="1" data-level="1" data-column="0" type="number" step="0.01" min="0" max="100" aria-label="Hot Streak 1 first chance"><input data-rate="1" data-level="1" data-column="1" type="number" step="0.01" min="0" max="100" aria-label="Hot Streak 1 second chance"><label>2/3</label><input data-rate="1" data-level="2" data-column="0" type="number" step="0.01" min="0" max="100" aria-label="Hot Streak 2 first chance"><input data-rate="1" data-level="2" data-column="1" type="number" step="0.01" min="0" max="100" aria-label="Hot Streak 2 second chance"><label>3/3</label><input data-rate="1" data-level="3" data-column="0" type="number" step="0.01" min="0" max="100" aria-label="Hot Streak 3 first chance"><input data-rate="1" data-level="3" data-column="1" type="number" step="0.01" min="0" max="100" aria-label="Hot Streak 3 second chance"></div></div>
+<div class="modifier-row" id="luckRow"><input type="checkbox" class="mod-on" id="luckOn" aria-label="Luck on" checked><span aria-hidden="true" class="modifier-emoji">🐇</span><div class="modifier-label"><strong>Luck</strong><button type="button" class="mod-info" data-mod="luck" aria-label="About Luck">?</button><small id="luckDescription">Luck reduces the chance of a losing ticket and increases the odds of cash prizes. Higher levels generally give bigger boosts, but a win is never guaranteed.</small></div><select aria-label="Luck level" id="luckLevel"></select><select class="rate-mode" aria-label="Luck rate mode" id="luckRateMode"><option value="default">Default</option><option value="edit">Edit</option></select></div><div class="modifier-details" aria-live="polite">
   <strong class="modifier-details-header" id="luckDetailsHeader">🐇 Luck — Level 0</strong>
   <div class="modifier-details-summary" id="luckDetailsSummary">Select a level to see how the prize odds change.</div>
   <div id="luckDetailsRates" class="modifier-details-rates hidden">
@@ -711,7 +718,7 @@ body.setup-open{overflow:hidden}.card-top .ticket-gear+h3{margin-right:auto}
     <div class="modifier-details-line"><span>$1 prize</span><strong id="luckOneOdds">—</strong></div>
     <div class="modifier-details-line"><span>$5 prize</span><strong id="luckFiveOdds">—</strong></div>
     <div class="modifier-details-line"><span>$25 prize</span><strong id="luckTwentyFiveOdds">—</strong></div>
-    <small class="modifier-details-note">Each line shows the chance before → after Luck. These odds exclude Momentum and shot-accuracy effects; all prize chances still total 100%.</small>
+    <small class="modifier-details-note">Each line shows the chance before → after Luck. These odds exclude Hot Streak and shot-accuracy effects; all prize chances still total 100%.</small>
   </div>
 </div>
 <div class="rate-editor hidden" id="luckEdit"><strong>Luck custom rates (%)</strong><div class="rates-grid rates-grid-5"><span>Level</span><span>Lose</span><span>$1</span><span>$5</span><span>$25</span><label>1/3</label><input data-rate="1" data-level="1" data-column="0" type="number" step="any" min="0" max="100" aria-label="Luck 1 lose percent"><input data-rate="1" data-level="1" data-column="1" type="number" step="any" min="0" max="100" aria-label="Luck 1 one percent"><input data-rate="1" data-level="1" data-column="2" type="number" step="any" min="0" max="100" aria-label="Luck 1 five percent"><input data-rate="1" data-level="1" data-column="3" type="number" step="any" min="0" max="100" aria-label="Luck 1 twentyfive percent"><label>2/3</label><input data-rate="1" data-level="2" data-column="0" type="number" step="any" min="0" max="100" aria-label="Luck 2 lose percent"><input data-rate="1" data-level="2" data-column="1" type="number" step="any" min="0" max="100" aria-label="Luck 2 one percent"><input data-rate="1" data-level="2" data-column="2" type="number" step="any" min="0" max="100" aria-label="Luck 2 five percent"><input data-rate="1" data-level="2" data-column="3" type="number" step="any" min="0" max="100" aria-label="Luck 2 twentyfive percent"><label>3/3</label><input data-rate="1" data-level="3" data-column="0" type="number" step="any" min="0" max="100" aria-label="Luck 3 lose percent"><input data-rate="1" data-level="3" data-column="1" type="number" step="any" min="0" max="100" aria-label="Luck 3 one percent"><input data-rate="1" data-level="3" data-column="2" type="number" step="any" min="0" max="100" aria-label="Luck 3 five percent"><input data-rate="1" data-level="3" data-column="3" type="number" step="any" min="0" max="100" aria-label="Luck 3 twentyfive percent"></div><small>Each level must add up to 100%.</small></div>
@@ -735,7 +742,7 @@ body.setup-open{overflow:hidden}.card-top .ticket-gear+h3{margin-right:auto}
 <div class="kv"><span class="muted">Chance of a profitable cash ticket</span><strong id="profitChance">—</strong></div>
 <div class="kv"><span class="muted">Chance of Lose</span><strong id="losingChance">—</strong></div>
 <div class="kv"><span class="muted">Base cash payout / ticket</span><strong id="baseEV">—</strong></div>
-<div class="kv"><span class="muted">Luck / Momentum / Double Down bonus</span><strong class="green" id="luckEV">—</strong></div><div class="kv"><span class="muted">Shot accuracy adjustment</span><strong id="shotEV">—</strong></div>
+<div class="kv"><span class="muted">Luck / Hot Streak / Double Down bonus</span><strong class="green" id="luckEV">—</strong></div><div class="kv"><span class="muted">Shot accuracy adjustment</span><strong id="shotEV">—</strong></div>
 <div class="big-ev"><div><strong id="evHeading">Expected cash payout per ticket</strong><div class="tiny muted">Current streak stage · excludes noncash items</div></div><div class="value" id="finalEV">—</div></div>
 </section>
     <section class="card">
@@ -968,7 +975,7 @@ function normalOdds(t,stage=t.stage){
   // The locked approved table gives TOTAL stage odds. For altered base/Luck odds,
   // do not make a winning streak less likely: keep the greater of natural or target.
   const target=Math.max(naturalTop,momentumRates(t)[stage-1]);
-  if(target>100+1e-8)return {valid:false,error:'Momentum target exceeds 100%.',rows,baseSum};
+  if(target>100+1e-8)return {valid:false,error:'Hot Streak target exceeds 100%.',rows,baseSum};
   const remainder=100-naturalTop, remaining=100-target;
   for(const r of rows){r.final=r.id===highest.id?target:remainder>1e-12?r.final*remaining/remainder:0;r.modifier=r.final-r.base;}
  }
@@ -1020,7 +1027,7 @@ function singleDraw(t,random=Math.random,applyShots=true){
   const payout=shot.payout*(doubled?2:1);
   outcome={kind,payout,label:kind===CASH?usd(payout):'Lose',baseTop,doubled,numbers:shot.numbers,original:shot.original,pre:shot.pre,hits:shot.hits,changed:shot.changed};
  }
- // Momentum tracks the UNDERLYING outcome, not any skill mutation or Double Down payout.
+ // Hot Streak tracks the UNDERLYING outcome, not any skill mutation or Double Down payout.
  if(t.momentum===0)t.stage=0;
  else if(outcome.baseTop){t.stage=t.stage===2?0:t.stage+1;}
  else t.stage=0;
@@ -1314,9 +1321,9 @@ function renderModifiers(){
   if(t[key]>0)delete t.modOff[key];const off=t.modOff[key]!==undefined;
   $(p+'On').checked=!off;$(p+'Row').classList.toggle('mod-off',off);$(p+'Level').disabled=off;$(p+'RateMode').disabled=off;if(off)$(p+'Level').value=String(t.modOff[key]);}
  $('activeDouble').textContent=t.doubleDown+'/3';$('activeMomentum').textContent=t.momentum+'/3';$('activeLuck').textContent=t.luck+'/3';
- $('doubleDescription').textContent='When you win the highest cash prize, you have a chance to double your winnings.';
- $('momentumDescription').textContent='Winning the highest cash prize increases your chance of hitting it again on the next ticket. Win twice in a row for an even bigger boost! Any other result breaks your streak.';
- $('luckDescription').textContent='Improves your chances of winning by taking probability away from losing tickets and adding it to cash prizes. Higher levels provide bigger bonuses.'+(isLuckyCurve(t)?'':' (Only available with the standard Lucky Buck prize odds.)');
+ $('doubleDescription').textContent='Double Down can double a win of the highest cash prize. Higher levels improve the doubling chance, but do not increase the chance of getting a winning ticket.';
+ $('momentumDescription').textContent='When a ticket originally draws the highest cash prize, Hot Streak boosts the chance of drawing that prize again on the next ticket. Two top-prize draws in a row give a stronger boost. Any different original result, or a third top-prize draw, resets the streak. Shooting bonuses and Double Down do not count.';
+ $('luckDescription').textContent='Luck reduces the chance of a losing ticket and increases the odds of cash prizes. Higher levels generally give bigger boosts, but a win is never guaranteed.'+(isLuckyCurve(t)?'':' (Only available with the standard Lucky Buck prize odds.)');
 
  // All three modifiers use the same live-updating information panel.
  $('doubleDetailsHeader').textContent='💰 Double Down — Level '+t.doubleDown;
@@ -1328,8 +1335,8 @@ function renderModifiers(){
   $('doublePayout').textContent=topCash>0?usd(topCash)+' → '+usd(topCash*2):'No cash prize';
  }
 
- $('momentumDetailsHeader').textContent='🍀 Momentum — Level '+t.momentum;
- $('momentumDetailsSummary').textContent=t.momentum?'Build a winning streak to improve your odds of hitting the top prize again.':'Momentum is off. Select level 1–3 to see your streak bonuses.';
+ $('momentumDetailsHeader').textContent='🔥 Hot Streak — Level '+t.momentum;
+ $('momentumDetailsSummary').textContent=t.momentum?'Build a winning streak to improve your odds of hitting the top prize again.':'Hot Streak is off. Select level 1–3 to see your streak bonuses.';
  $('momentumDetailsRates').classList.toggle('hidden',t.momentum===0);
  if(t.momentum>0){
   const rates=momentumRates(t);
@@ -1356,7 +1363,7 @@ function renderModifiers(){
   $('luckTwentyFiveOdds').textContent=changeFor(CASH,25);
  }
 
- $('ticketLuck').textContent=`Double Down ${t.doubleDown}/3 · Momentum ${t.momentum}/3 · Luck ${t.luck}/3`;renderRateSettings(t);
+ $('ticketLuck').textContent=`Double Down ${t.doubleDown}/3 · Hot Streak ${t.momentum}/3 · Luck ${t.luck}/3`;renderRateSettings(t);
 }
 function renderRateSettings(t){
  if(!t.rates)t.rates=defaultRates();
@@ -1412,7 +1419,7 @@ function refreshOdds(){const t=T(),c=valid(t);
  const modBit=(v,sym,label)=>Math.abs(v)<1e-9?'':`<span class="${v>0?'pos':'neg'}" title="${label}">(${v>0?'+':''}${pct(v)} ${sym})</span>`;
  for(const r of t.rows){const m=$('mod-'+r.id),f=$('final-'+r.id);if(!m||!f)continue;
  if(r.kind===JACKPOT){m.innerHTML=`<small>${r.mode==='guaranteed'?'1 item / pack':'Rare inclusion'}</small>`;f.textContent=pct((r.mode==='guaranteed'?100:r.chance)/t.packSize)+' avg / ticket';}
- else{const x=rowById.get(r.id);{const luck=c0.valid?(luckById.get(r.id)?.modifier||0):0;m.innerHTML=x&&c.valid?modBit(luck,'🐇','Luck')+modBit(x.modifier-luck,'🍀','Momentum'):'';}f.textContent=x&&c.valid?pct(x.final):'—';}}
+ else{const x=rowById.get(r.id);{const luck=c0.valid?(luckById.get(r.id)?.modifier||0):0;m.innerHTML=x&&c.valid?modBit(luck,'🐇','Luck')+modBit(x.modifier-luck,'🔥','Hot Streak'):'';}f.textContent=x&&c.valid?pct(x.final):'—';}}
  $('baseTotal').textContent=pct(t.rows.filter(r=>r.kind!==JACKPOT).reduce((s,r)=>s+r.chance,0));$('effectiveTotal').textContent=c.valid?pct(c.total):'—';$('effectiveTotal').style.color=c.valid?'var(--green)':'var(--red)';
  $('warning').style.display=c.valid&&canSave?'none':'block';$('warning').textContent=!canSave?'An existing save could not load safely. The original browser data has NOT been overwritten; download your existing backup before editing. '+(loadError||''):c.error||'';
  const unsupported=t.luck>0&&!isLuckyCurve(t);$('overflowNote').classList.toggle('hidden',!unsupported);if(unsupported)$('overflowNote').textContent='No Luck curve is defined for this ticket’s prize set. Luck level is saved, but does not change outcomes. The approved $1 Lucky Buck formula only applies to Lose / $1 / $5 / $25.';
@@ -1654,14 +1661,14 @@ if(center&&shot){
  if(title){
   title.textContent='🎯 Special Function';
   const help=document.createElement('button');help.className='v3-help';help.type='button';help.textContent='?';help.setAttribute('aria-label','Explain shot function and gray or green numbers');
-  help.dataset.help='Gray: originally drawn numbers. Green: numbers rescued or upgraded by bullseyes. Each consecutive bullseye offers an adjustable chance to rescue a losing ticket to $1. Three bullseyes also unlock a separate prize upgrade. Misses and auto-scratch do not penalize base odds. To run ordinary auto-scratch batches, leave Apply shooting bonuses unchecked.';
+  help.dataset.help='Original shows the three numbers first drawn on your ticket. Final shows the numbers after shooting. Green marks numbers changed by a rescue or prize upgrade. Bullseyes can rescue a losing ticket for $1; three in a row can also upgrade a prize. Missing never takes away an original win. For batch tests without shooting, leave shooting bonuses off.';
   title.append(help);
   const read=document.createElement('div');read.className='v3-shot-readout';read.id='v3ShotReadout';title.insertAdjacentElement('afterend',read);
   window.v3ShotReadout=function(q,popped=[false,false,false]){
    const original=Array.isArray(q?.original)?q.original:[null,null,null],shownFinal=q?.pre&&!popped.every(Boolean)?q.pre:q?.numbers,final=Array.isArray(shownFinal)?shownFinal:[null,null,null];
    const penalty=new Set((q?.changed||[]).filter(c=>c.kind==='penalty').map(c=>Number(c.balloon)-1));
    const changed=new Set((q?.changed||[]).map(c=>Number(c.balloon)-1));
-   const line=(nums,isFinal)=>'<span class="v3-shot-line">'+nums.map((n,i)=>'<span class="v3-shot-cell'+(isFinal&&popped[i]&&changed.has(i)?(penalty.has(i)&&final[i]===0?' penalty':' changed'):'')+'">'+(isFinal&&!popped[i]?'?':n===null||n===undefined?'–':String(n))+'</span>').join('')+'</span>';
+   const line=(nums,isFinal)=>'<span class="v3-shot-line v3-labeled"><span class="v3-shot-row-label" aria-hidden="true">'+(isFinal?'Final':'Original')+'</span>'+nums.map((n,i)=>'<span class="v3-shot-cell'+(isFinal&&popped[i]&&changed.has(i)?(penalty.has(i)&&final[i]===0?' penalty':' changed'):'')+'">'+(isFinal&&!popped[i]?'?':n===null||n===undefined?'–':String(n))+'</span>').join('')+'</span>';
    read.innerHTML=line(original,false)+line(final,true);
    read.setAttribute('aria-label','Original draw '+original.join(', ')+'; revealed final draw '+final.map((n,i)=>popped[i]?n:'hidden').join(', ')+'. Green numbers were changed by shot effects.');
   };window.v3ShotReadout(null);
@@ -1688,12 +1695,21 @@ quick.addEventListener('change',()=>{origPrice.value=quick.value;origPrice.dispa
 const hiddenPriceContainer=origPrice.closest('.money-field')?.parentElement;
 if(hiddenPriceContainer)hiddenPriceContainer.style.display='none';
 const info=[
- [oddsCard.querySelector('.card-top'),'The percentages in Cash and Lose outcomes must total exactly 100%. Item jackpots are set in ⚙ Ticket settings under Special item. Changing a percentage updates the live calculations.'],
- [batchCard.querySelector('.card-top'),'Each run adds to this ticket’s saved cumulative totals. Use Clear totals only when you intentionally want to reset this ticket’s history and waiting tickets.'],
- [modCard.querySelector('.card-top'),'Set the existing Double Down, Momentum, and Luck levels from zero to three. No individual equipment selection is needed.'],
- [calcCard.querySelector('.card-top'),'Expected payout is an average per ticket based on the current prize odds, modifiers, and shot accuracy, not a guaranteed result.']
+ [oddsCard.querySelector('.card-top'),'Choose how often each cash prize or loss occurs. For example, 25% means roughly 25 out of every 100 tickets over many plays. All cash-prize and losing percentages must add up to 100%. Special item jackpots are set separately in Ticket settings.'],
+ [batchCard.querySelector('.card-top'),'Test many tickets at once. Turn on shooting bonuses to use your shot settings, or leave them off for ordinary auto-scratch odds. Results add to the selected ticket totals. Clear totals deletes its statistics, recent runs, and waiting tickets.'],
+ [modCard.querySelector('.card-top'),'Modifiers are special ticket advantages. Check one to turn it on, then choose a level from 1 to 3. Level 0 has no effect. Tap the question mark beside each modifier for its specific rules.'],
+ [calcCard.querySelector('.card-top'),'These calculations estimate average results over many tickets. They use your current prize odds, enabled modifiers, and shooting settings. Individual results can differ, and special item jackpots are tracked separately.']
 ];
 for(const [parent,description] of info){if(!parent)continue;const help=document.createElement('button');help.className='v3-help';help.type='button';help.textContent='?';help.dataset.help=description;help.setAttribute('aria-label','Help for '+(parent.querySelector('h3')?.textContent||'this section'));parent.append(help);}
+ // Small question marks beside settings that need extra explanation.
+ const makeHelp=(description,label)=>{const b=document.createElement('button');b.className='v3-help v3-help-mini';b.type='button';b.textContent='?';b.dataset.help=description;b.setAttribute('aria-label','Explain '+label);return b;};
+ const addInlineHelp=(label,description,name)=>{if(!label)return;const wrap=document.createElement('div');wrap.className='v3-help-inline';label.before(wrap);wrap.append(label,makeHelp(description,name));};
+ addInlineHelp(presetBox?.querySelector('.preset-caption'),'Choose a saved set of ticket settings. Picking a name does not apply it: tap Load selected to load it onto this ticket. Save to slot updates a custom slot; Factory default loads the protected original settings. Your other tickets are not changed.','saved presets');
+ addInlineHelp(byId('specialOn')?.closest('label'),'A special item is a noncash jackpot, such as the Trusty Shotgun. Pack guarantees exactly the selected number of items within each group of tickets, shuffled into random positions. Random chance gives every ticket an independent chance, so items may arrive close together or far apart.','special item Pack versus Random chance');
+ const randLabel=byId('randomAccuracy')?.closest('label');
+ if(randLabel)randLabel.insertAdjacentElement('afterend',makeHelp('Simulate a different aim for each shot instead of using your three chosen accuracy values. Random chooses 0–100% freely. Good shooters reach a bullseye about 25% of the time; Medium about 10%; Poor about 3%. The presets also vary misses and ordinary shots. Random accuracy automatically enables shooting bonuses for that batch.','random shooting accuracy'));
+ addInlineHelp(byId('bullMin')?.parentElement?.querySelector('label'),'Choose the minimum accuracy that counts as a bullseye. For example, a 95% threshold means accuracy from 95% through 100% can trigger a rescue-bonus roll. Lower accuracy gives no rescue bonus; 0% is a miss, but it does not reduce your original cash prize. The threshold is separate from the rescue chance dropdowns.','bullseye threshold');
+ shotPop.querySelector('.ssp-head strong')?.insertAdjacentElement('afterend',makeHelp('First, second, and third consecutive bullseyes have separate chances to turn a losing ticket into a $1 winner. If one rescue roll fails, the next bullseye in the streak can try again. A missed or partial shot breaks the streak. Three consecutive bullseyes also unlock a separate chance to upgrade a prize from $1 to $5 or $5 to $25. These bonuses do not reduce original winnings.','Rescue Bonus settings'));
 const popup=document.createElement('div');popup.className='v3-help-popup';popup.id='v3HelpPopup';popup.setAttribute('role','dialog');popup.setAttribute('aria-label','Explanation');
 popup.innerHTML='<button type="button" aria-label="Close explanation">Close ×</button><div id="v3HelpText"></div>';
 document.body.append(popup);
