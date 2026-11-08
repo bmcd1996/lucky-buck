@@ -609,7 +609,7 @@ body.setup-open{overflow:hidden}.card-top .ticket-gear+h3{margin-right:auto}
 .skill-on .skill-hide{display:none!important}
 .skill-play-card{padding-left:2px!important;padding-right:2px!important}
 .skill-play-card .card-top{padding:0 6px}
-.sk-open{color:var(--gold);font-weight:800;text-decoration:none}
+.sk-open{color:var(--gold);font-weight:800;text-decoration:none}.sk-top-actions{display:flex;align-items:center;gap:10px}.sk-hide{min-height:40px;padding:6px 12px;border-radius:10px;border:1px solid #618776;background:#1c4331;color:#fff;font-weight:800;font-size:13px;white-space:nowrap}
 #skFrame{display:block;width:100%;height:640px;border:0;background:transparent;margin:6px 0 4px}
 .sk-playset{margin:8px 4px 0;border:1px solid var(--border);border-radius:12px;padding:8px 10px}
 .sk-playset summary{font-weight:800;min-height:38px;display:flex;align-items:center;cursor:pointer}
@@ -622,7 +622,7 @@ body.setup-open{overflow:hidden}.card-top .ticket-gear+h3{margin-right:auto}
 <div class="wrap">
 <header class="header">
 <div class="brand"><div class="brand-mark">$</div><div><small>QUILL PRODUCTIONS</small><h1>Cardboard to Cash</h1></div></div>
-<div class="header-right"><span class="version-badge" title="Lucky Buck simulator version">v3.4.1</span><span class="save" id="saveStatus">Loading…</span></div>
+<div class="header-right"><span class="version-badge" title="Lucky Buck simulator version">v3.4.2</span><span class="save" id="saveStatus">Loading…</span></div>
 </header>
 
 <section class="hero">
@@ -1836,7 +1836,7 @@ card.innerHTML='<div class="card-top"><h3>🎯 Balloon target zones</h3><span cl
  '<div class="sk-seg" role="group" aria-label="Zoom"><button type="button" id="skZoomOut" aria-label="Zoom out">−</button><span id="skZoomLabel">1×</span><button type="button" id="skZoomIn" aria-label="Zoom in">+</button><button type="button" id="skMove" aria-pressed="false">✋ Move</button></div></div>'+
  '<div class="sk-shells"><label for="skShells">Shells per ticket</label><input type="number" id="skShells" inputmode="numeric" min="1" max="20" step="1"><small class="tiny muted">Each shot uses one, hit or miss. Balloons left when you run out count as $0.</small></div>'+
  '<div class="sk-gridwrap" id="skWrap"><canvas id="skGrid" aria-label="Balloon target zone grid. Tap squares to paint."></canvas></div>'+
- '<p class="tiny muted sk-legend">White dot = dead-centre pixel. Gold squares = Buck’s Secret.</p>'+
+ '<p class="tiny muted sk-legend">White dot = dead-centre pixel. Gold squares = Buck’s Secret. Two fingers: pinch to zoom and slide (never paints). Swipe on the black area to scroll.</p>'+
  '<details class="sk-rings"><summary>Quick rings (bullseye range)</summary>'+
  [['gold','Gold (Buck’s Secret) size',0,10],['green','Green ring size',0,18],['yellow','Yellow ring size',0,18]].map(([k,l,lo,hi])=>'<div class="sk-ring"><label for="skR_'+k+'">'+l+'</label><input type="range" id="skR_'+k+'" min="'+lo+'" max="'+hi+'" step="0.5"><output id="skO_'+k+'"></output></div>').join('')+
  '<button type="button" id="skRepaint" class="sk-btn">Repaint as rings</button><small class="tiny muted">Repainting replaces hand-painted squares. Sizes are in pixels from the centre; gold 0 = dead-centre pixel only.</small></details>'+
@@ -1860,7 +1860,7 @@ for(const c of [oddsCard,mod].filter(Boolean)){c.classList.add('skill-odds');con
 /* ---------- big playable ticket + play sliders (Skill mode) ---------- */
 const play=document.createElement('section');play.className='card skill-play-card';play.id='skillPlayCard';
 const SL=[['speed','Balloon movement speed',0.3,2.2,0.1,v=>Number(v).toFixed(1)+'×'],['movement','Balloon movement distance',30,120,5,v=>v+'%'],['size','Balloon size',70,130,5,v=>v+'%'],['wobble','Crosshair pattern size (∞ then 8)',0,40,1,v=>v+'px'],['lift','Crosshair height above finger',0,220,10,v=>v+'px']];
-play.innerHTML='<div class="card-top"><h3>🎟️ Play Lucky Buck (Skill)</h3><a class="tiny sk-open" href="'+TICKET_URL+'">Open full screen ↗</a></div>'+
+play.innerHTML='<div class="card-top"><h3>🎟️ Play Lucky Buck (Skill)</h3><span class="sk-top-actions"><a class="tiny sk-open" href="'+TICKET_URL+'">Full screen ↗</a><button type="button" class="sk-hide" id="skHideTicket" aria-expanded="true">Hide ticket ▴</button></span></div>'+
  '<iframe id="skFrame" title="Playable Lucky Buck ticket" scrolling="no"></iframe>'+
  '<details class="sk-playset" open><summary>🎛️ Play settings</summary>'+SL.map(([k,l,lo,hi,st])=>'<div class="sk-slider"><label for="skP_'+k+'">'+l+'</label><output id="skPO_'+k+'"></output><input type="range" id="skP_'+k+'" min="'+lo+'" max="'+hi+'" step="'+st+'"></div>').join('')+
  '<label class="sk-check"><input type="checkbox" id="skP_sound"> Sound effects</label>'+
@@ -1869,6 +1869,11 @@ const scratchCard=document.querySelector('.showcase-center > .card');
 /* Ticket goes first in Skill mode so it is easy to play; the zone grid follows. */card.insertAdjacentElement('beforebegin',play);scratchCard?.classList.add('skill-hide');
 document.getElementById('shotCalculator')?.classList.add('skill-hide');
 const frame=$('skFrame');
+/* Hide/Show ticket: folds the ticket away so it is quick to scroll to the grid (remembered on this phone). */
+let ticketHidden=false;try{ticketHidden=localStorage.getItem('lucky-buck-hide-ticket')==='1'}catch(e){}
+function showHideTicket(){frame.style.display=ticketHidden?'none':'block';$('skHideTicket').textContent=ticketHidden?'Show ticket ▾':'Hide ticket ▴';$('skHideTicket').setAttribute('aria-expanded',String(!ticketHidden));}
+$('skHideTicket').addEventListener('click',()=>{ticketHidden=!ticketHidden;try{localStorage.setItem('lucky-buck-hide-ticket',ticketHidden?'1':'0')}catch(e){}showHideTicket();if(!ticketHidden)requestAnimationFrame(fitFrame);});
+showHideTicket();
 function fitFrame(){try{const d=frame.contentDocument,pg=d&&d.querySelector('.page');if(pg)frame.style.height=Math.ceil(pg.getBoundingClientRect().height)+2+'px';}catch(e){}}
 frame.addEventListener('load',()=>{fitFrame();try{const W=frame.contentWindow;new W.ResizeObserver(fitFrame).observe(frame.contentDocument.querySelector('.page'));}catch(e){}});
 function loadFrame(){if(!frame.getAttribute('src'))frame.src=TICKET_URL+(TICKET_URL.includes('?')?'&':'?')+'embed=1';}
@@ -1888,11 +1893,27 @@ function draw(){ctx.clearRect(0,0,cv.width,cv.height);const g=Math.max(1,Math.ro
 function paintAt(e){const r=cv.getBoundingClientRect();const i=Math.floor((e.clientX-r.left)/r.width*LB_GW),j=Math.floor((e.clientY-r.top)/r.height*LB_GH);const h=(brushSize-1)/2;let changed=false;const a=S.grid.split('');
  for(let y=j-h;y<=j+h;y++)for(let x=i-h;x<=i+h;x++){if(x<0||y<0||x>=LB_GW||y>=LB_GH)continue;const k=y*LB_GW+x;if(a[k]==='.'||a[k]===brush)continue;a[k]=brush;changed=true;}
  if(changed){S.grid=a.join('');draw();}return changed;}
-let painting=false,dirty=false;
-cv.addEventListener('pointerdown',e=>{if(moveMode)return;painting=true;dirty=paintAt(e)||dirty;cv.setPointerCapture?.(e.pointerId);e.preventDefault();});
-cv.addEventListener('pointermove',e=>{if(!painting)return;dirty=paintAt(e)||dirty;e.preventDefault();});
+/* Touch: one finger paints. Two fingers pinch to zoom and slide the grid; they never paint
+   (if the first finger already painted, that stroke is undone when the second finger lands). */
+let painting=false,dirty=false,strokeStart=null,pinch=null,blocked=false,scrolling=null;const pts=new Map();
+/* One finger on the black area around the balloon scrolls instead of painting. */
+function offBalloon(e){const r=cv.getBoundingClientRect();const i=Math.floor((e.clientX-r.left)/r.width*LB_GW),j=Math.floor((e.clientY-r.top)/r.height*LB_GH);return i<0||j<0||i>=LB_GW||j>=LB_GH||S.grid[j*LB_GW+i]==='.';}
+function dragScroll(e){const dx=scrolling.x-e.clientX,dy=scrolling.y-e.clientY;scrolling={x:e.clientX,y:e.clientY};
+ if(zoom>1){const t=wrap.scrollTop;wrap.scrollLeft+=dx;wrap.scrollTop+=dy;const rest=dy-(wrap.scrollTop-t);if(Math.abs(rest)>.5)window.scrollBy(0,rest);}else window.scrollBy(0,dy);}
+function fmtZoom(){return (Number.isInteger(zoom)?zoom:zoom.toFixed(1))+'×';}
+function twoPts(){const [a,b]=[...pts.values()];return {d:Math.hypot(a.x-b.x,a.y-b.y)||1,x:(a.x+b.x)/2,y:(a.y+b.y)/2};}
+function startPinch(){const t=twoPts(),cr=cv.getBoundingClientRect();pinch={d:t.d,z:zoom,fx:(t.x-cr.left)/cr.width,fy:(t.y-cr.top)/cr.height};}
+function movePinch(){const t=twoPts();const z=Math.round(Math.min(4,Math.max(1,pinch.z*t.d/pinch.d))*10)/10;
+ if(z!==zoom){zoom=z;wrap.classList.toggle('zoomed',zoom>1);size();$('skZoomLabel').textContent=fmtZoom();}
+ if(zoom>1){const wr=wrap.getBoundingClientRect();wrap.scrollLeft=pinch.fx*cv.width-(t.x-wr.left);wrap.scrollTop=pinch.fy*cv.height-(t.y-wr.top);}}
+cv.addEventListener('pointerdown',e=>{if(moveMode)return;pts.set(e.pointerId,{x:e.clientX,y:e.clientY});cv.setPointerCapture?.(e.pointerId);e.preventDefault();
+ if(pts.size===1&&!blocked){if(offBalloon(e))scrolling={x:e.clientX,y:e.clientY};else{strokeStart=S.grid;painting=true;dirty=paintAt(e)||dirty;}}
+ else if(pts.size===2){scrolling=null;if(painting){S.grid=strokeStart;painting=false;dirty=false;draw();}blocked=true;startPinch();}});
+cv.addEventListener('pointermove',e=>{if(!pts.has(e.pointerId))return;pts.set(e.pointerId,{x:e.clientX,y:e.clientY});e.preventDefault();
+ if(pts.size>=2&&pinch)movePinch();else if(scrolling)dragScroll(e);else if(painting&&!blocked)dirty=paintAt(e)||dirty;});
 const endPaint=()=>{if(!painting)return;painting=false;if(dirty){persist();stats();}dirty=false;};
-cv.addEventListener('pointerup',endPaint);cv.addEventListener('pointercancel',endPaint);
+const liftFinger=e=>{if(!pts.delete(e.pointerId))return;if(painting&&pts.size===0)endPaint();if(pts.size<2&&pinch){pinch=null;if(zoom===1)moveMode=false;syncUI();}if(pts.size===0){blocked=false;scrolling=null;}};
+cv.addEventListener('pointerup',liftFinger);cv.addEventListener('pointercancel',liftFinger);
 /* ---------- stats ---------- */
 function stats(){const cnt={G:0,N:0,Y:0,R:0};let tot=0;for(const c of S.grid)if(c!=='.'){cnt[c]++;tot++;}
  /* worst-shot rule: prize = lowest of the three balloon values */let win=0,ev=0;for(const a of LB_ZONES)for(const b of LB_ZONES)for(const c of LB_ZONES){const p=cnt[a]*cnt[b]*cnt[c]/tot**3,v=Math.min(S.values[a],S.values[b],S.values[c]);if(v>0){win+=p;ev+=p*v;}}
@@ -1910,7 +1931,7 @@ function syncUI(){const on=S.skillOn;document.body.classList.toggle('skill-on',o
  for(const k of ['gold','green','yellow']){$('skR_'+k).value=S.rings[k];$('skO_'+k).textContent=S.rings[k]+' px';}
  $('secOn').checked=S.secret.on;$('secAmount').value=S.secret.amount;$('secMax').value=S.secret.max;
  for(const id of ['secAmount','secMax'])$(id).disabled=!S.secret.on;
- $('skZoomLabel').textContent=zoom+'×';$('skMove').setAttribute('aria-pressed',String(moveMode));cv.style.touchAction=moveMode?'auto':'none';wrap.classList.toggle('zoomed',zoom>1);}
+ $('skZoomLabel').textContent=fmtZoom();$('skMove').setAttribute('aria-pressed',String(moveMode));cv.style.touchAction=moveMode?'auto':'none';wrap.classList.toggle('zoomed',zoom>1);}
 $('skillToggle').addEventListener('click',()=>{S.skillOn=!S.skillOn;persist();syncUI();if(S.skillOn)size();});
 card.addEventListener('click',e=>{const sw=e.target.closest('.sk-swatch');if(sw){brush=sw.dataset.zone;moveMode=false;syncUI();}
  const br=e.target.closest('[data-brush]');if(br){brushSize=Number(br.dataset.brush);for(const b of card.querySelectorAll('[data-brush]'))b.setAttribute('aria-pressed',String(b===br));}});
@@ -1918,8 +1939,8 @@ card.addEventListener('input',e=>{const z=e.target.dataset?.val;if(z){const v=Nu
  const m=/^skR_(\w+)$/.exec(e.target.id||'');if(m){S.rings[m[1]]=Number(e.target.value);$('skO_'+m[1]).textContent=S.rings[m[1]]+' px';persist();}});
 $('skShells').addEventListener('input',e=>{const v=Math.round(Number(e.target.value));if(v>=1&&v<=20){S.shells=v;persist();}});
 $('skRepaint').addEventListener('click',()=>{const r=S.rings;const g=r.gold,n=Math.max(g,r.green),y=Math.max(n,r.yellow);S.grid=lbRingGrid(g,n,y);persist();draw();stats();});
-$('skZoomIn').addEventListener('click',()=>{zoom=Math.min(3,zoom+1);syncUI();size();});
-$('skZoomOut').addEventListener('click',()=>{zoom=Math.max(1,zoom-1);if(zoom===1)moveMode=false;syncUI();size();});
+$('skZoomIn').addEventListener('click',()=>{zoom=Math.min(4,Math.floor(zoom)+1);syncUI();size();});
+$('skZoomOut').addEventListener('click',()=>{zoom=Math.max(1,Math.ceil(zoom)-1);if(zoom===1)moveMode=false;syncUI();size();});
 $('skMove').addEventListener('click',()=>{moveMode=!moveMode;syncUI();});
 $('secOn').addEventListener('change',e=>{S.secret.on=e.target.checked;persist();syncUI();});
 for(const id of ['secAmount','secMax'])$(id).addEventListener('input',e=>{const v=Number(e.target.value);if(Number.isFinite(v)&&v>=0){S.secret[id==='secAmount'?'amount':'max']=v;persist();}});
