@@ -45,6 +45,11 @@
 .back .rules .secret{margin-top:auto;padding-top:2cqw;padding:0 1cqw .4cqw;color:#c4232b;font-family:'Annie Use Your Telescope','Bradley Hand','Segoe Print','Comic Sans MS',cursive;transform:rotate(-2deg);transform-origin:left center}
 .back .rules .secret .t{font-size:6.6cqw;line-height:1;text-decoration:underline;text-decoration-thickness:.3cqw;text-underline-offset:1cqw}
 .back .rules .secret p{margin:1.2cqw 0 0;font-family:inherit;font-size:5.7cqw;line-height:1.08;color:inherit;-webkit-text-stroke:.08cqw #c4232b}
+/* Pixel-art crosshair (owner pick: Hunter red). 17 cells on the same grid as the balloons
+   (22.8% / 37 cells = 0.6162% of ticket width per cell), so its single centre cell is the
+   same size as a balloon's centre cell and sits exactly on the aim point. */
+.crosshair{width:10.476%;height:auto;aspect-ratio:1/1;background:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEQAAABECAYAAAA4E5OyAAAA90lEQVR42u3cwQnCMBQA0FQ8ebIg2BEcxSnEKRyiUxSncBRHUBD05FWvNgdDITRa3r/VHhoe/4dvfmkVCsdysXp9Xj+et6rkemZBAAEyIOal94xz0/Tuby6h6J4iQ4AAAQIECBAgQIAAAQIECBAgQIAIIOGHzlTjWO+2/R/aToYoGSD/E1VqbpI74jlLarY79npkiJIBMqwPSc1ac/cZddsNmu3eD/ve/evxlHV98fNkiJIBog/RhygZIOX2kDDyO2Zxn1FH5yHeMVMyQJypfovc/01kCBAgQIAAAQIECBAgQIAIIECAAAECJExoLhN8P0TJAJlSvAHjjUEne10gTAAAAABJRU5ErkJggg==") center/100% 100% no-repeat;image-rendering:pixelated;filter:drop-shadow(0 1px 0 #0a050c99)}
+.crosshair:before,.crosshair:after{content:none;display:none}
 </style>
 </head>
 <body>
