@@ -28,6 +28,61 @@
 .back .buck-ink-title{font-size:clamp(22px,6.8vw,34px);line-height:1;font-weight:700;letter-spacing:.015em}
 .back .buck-ink p{font-family:inherit;font-size:clamp(19px,5.1vw,27px);line-height:1.04;font-weight:600;letter-spacing:.008em;margin:2px 0 0;color:inherit}
 @media(max-height:670px){.back .buck-ink p{font-size:clamp(17px,4.8vw,23px)}.back .buck-ink-title{font-size:clamp(21px,6.5vw,30px)}}
+/* Lucky Buck visual polish: shared original-art border, logo and cohesive reverse. */
+@import url('https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap');
+.ticket { --ticket-frame:none; }
+.ticket .back{
+  background:
+    repeating-linear-gradient(0deg,transparent 0 25px,#ffc8780b 25px 27px,transparent 27px 44px),
+    linear-gradient(180deg,#251635 0%,#45265f 21%,#764291 46%,#b45b91 70%,#e99067 100%);
+  border:20px solid transparent;
+  border-image-source:var(--ticket-frame);
+  border-image-slice:30;
+  border-image-width:20px;
+  border-image-repeat:stretch;
+  box-shadow:none;
+  display:none;flex-direction:column;justify-content:flex-start;align-items:stretch;
+  padding:2.5% 5.5% 4%;gap:0;text-align:center;
+  color:#fff1c6;
+}
+.ticket.flipped .back{display:flex;}
+.back::before{content:'';position:absolute;inset:24px;pointer-events:none;border:3px solid #f3b55788;box-shadow:inset 0 0 0 3px #331a37bb;z-index:0;}
+.back>*{position:relative;z-index:1;}
+.back .backLogo{width:83%;height:22%;min-height:0;display:flex;align-items:center;justify-content:center;margin:7.4% auto 1%;flex-shrink:0;}
+.back .backLogo img{display:block;width:100%;height:100%;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(1px 3px 0 #1d0d28c7);}
+.back .miniPrize{width:93%;display:flex;align-items:center;justify-content:center;gap:7px;margin:0 auto 3%;padding:5px 7px;border:3px solid #f4bd5d;outline:2px solid #301a30;background:#22162ecf;box-shadow:3px 3px 0 #241128;min-height:37px;font-family:'Silkscreen',monospace;text-shadow:2px 2px 0 #28132c;}
+.back .miniPrize .backPrice{color:#ffdd8c;font-weight:700;font-size:clamp(15px,4.6vw,24px);white-space:nowrap;}
+.back .miniPrize .backWinLine{color:#ffebbd;font-weight:700;letter-spacing:-.45px;font-size:clamp(8px,2.3vw,12px);line-height:1.17;text-align:left;}
+.back .instructions{width:100%;display:flex;flex-direction:column;gap:7px;background:none;border:0;border-radius:0;box-shadow:none;padding:0 3%;text-align:left;}
+.back .instructions p{display:grid;grid-template-columns:27% 1fr;align-items:center;column-gap:10px;min-height:40px;margin:0;padding:3px 5px 4px 0;border-bottom:2px dashed #ffd08c85;}
+.back .instructions strong{display:flex;align-items:center;justify-content:center;min-height:27px;background:#ffcf69;color:#28162e;font-family:'Silkscreen',monospace;font-size:clamp(9px,2.5vw,13px);font-weight:700;line-height:1.05;border:3px solid #33182e;box-shadow:2px 2px 0 #1b1020;padding:3px 2px;}
+.back .instructions .ruleCopy{color:#fff0c9;font-family:'Silkscreen',monospace;font-size:clamp(8px,2.1vw,11px);line-height:1.28;letter-spacing:-.5px;text-shadow:1px 1px 0 #221127;}
+.back .buck-ink{width:98%;flex:1;min-height:0;margin:5% auto 0;padding:0 2%;display:flex;flex-direction:column;justify-content:center;transform:rotate(-1.1deg);background:none;border:0;box-shadow:none;color:#29122e;text-shadow:1px 1px 0 #ffc69777;text-align:left;}
+.back .buck-ink-title{font-family:'Handjet','Courier New',monospace;font-style:italic;font-size:clamp(23px,6.5vw,34px);font-weight:700;letter-spacing:.016em;line-height:.99;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:2px;}
+.back .buck-ink p{font-family:'Handjet','Courier New',monospace;font-style:italic;font-weight:700;letter-spacing:.006em;font-size:clamp(20px,5.4vw,30px);line-height:1.0;color:#29122e;margin:3px 0 0;}
+.ticket .flipHotspot, .ticket .back button.flipHotspot{
+  position:absolute;top:2.9%;width:15.15%;height:7.1%;min-width:0;min-height:0;max-width:none;
+  z-index:30;padding:0;margin:0;
+  border:0;border-radius:0;background:#1b0b27;color:#ffffff;
+  font-family:'Silkscreen',monospace;font-size:clamp(24px,5.8vw,39px);font-weight:700;
+  line-height:1;text-align:center;letter-spacing:0;text-shadow:2px 2px 0 #0a0410;
+  clip-path:polygon(7% 0,93% 0,93% 6%,98% 6%,98% 15%,100% 15%,100% 82%,97% 82%,97% 92%,90% 92%,90% 99%,10% 99%,10% 92%,4% 92%,4% 83%,0 83%,0 16%,4% 16%,4% 7%,7% 7%);
+  box-shadow:none;outline:none;touch-action:manipulation;
+}
+.ticket #flip{right:4.55%;}
+.ticket #flipBack{right:4.55%;}
+.ticket .flipHotspot svg{width:58%;height:58%;display:block;margin:auto;image-rendering:pixelated;stroke:#fff;stroke-width:2;fill:none;stroke-linecap:square;stroke-linejoin:miter;}
+.ticket .flipHotspot:focus-visible{outline:2px solid #ffec9c;outline-offset:2px;}
+@media(max-width:355px){
+  .back .backLogo{height:20%;margin-top:7.5%}
+  .back .miniPrize{min-height:31px;padding:3px 5px;margin-bottom:2%}
+  .back .instructions{gap:3px}
+  .back .instructions p{min-height:34px;padding-bottom:2px}
+  .back .instructions strong{min-height:23px;border-width:2px}
+  .back .buck-ink{margin-top:3%}
+  .back .buck-ink-title{font-size:clamp(20px,6.4vw,27px)}
+  .back .buck-ink p{font-size:clamp(17px,5.1vw,23px)}
+}
 </style>
 </head>
 <body>
@@ -47,10 +102,15 @@
     <button id="flip" class="flipHotspot" type="button" aria-label="Flip ticket to read instructions">↻</button>
    </div>
    <div class="face back" aria-label="Ticket rules on the reverse">
-    <h2>LUCKY BUCK</h2><div class="miniPrize">$1 • MATCH THREE</div>
-    <div class="instructions"><p><strong>🎯 Shoot:</strong> Hold to aim at the moving balloons. Release your finger to fire.</p><p><strong>🎈 Reveal:</strong> Hit all three balloons to uncover the three amounts.</p><p><strong>💰 Win:</strong> Match three amounts and win that cash prize.</p></div>
-    <div class="buck-ink" aria-label="Buck’s Secret handwritten on the back of the ticket"><div class="buck-ink-title">Buck’s Secret</div><p>Word around the woods is hittin’ a perfect bullseye can earn ya an extra buck or two...</p></div>
-    <p>Standalone playtest — not connected to your live simulator.</p><button id="flipBack" class="flipHotspot" type="button" aria-label="Flip ticket to game side">↻</button>
+    <div class="backLogo"><img id="reverseLogo" alt="Original Lucky Buck letters and antlers logo"></div>
+    <div class="miniPrize"><span class="backPrice">$1</span><span class="backWinLine">MATCH 3 AMOUNTS<br>TO WIN!</span></div>
+    <div class="instructions">
+      <p><strong>SHOOT</strong><span class="ruleCopy">Hold to aim at the moving balloons. Release to fire.</span></p>
+      <p><strong>REVEAL</strong><span class="ruleCopy">Pop all three balloons to show the amounts.</span></p>
+      <p><strong>WIN</strong><span class="ruleCopy">Match all three amounts to win that prize.</span></p>
+    </div>
+    <div class="buck-ink" aria-label="Buck’s Secret handwritten directly in ink on the ticket"><div class="buck-ink-title">Buck’s Secret</div><p>Word around the woods is hittin’ a perfect bullseye can earn ya an extra buck or two...</p></div>
+    <button id="flipBack" class="flipHotspot" type="button" aria-label="Flip ticket to game side">↻</button>
    </div>
   </div>
  </div>
@@ -116,6 +176,89 @@ if(hold&&pointer){const wobble=Number($('wobble').value);const sec=now*.001;cons
 requestAnimationFrame(loop)}
 for(const [id,suffix] of [['speed','×'],['movement','%'],['wobble','px']]){const input=$(id),out=$(id+'Out');const show=()=>out.textContent=(id==='speed'?Number(input.value).toFixed(1):input.value)+suffix;input.addEventListener('input',show);show()}
 window.__luckyBuckPlaytest={getState:()=>({purchased,completed,count,total,popped:balloons.filter(b=>b.popped).length,balloons:balloons.map(b=>({x:b.x,y:b.y,popped:b.popped})),flipState}),buy:resetForTicket,shoot};
+/* Preserve the real logo while clearing silhouetted trees from the logo's sky.
+   This is artwork-only canvas processing; the ticket rules and hit detection do not change. */
+function polishLuckyBuckArtwork(){
+ const original=front.querySelector('img.base');if(!original||!original.complete||!original.naturalWidth)return;
+ if(original.dataset.skyCleaned==='1')return;
+ original.dataset.skyCleaned='1';
+ try{
+  const w=original.naturalWidth,h=original.naturalHeight;
+  const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+  const context=canvas.getContext('2d',{willReadFrequently:true});context.drawImage(original,0,0,w,h);
+  const raw=context.getImageData(0,0,w,h),data=raw.data;
+  const seed=new Uint8Array(w*h), mask=new Uint8Array(w*h),checked=new Uint8Array(w*h);
+  const xMin=132,xMax=608,yMin=25,yMax=246;
+  for(let y=yMin;y<yMax;y++)for(let x=xMin;x<xMax;x++){
+   const i=y*w+x,k=i*4,r=data[k],g=data[k+1],b=data[k+2];
+   if(r>113&&g>67&&r>g*1.12&&g>b*1.07&&b<146)seed[i]=1;
+  }
+  // Group gold pixels into connected regions and reject small sky highlights.
+  for(let y=yMin;y<yMax;y++)for(let x=xMin;x<xMax;x++){
+   const i=y*w+x;if(!seed[i]||checked[i])continue;
+   const stack=[i],component=[];checked[i]=1;let minX=x,minY=y;
+   while(stack.length){
+    const n=stack.pop(),yy=(n/w)|0,xx=n-yy*w;component.push(n);
+    if(xx<minX)minX=xx;if(yy<minY)minY=yy;
+    for(const p of [n-1,n+1,n-w,n+w]){
+     if(p<0||p>=seed.length||checked[p]||!seed[p])continue;
+     const py=(p/w)|0,px=p-py*w;if(px<xMin||px>=xMax||py<yMin||py>=yMax||Math.abs(px-xx)+Math.abs(py-yy)!==1)continue;
+     checked[p]=1;stack.push(p);
+    }
+   }
+   if(component.length<30||(minY>=165&&(minX<xMin+125||minX>xMin+370)))continue;
+   for(const q of component)mask[q]=1;
+  }
+  // Grow around real lettering/antlers to retain the original ink and gold outline.
+  const grow=new Uint8Array(w*h),radius=7;
+  for(let y=yMin;y<yMax;y++)for(let x=xMin;x<xMax;x++){
+   if(!mask[y*w+x])continue;
+   for(let dy=-radius;dy<=radius;dy++)for(let dx=-radius;dx<=radius;dx++){
+    if(dx*dx+dy*dy>radius*radius)continue;const xx=x+dx,yy=y+dy;
+    if(xx>=xMin&&xx<xMax&&yy>=yMin&&yy<yMax)grow[yy*w+xx]=1;
+   }
+  }
+  // Extract the actual logo for the back. Transparent pixels eliminate tree fragments.
+  const logo=document.createElement('canvas');logo.width=xMax-xMin;logo.height=yMax-yMin;
+  const logoc=logo.getContext('2d');const logodata=logoc.createImageData(logo.width,logo.height);
+  for(let y=yMin;y<yMax;y++)for(let x=xMin;x<xMax;x++){
+   const id=(y*w+x)*4,dest=((y-yMin)*logo.width+x-xMin)*4;
+   logodata.data[dest]=data[id];logodata.data[dest+1]=data[id+1];logodata.data[dest+2]=data[id+2];logodata.data[dest+3]=grow[y*w+x]?255:0;
+  }
+  logoc.putImageData(logodata,0,0);
+  const reverseLogo=document.getElementById('reverseLogo');if(reverseLogo)reverseLogo.src=logo.toDataURL('image/png');
+  // Replace ONLY the trees and sky immediately around the logo, with softly
+  // feathered sunset-palette sky. Preserve every original logo pixel.
+  const stops=[[105,[101,45,132]],[140,[116,53,148]],[190,[121,55,149]],[240,[121,58,149]],[250,[122,60,151]]];
+  for(let y=106;y<Math.min(252,h);y++){
+   let a=stops[stops.length-1],b=a;
+   for(let j=0;j<stops.length-1;j++)if(y<=stops[j+1][0]){a=stops[j];b=stops[j+1];break;}
+   const t=Math.max(0,Math.min(1,(y-a[0])/Math.max(1,b[0]-a[0])));
+   for(let x=68;x<Math.min(614,w);x++){
+    if(grow[y*w+x])continue;
+    let alpha=Math.max(0,Math.min(1,(y-105)/12,(251-y)/24,(x-68)/22,(614-x)/22));
+    if(y<135&&x<150)alpha*=.2;
+    if(alpha<=0)continue;
+    const variation=[7*Math.sin(x/62+y/22),3*Math.sin(x/42+y/30),7*Math.cos(x/83-y/28)];
+    const idx=(y*w+x)*4;
+    for(let c=0;c<3;c++){
+     const color=a[1][c]*(1-t)+b[1][c]*t+variation[c];
+     data[idx+c]=Math.round(data[idx+c]*(1-alpha)+color*alpha);
+    }
+   }
+  }
+  context.putImageData(raw,0,0);
+  const cleaned=canvas.toDataURL('image/webp',.93);
+  const frame=canvas.toDataURL('image/png');
+  card.style.setProperty('--ticket-frame','url("'+frame+'")');
+  original.src=cleaned;
+ }catch(e){console.warn('Lucky Buck artwork polish fell back to original art',e);}
+}
+const originalArtForPolish=front.querySelector('img.base');
+if(originalArtForPolish){
+ if(originalArtForPolish.complete&&originalArtForPolish.naturalWidth)polishLuckyBuckArtwork();
+ else originalArtForPolish.addEventListener('load',polishLuckyBuckArtwork,{once:true});
+}
 requestAnimationFrame(loop);
 })();
 </script>
