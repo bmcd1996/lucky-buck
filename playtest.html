@@ -101,10 +101,10 @@
 <button id="buy" class="buy" type="button">🎟️ Buy test ticket · $1</button>
 <div class="stats"><span>Tickets <b id="count">0</b></span><span>Hits <b id="hits">0/3</b></span><span>Last shot <b id="accuracy">—</b></span></div>
 <details class="tune" id="tune"><summary>⚙️ Testing controls (optional)</summary><div class="tuneBody">
-<div class="field"><div><label for="speed">Balloon movement speed</label><output id="speedOut">1.0×</output></div><input id="speed" type="range" min="0.3" max="2.2" step="0.1" value="1"></div>
+<div class="field"><div><label for="speed">Balloon movement speed</label><output id="speedOut">1.0×</output></div><input id="speed" type="range" min="0.3" max="2.2" step="0.1" value="1.6"></div>
 <div class="field"><div><label for="movement">Balloon movement distance</label><output id="movementOut">100%</output></div><input id="movement" type="range" min="30" max="120" step="5" value="100"></div>
-<div class="field"><div><label for="wobble">Crosshair pattern size (∞ then 8)</label><output id="wobbleOut">16px</output></div><input id="wobble" type="range" min="0" max="40" step="1" value="16"></div>
-<div class="field"><div><label for="lift">Crosshair height above finger</label><output id="liftOut">150px</output></div><input id="lift" type="range" min="0" max="220" step="10" value="150"></div>
+<div class="field"><div><label for="wobble">Crosshair pattern size (∞ then 8)</label><output id="wobbleOut">20px</output></div><input id="wobble" type="range" min="0" max="40" step="1" value="20"></div>
+<div class="field"><div><label for="lift">Crosshair height above finger</label><output id="liftOut">130px</output></div><input id="lift" type="range" min="0" max="220" step="10" value="130"></div>
 <div class="field"><label for="force">Test next ticket outcome</label><select id="force"><option value="normal">Natural odds (default)</option><option value="lose">Force losing ticket</option><option value="1">Force $1 winner</option><option value="5">Force $5 winner</option><option value="25">Force $25 winner</option></select></div>
 <label class="field" style="display:flex;align-items:center;gap:7px"><input type="checkbox" id="sound" checked> <span style="font-size:12px">Play sound effects</span></label>
 <p class="small">Ticket odds are currently 75% lose, 17% $1, 6.5% $5, 1.5% $25. This first build tests motion and aiming; the complete simulator modifiers and Rescue Bonus have <b>not</b> been ported or verified here yet. All money is imaginary.</p>
