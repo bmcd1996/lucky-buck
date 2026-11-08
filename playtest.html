@@ -22,7 +22,7 @@
 .back button.flipHotspot{position:absolute;right:4.6%;top:2.4%;width:16%;height:8%;z-index:20;margin:0;padding:0;border:4px solid #ffc34d;background:#28102a;color:#fff6d1;text-shadow:2px 2px #080609;font-size:clamp(18px,5vw,30px);font-weight:900;border-radius:7px;box-shadow:inset 0 0 0 2px #a45723,0 2px 0 #080808;cursor:pointer;touch-action:manipulation}
 /* Growth of about 15%, keeping the approved artwork and balloon centers. */
 .balloon{width:22.8%}
-.balloon img{image-rendering:pixelated}
+.balloon img{image-rendering:pixelated}#front .balloon{width:calc(22.8% * var(--bs,1))}#front .crosshair{width:calc(10.476% * var(--bs,1));height:auto}.embed body{background:transparent;min-height:0}.embed .page{min-height:0}.embed .page{width:100%;padding:0;gap:8px}.embed .gameShell{width:100%}.embed .topbar,.embed .lead,.embed .tune,.embed .page>p.small:last-child{display:none}
 .back h2{margin-top:10px}
 
 /* Lucky Buck ticket art restore: original front art untouched; the back reuses the
@@ -99,17 +99,18 @@
 </div>
 <section class="status"><span id="message" role="status" aria-live="polite">Ready to buy your first ticket!</span><span id="wallet">Test $0</span></section>
 <button id="buy" class="buy" type="button">🎟️ Buy test ticket · $1</button>
-<div class="stats"><span>Tickets <b id="count">0</b></span><span>Hits <b id="hits">0/3</b></span><span>Last shot <b id="accuracy">—</b></span></div>
+<div class="stats"><span>Tickets <b id="count">0</b></span><span>Hits <b id="hits">0/3</b></span><span id="shellBox" style="display:none">Shells <b id="shells">—</b></span><span>Last shot <b id="accuracy">—</b></span></div>
 <details class="tune" id="tune"><summary>⚙️ Testing controls (optional)</summary><div class="tuneBody">
 <div class="field"><div><label for="speed">Balloon movement speed</label><output id="speedOut">1.0×</output></div><input id="speed" type="range" min="0.3" max="2.2" step="0.1" value="1.6"></div>
 <div class="field"><div><label for="movement">Balloon movement distance</label><output id="movementOut">100%</output></div><input id="movement" type="range" min="30" max="120" step="5" value="100"></div>
 <div class="field"><div><label for="wobble">Crosshair pattern size (∞ then 8)</label><output id="wobbleOut">20px</output></div><input id="wobble" type="range" min="0" max="40" step="1" value="20"></div>
 <div class="field"><div><label for="lift">Crosshair height above finger</label><output id="liftOut">130px</output></div><input id="lift" type="range" min="0" max="220" step="10" value="130"></div>
+<div class="field"><div><label for="bsize">Balloon size</label><output id="bsizeOut">100%</output></div><input id="bsize" type="range" min="70" max="130" step="5" value="100"></div>
 <div class="field"><label for="force">Test next ticket outcome</label><select id="force"><option value="normal">Natural odds (default)</option><option value="lose">Force losing ticket</option><option value="1">Force $1 winner</option><option value="5">Force $5 winner</option><option value="25">Force $25 winner</option></select></div>
 <label class="field" style="display:flex;align-items:center;gap:7px"><input type="checkbox" id="sound" checked> <span style="font-size:12px">Play sound effects</span></label>
-<p class="small">Ticket odds are currently 75% lose, 17% $1, 6.5% $5, 1.5% $25. This first build tests motion and aiming; the complete simulator modifiers and Rescue Bonus have <b>not</b> been ported or verified here yet. All money is imaginary.</p>
+<p class="small" id="modeNote"></p><p class="small"><a href="index.html" style="color:inherit;font-weight:800">⚙️ Open the calculator</a> to switch Skill mode, paint the balloon zones, set Buck’s Secret, or change the odds. Rescue Bonus, Hot Streak, Double Down and special items are not applied on this ticket yet. All money is imaginary.</p>
 </div></details>
-<p class="small" style="text-align:center">Original Lucky Buck Ticket 1.0.0 · Standalone playtest · Simulator and saved tickets unchanged</p>
+<p class="small" style="text-align:center">Original Lucky Buck Ticket 1.0.0 · Linked to the Cardboard to Cash calculator (Skill mode, odds, Buck’s Secret)</p>
 </main>
 <script>
 (()=>{'use strict';
@@ -122,15 +123,65 @@ let pointer=null,aim={x:.50,y:.40},reticle={x:.5,y:.4},lastFrame=performance.now
 let lastSound=null;
 const clamp=(v,lo,hi)=>Math.min(hi,Math.max(lo,v));
 const nfmt=n=>Number(n).toLocaleString('en-US');
+/* Lucky Buck shared skill settings (used by calculator AND ticket). One grid applies to all three balloons. */
+const LB_SKILL_KEY='lucky-buck-skill-v1',LB_CALC_KEY='quill-lucky-buck-v2';
+const LB_GW=37,LB_GH=45,LB_CX=18,LB_CY=22;
+const LB_MASK='.............................................................................................................................................................................................................................................#######...........................###ooooooo###......................##ooooooooooooo##...................#ooooooooooooooooo#.................#ooooooooooooooooooo#...............#ooooooooooooooooooooo#.............#ooooooooooooooooooooooo#...........#ooooooooooooooooooooooooo#.........#ooooooooooooooooooooooooooo#........#ooooooooooooooooooooooooooo#.......#oooooooo#ooooooooooo#oooooooo#......#oooooooo##ooooooooo##oooooooo#......#ooooooooo##ooooooo##ooooooooo#.....#ooooooooooo##ooooo##ooooooooooo#....#oooooooooooo##ooo##oooooooooooo#....#ooooooooooooo#####ooooooooooooo#....#oooooooooooooo#o#oooooooooooooo#....#ooooooooooooo#####ooooooooooooo#....#oooooooooooo##ooo##oooooooooooo#....#ooooooooooo##ooooo##ooooooooooo#.....#ooooooooo##ooooooo##ooooooooo#......#oooooooo##ooooooooo##oooooooo#......#oooooooo#ooooooooooo#oooooooo#.......#ooooooooooooooooooooooooooo#........#ooooooooooooooooooooooooooo#.........#ooooooooooooooooooooooooo#...........#ooooooooooooooooooooooo#.............#ooooooooooooooooooooo#...............#ooooooooooooooooooo#.................#ooooooooooooooooo#...................##ooooooooooooo##......................###ooooooo###...........................##ooo##...............................#ooo#.................................###.....................................................................................................................................................................';
+const LB_ZONES=['G','N','Y','R'];
+const LB_ZONE_INFO={G:{name:'Gold',col:'#f5b81c'},N:{name:'Green',col:'#35c759'},Y:{name:'Yellow',col:'#fff06a'},R:{name:'Red',col:'#ef3b3b'}};
+function lbRingGrid(g,n,y){let s='';for(let j=0;j<LB_GH;j++)for(let i=0;i<LB_GW;i++){if(LB_MASK[j*LB_GW+i]==='.'){s+='.';continue}const d=Math.hypot(i-LB_CX,j-LB_CY);s+=d<=g?'G':d<=n?'N':d<=y?'Y':'R'}return s}
+/* Gold = Buck's Secret spot. Default: the single dead-centre pixel. */
+/* Play settings shared by the calculator sliders and the ticket. */
+const LB_PLAY_DEFAULTS={speed:1.6,movement:100,wobble:20,lift:130,size:100,sound:true};
+const LB_PLAY_RANGES={speed:[0.3,2.2],movement:[30,120],wobble:[0,40],lift:[0,220],size:[70,130]};
+function lbCleanPlay(p){p=p||{};const o={};for(const k in LB_PLAY_RANGES){const x=Number(p[k]),[lo,hi]=LB_PLAY_RANGES[k];o[k]=Number.isFinite(x)?Math.min(hi,Math.max(lo,x)):LB_PLAY_DEFAULTS[k];}o.sound=p.sound!==false;return o}
+function lbSkillDefaults(){return {version:2,skillOn:false,rings:{gold:0,green:6.5,yellow:11.5},grid:lbRingGrid(0,6.5,11.5),values:{G:25,N:5,Y:1,R:0},shells:5,play:{...LB_PLAY_DEFAULTS},secret:{on:true,amount:1,max:2}}}
+function lbLoadSkill(){const d=lbSkillDefaults();try{const v=JSON.parse(localStorage.getItem(LB_SKILL_KEY)||'null');if(!v||typeof v!=='object'||v.version!==2)return d;
+ let grid=d.grid;if(typeof v.grid==='string'&&v.grid.length===LB_GW*LB_GH){grid='';for(let k=0;k<v.grid.length;k++){const m=LB_MASK[k]==='.',c=v.grid[k];grid+=m?'.':(LB_ZONES.includes(c)?c:'R')}}
+ const num=(x,f,lo,hi)=>{x=Number(x);return Number.isFinite(x)?Math.min(hi,Math.max(lo,x)):f};
+ const values={};for(const z of LB_ZONES)values[z]=num(v.values?.[z],d.values[z],0,100000);
+ const s=v.secret||{};
+ return {version:2,skillOn:v.skillOn===true,rings:{gold:num(v.rings?.gold,0,0,20),green:num(v.rings?.green,6.5,0,25),yellow:num(v.rings?.yellow,11.5,0,25)},grid,values,play:lbCleanPlay(v.play),shells:Math.round(num(v.shells,5,1,20)),
+  secret:{on:s.on!==false,amount:num(s.amount,1,0,1000),max:num(s.max,2,0,10000)}};
+ }catch(e){return d}}
+function lbSaveSkill(v){try{localStorage.setItem(LB_SKILL_KEY,JSON.stringify(v));return true}catch(e){return false}}
+function lbIsGold(S,c){return c.cx>=0&&c.cx<LB_GW&&c.cy>=0&&c.cy<LB_GH&&S.grid[c.cy*LB_GW+c.cx]==='G'}
+
+/* Calculator odds for Skill OFF: the lucky-buck ticket's prize rows plus its Luck level (Hot Streak, Double Down, Rescue Bonus and special items are not applied on this ticket yet). */
+function calcOdds(){const fb={p:[75,17,6.5,1.5],src:'built-in odds (no calculator save found)'};
+ try{const st=JSON.parse(localStorage.getItem(LB_CALC_KEY)||'null');const t=st&&Array.isArray(st.tickets)&&st.tickets.find(x=>x.id==='lucky-buck');if(!t)return fb;
+  const rows=t.rows.filter(r=>r.kind!=='jackpot');const L=rows.find(r=>r.kind==='lose'),c=a=>rows.find(r=>r.kind==='cash'&&Number(r.amount)===a);
+  if(rows.length!==4||!L||!c(1)||!c(5)||!c(25))return {...fb,src:'built-in odds (calculator ticket has a different prize set)'};
+  let p=[L.chance,c(1).chance,c(5).chance,c(25).chance].map(Number);const lv=Number(t.luck)||0;
+  if(lv>0&&t.luckMode==='luckyBuck'){const cu=t.rates?.luck?.mode==='edit'?t.rates.luck.levels?.[lv]:null;p=cu&&cu.length===4?cu.map(Number):[p[0]-(11/3)*lv,p[1]+lv,p[2]+2*lv,p[3]+(2/3)*lv];}
+  const sum=p.reduce((x,y)=>x+y,0);if(!p.every(v=>Number.isFinite(v)&&v>=0)||Math.abs(sum-100)>1e-6)return {...fb,src:'built-in odds (calculator odds invalid)'};
+  return {p,src:'calculator'+(lv>0?' + Luck '+lv:'')};}catch(e){return fb}}
+let S=lbLoadSkill(),bonus=0,shells=0;
+const bsz=()=>S.play.size/100;
+/* Play settings: shared with the calculator's sliders (same saved settings). */
+const PLAY_IDS=[['speed','speed'],['movement','movement'],['wobble','wobble'],['lift','lift'],['bsize','size']];
+function outText(id){const i=$(id),o=$(id+'Out');if(o)o.textContent=(id==='speed'?Number(i.value).toFixed(1)+'×':id==='movement'||id==='bsize'?i.value+'%':i.value+'px');}
+function applyPlay(){for(const [id,k] of PLAY_IDS){$(id).value=S.play[k];outText(id);}$('sound').checked=S.play.sound;front.style.setProperty('--bs',bsz());}
+function savePlay(k,v){const cur=lbLoadSkill();cur.play[k]=v;lbSaveSkill(cur);S.play=cur.play;front.style.setProperty('--bs',bsz());}
+if(new URLSearchParams(location.search).get('embed')==='1')document.documentElement.classList.add('embed');
+function showShells(){const box=$('shellBox');if(!box)return;box.style.display=S.skillOn?'':'none';$('shells').textContent=shells+'/'+S.shells;}
+function cellFor(b,spot,r){const cs=r.width*0.228*bsz()/LB_GW;return{cx:Math.floor(LB_CX+.5+(spot.x-b.x)*r.width/cs),cy:Math.floor(LB_CY+.5+(spot.y-b.y)*r.height/cs)}}
+function inMask(c){return c.cx>=0&&c.cx<LB_GW&&c.cy>=0&&c.cy<LB_GH&&LB_MASK[c.cy*LB_GW+c.cx]!=='.'}
+function showMode(){const o=calcOdds();$('modeNote').innerHTML=S.skillOn?'<b>🎯 Skill mode ON</b> (set in the calculator): where you hit each balloon decides its number, and your worst shot sets the prize. Gold $'+S.values.G+', green $'+S.values.N+', yellow $'+S.values.Y+', red $'+S.values.R+'. '+S.shells+' shells per ticket; balloons left when you run out count as $0.':'<b>Skill mode OFF</b>: odds from '+o.src+': lose '+o.p[0].toFixed(2).replace(/\.?0+$/,'')+'%, $1 '+o.p[1].toFixed(2).replace(/\.?0+$/,'')+'%, $5 '+o.p[2].toFixed(2).replace(/\.?0+$/,'')+'%, $25 '+o.p[3].toFixed(2).replace(/\.?0+$/,'')+'%.';
+ const gold=[...S.grid].filter(c=>c==='G').length;
+ $('modeNote').innerHTML+=S.secret.on?' Buck’s Secret = the gold spot ('+gold+' pixel'+(gold===1?'':'s')+')'+(S.skillOn?': it shows the gold prize.':': each gold hit pays +$'+S.secret.amount+', up to +$'+S.secret.max+' per ticket.'):' Buck’s Secret is off.';
+ $('force').disabled=S.skillOn;showShells();}
+window.addEventListener('storage',e=>{if(e.key===LB_SKILL_KEY||e.key===LB_CALC_KEY){const f=lbLoadSkill();if(!purchased||completed)S=f;else S.play=f.play;showMode();applyPlay();}});
+
 function updateLabel(s){message.textContent=s}
 function playSound(kind){if(!$('sound').checked)return;try{const A=window.AudioContext||window.webkitAudioContext;if(!A)return;lastSound=lastSound||new A();if(lastSound.state==='suspended')lastSound.resume();const t=lastSound.currentTime;if(kind==='bull'){for(const [hz,delay] of [[540,0],[805,.085]]){const osc=lastSound.createOscillator(),gain=lastSound.createGain(),at=t+delay;osc.type='triangle';osc.frequency.setValueAtTime(hz,at);osc.frequency.exponentialRampToValueAtTime(hz*1.17,at+.12);gain.gain.setValueAtTime(.0001,at);gain.gain.exponentialRampToValueAtTime(.07,at+.018);gain.gain.exponentialRampToValueAtTime(.001,at+.19);osc.connect(gain);gain.connect(lastSound.destination);osc.start(at);osc.stop(at+.2)}return;}const osc=lastSound.createOscillator(),gain=lastSound.createGain();osc.type=kind==='win'?'triangle':kind==='miss'?'sine':'square';osc.frequency.setValueAtTime(kind==='win'?500:kind==='miss'?155:360,t);osc.frequency.exponentialRampToValueAtTime(kind==='win'?900:kind==='miss'?85:120,t+.15);gain.gain.setValueAtTime(.06,t);gain.gain.exponentialRampToValueAtTime(.001,t+.2);osc.connect(gain);gain.connect(lastSound.destination);osc.start(t);osc.stop(t+.21)}catch(e){}}
 function choice(vals){return vals[Math.floor(Math.random()*vals.length)]}
-function baseOutcome(){let forced=$('force').value;if(forced==='normal'){const r=Math.random()*100;forced=r<75?'lose':r<92?'1':r<98.5?'5':'25'}
+function baseOutcome(){let forced=$('force').value;if(forced==='normal'){const p=calcOdds().p,r=Math.random()*100;forced=r<p[0]?'lose':r<p[0]+p[1]?'1':r<p[0]+p[1]+p[2]?'5':'25'}
 if(forced!=='lose')return {numbers:[Number(forced),Number(forced),Number(forced)],winning:Number(forced)};
 const options=[0,1,5,25];let nums;do{nums=[choice(options),choice(options),choice(options)]}while(nums[0]===nums[1]&&nums[1]===nums[2]);return {numbers:nums,winning:0};}
 let ticketResult=null,flipTimerA=null,flipTimerB=null;
-function resetForTicket(){clearTimeout(flipTimerA);clearTimeout(flipTimerB);card.classList.remove('flipping');ticketResult=baseOutcome();purchased=true;completed=false;flipState=false;card.classList.remove('flipped');count++;$('count').textContent=nfmt(count);$('accuracy').textContent='—';
-for(let i=0;i<3;i++){const b=balloons[i];b.popped=false;b.accuracy=null;b.amount=ticketResult.numbers[i];b.node.classList.remove('popped');b.node.style.opacity='1';b.node.innerHTML='<img draggable="false" alt="" src="'+[redSrc,blueSrc,yellowSrc][i]+'"><span class="glyph">?</span>';}
+function resetForTicket(){clearTimeout(flipTimerA);clearTimeout(flipTimerB);card.classList.remove('flipping');S=lbLoadSkill();bonus=0;shells=S.shells;showMode();showShells();ticketResult=S.skillOn?{numbers:[null,null,null],winning:0,skill:true}:baseOutcome();purchased=true;completed=false;flipState=false;card.classList.remove('flipped');count++;$('count').textContent=nfmt(count);$('accuracy').textContent='—';
+for(let i=0;i<3;i++){const b=balloons[i];b.popped=false;b.accuracy=null;b.amount=ticketResult.numbers[i];b.node.classList.remove('popped');b.node.style.opacity='1';b.node.innerHTML='<img draggable="false" alt="" src="'+[redSrc,blueSrc,yellowSrc][i]+'"><span class="glyph">?</span>';}front.style.setProperty('--bs',bsz());
 front.querySelectorAll('.revealed,.impact,.lbStar').forEach(e=>e.remove());$('hits').textContent='0/3';btn.textContent='🎟️ Buy next test ticket · $1';updateLabel('Hold your finger on the ticket to aim, then release to fire.');playSound('buy');}
 const redSrc=$('balloon0').querySelector('img').src,blueSrc=$('balloon1').querySelector('img').src,yellowSrc=$('balloon2').querySelector('img').src;
 function setFlip(v){if(flipState===v||card.classList.contains('flipping'))return;stopAim();card.classList.add('flipping');flipTimerA=setTimeout(()=>{flipState=v;card.classList.toggle('flipped',v)},330);flipTimerB=setTimeout(()=>card.classList.remove('flipping'),670);}
@@ -154,18 +205,37 @@ function starBurst(x,y,n){const col=STAR_COL[balloons.find(o=>o.x===x&&o.y===y)?
 function shoot(spot){if(!purchased||completed)return;const remaining=balloons.filter(b=>!b.popped);if(!remaining.length)return;const r=front.getBoundingClientRect(),width=r.width,height=r.height;
 const closest=remaining.map(b=>({b,d:Math.hypot((b.x-spot.x)*width,(b.y-spot.y)*height)})).sort((a,z)=>a.d-z.d)[0];
 flash.classList.remove('fire');void flash.offsetWidth;flash.classList.add('fire');
-const hitRadius=width*.106,accuracy=Math.round(clamp(100*(1-Math.pow(closest.d/(width*.28),2)),0,100));$('accuracy').textContent=accuracy+'%';
-if(closest.d>hitRadius){playSound('miss');effect(spot.x,spot.y,'MISS!',false);updateLabel('Miss! Try again. Hold, follow a balloon, release.');return;}
-const b=closest.b;b.popped=true;b.accuracy=accuracy;playSound(accuracy>=95?'bull':'pop');b.node.classList.add('popped');b.node.style.opacity='0';const n=document.createElement('span');n.className='revealed p'+b.amount;starBurst(b.x,b.y,n);n.textContent=b.amount===0?'$0':'$'+b.amount;n.style.left=(b.x*100)+'%';n.style.top=(b.y*100)+'%';front.append(n);
-const popped=balloons.filter(o=>o.popped).length;$('hits').textContent=popped+'/3';if(accuracy<95)effect(b.x,b.y,accuracy+'% HIT',true);updateLabel(popped===3?'Checking your numbers…':`${popped}/3 balloons popped — keep going!`);
-if(popped===3){completed=true;setTimeout(()=>{if(ticketResult.winning>0){total+=ticketResult.winning;$('wallet').textContent='Test $'+nfmt(total);updateLabel('🎉 MATCH THREE! YOU WON $'+ticketResult.winning+'!');playSound('win')}else{updateLabel('No match this time. Try another $1 ticket!')}btn.textContent='🎟️ Buy next test ticket · $1'},570)}
+const hitRadius=width*.106*bsz(),accFor=d=>Math.round(clamp(100*(1-Math.pow(d/(width*.28),2)),0,100));let b,accuracy,cell,label='';
+if(ticketResult.skill){shells--;showShells();const h=remaining.map(o=>({o,c:cellFor(o,spot,r)})).find(q=>inMask(q.c));
+ if(!h){$('accuracy').textContent='miss';playSound('miss');effect(spot.x,spot.y,'MISS!',false);if(shells<=0){outOfShells();return;}updateLabel('Miss! '+shells+' shell'+(shells===1?'':'s')+' left. Hold, follow a balloon, release.');return;}
+ b=h.o;cell=h.c;const z=S.grid[cell.cy*LB_GW+cell.cx];b.amount=Number(S.values[z])||0;b.zone=z;ticketResult.numbers[balloons.indexOf(b)]=b.amount;accuracy=accFor(Math.hypot((b.x-spot.x)*width,(b.y-spot.y)*height));label=LB_ZONE_INFO[z].name;$('accuracy').textContent=label;
+}else{accuracy=accFor(closest.d);$('accuracy').textContent=accuracy+'%';
+ if(closest.d>hitRadius){playSound('miss');effect(spot.x,spot.y,'MISS!',false);updateLabel('Miss! Try again. Hold, follow a balloon, release.');return;}
+ b=closest.b;cell=cellFor(b,spot,r);}
+/* Buck's Secret = the gold squares of the grid. Skill ON: gold shows the gold prize. Skill OFF: gold pays an extra bonus. */
+const perfect=S.secret.on&&lbIsGold(S,cell);let add=0;if(perfect&&!ticketResult.skill){add=Math.max(0,Math.min(S.secret.amount,S.secret.max-bonus));bonus+=add;}
+b.popped=true;b.accuracy=accuracy;playSound(perfect||(ticketResult.skill?b.zone==='G':accuracy>=95)?'bull':'pop');b.node.classList.add('popped');b.node.style.opacity='0';const n=document.createElement('span');n.className='revealed p'+b.amount;starBurst(b.x,b.y,n);n.textContent=b.amount===0?'$0':'$'+b.amount;n.style.left=(b.x*100)+'%';n.style.top=(b.y*100)+'%';front.append(n);
+const popped=balloons.filter(o=>o.popped).length;$('hits').textContent=popped+'/3';
+if(perfect)effect(b.x,b.y-.075,add>0?'BUCK’S SECRET +$'+add:'BUCK’S SECRET!',true);else if(ticketResult.skill)effect(b.x,b.y-.075,b.zone==='G'?'BULLSEYE!':label.toUpperCase(),true);else if(accuracy<95)effect(b.x,b.y,accuracy+'% HIT',true);
+if(popped<3&&ticketResult.skill&&shells<=0){outOfShells();return;}
+updateLabel(popped===3?'Checking your numbers…':`${popped}/3 balloons popped — keep going!`+(ticketResult.skill?' '+shells+' shell'+(shells===1?'':'s')+' left.':'')+(bonus>0?' Secret bonus +$'+bonus:''));
+if(popped===3)finishTicket();
 }
+/* Out of shells (Skill mode): every balloon still floating counts as $0. */
+function outOfShells(){for(const o of balloons){if(o.popped)continue;o.popped=true;o.amount=0;ticketResult.numbers[balloons.indexOf(o)]=0;o.node.classList.add('popped');o.node.style.opacity='0';const n=document.createElement('span');n.className='revealed p0';n.textContent='$0';n.style.left=(o.x*100)+'%';n.style.top=(o.y*100)+'%';front.append(n);}
+ $('hits').textContent='3/3';effect(.5,.55,'OUT OF SHELLS!',false);updateLabel('Out of shells! Leftover balloons count as $0.');finishTicket();}
+function finishTicket(){completed=true;setTimeout(()=>{const nums=ticketResult.numbers;/* Skill mode: your worst shot sets the prize (5,5,1 pays $1; any $0 = no prize). */const win=ticketResult.skill?Math.min(...nums):ticketResult.winning;const pay=win+bonus;
+ if(pay>0){total+=pay;$('wallet').textContent='Test $'+nfmt(total);updateLabel(win>0?(ticketResult.skill?'🎯 Worst shot $'+win+': YOU WON $'+win+'!':'🎉 MATCH THREE! YOU WON $'+win+'!')+(bonus>0?' + Buck’s Secret $'+bonus+' = $'+pay:''):'🦌 No match, but Buck’s Secret pays $'+bonus+'!');playSound('win')}
+ else{updateLabel(ticketResult.skill?'A $0 shot means no prize. Try another $1 ticket!':'No match this time. Try another $1 ticket!')}btn.textContent='🎟️ Buy next test ticket · $1'},570)}
 function loop(now){const dt=clamp((now-lastFrame)/1000,0,.06);lastFrame=now;elapsed+=dt*Number($('speed').value);const move=Number($('movement').value)/100;
 for(let i=0;i<3;i++){const b=balloons[i],p=positions[i];if(!b.popped){const t=elapsed*Math.PI*2/p.period+p.phase;b.x=p.x+move*p.dx*Math.sin(t*.75+Math.sin(t)*.16);b.y=p.y+move*p.dy*Math.sin(t+Math.cos(t*.67)*.14);b.node.style.left=(b.x*100)+'%';b.node.style.top=(b.y*100)+'%';}}
 if(hold&&pointer){const A=Number($('wobble').value);const w=front.clientWidth||400,h=front.clientHeight||550;/* Crosshair traces a cycle of shapes: infinity sign, then figure 8, then repeat. Each shape is one loop of PERIOD seconds, starting from the aim point; both shapes cross the centre with the same speed and direction, so the switch is seamless. */const PERIOD=2.4,t=Math.max(0,now-shotStart)/1000*2*Math.PI/PERIOD,shape=Math.floor(t/(2*Math.PI))%2;const ox=shape===0?Math.sin(t):.5*Math.sin(2*t),oy=shape===0?.5*Math.sin(2*t):Math.sin(t);reticle.x=clamp(aim.x+ox*A/w,.03,.97);reticle.y=clamp(aim.y-oy*A/h,.17,.82);cross.style.left=(reticle.x*100)+'%';cross.style.top=(reticle.y*100)+'%';}
 requestAnimationFrame(loop)}
-for(const [id,suffix] of [['speed','×'],['movement','%'],['wobble','px'],['lift','px']]){const input=$(id),out=$(id+'Out');const show=()=>out.textContent=(id==='speed'?Number(input.value).toFixed(1):input.value)+suffix;input.addEventListener('input',show);show()}
-window.__luckyBuckPlaytest={getState:()=>({purchased,completed,count,total,popped:balloons.filter(b=>b.popped).length,balloons:balloons.map(b=>({x:b.x,y:b.y,popped:b.popped})),flipState}),buy:resetForTicket,shoot};
+showMode();$('sound').addEventListener('change',e=>savePlay('sound',e.target.checked));
+for(const [id,k] of PLAY_IDS)$(id).addEventListener('input',e=>savePlay(k,Number(e.target.value)));
+applyPlay();
+for(const [id,suffix] of [['speed','×'],['movement','%'],['wobble','px'],['lift','px'],['bsize','%']]){const input=$(id),out=$(id+'Out');const show=()=>out.textContent=(id==='speed'?Number(input.value).toFixed(1):input.value)+suffix;input.addEventListener('input',show);show()}
+window.__luckyBuckPlaytest={skill:()=>S,calcOdds,cellFor,getState:()=>({bonus,numbers:ticketResult&&ticketResult.numbers,purchased,completed,count,total,popped:balloons.filter(b=>b.popped).length,balloons:balloons.map(b=>({x:b.x,y:b.y,popped:b.popped})),flipState}),buy:resetForTicket,shoot};
 /* The back shows the very same original artwork image as the front (frame + logo). */
 {const bb=document.getElementById('backBase'),fb=front.querySelector('img.base');if(bb&&fb)bb.src=fb.getAttribute('src');}
 requestAnimationFrame(loop);

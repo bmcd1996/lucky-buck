@@ -557,13 +557,72 @@ body.setup-open{overflow:hidden}.card-top .ticket-gear+h3{margin-right:auto}
 .hero .ticket-logo-heading img{display:block;max-width:min(100%,235px);max-height:88px;width:auto;height:auto;object-fit:contain;object-position:left center;image-rendering:pixelated}
 .hero .ticket-logo-heading h2{margin:0;max-width:100%;overflow-wrap:anywhere}
 @media(max-width:650px){.hero .ticket-logo-heading img{max-width:min(100%,190px);max-height:74px}}
+/* Skill mode (v3.4.0 preview) */
+.skill-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 10px;padding:10px;border:1px solid var(--border);border-radius:14px;background:#10241d}
+.skill-toggle{display:flex;align-items:center;gap:10px;flex:1 1 210px;min-height:48px;padding:8px 12px;border-radius:12px;border:1px solid #618776;background:#1c4331;color:#e4f9e8;font-weight:800;font-size:15px;text-align:left}
+.skill-toggle .sk-knob{flex:none;width:44px;height:26px;border-radius:13px;background:#0b1b15;border:1px solid #618776;position:relative}
+.skill-toggle .sk-knob:after{content:"";position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#9eb8aa;transition:left .15s,background .15s}
+.skill-toggle[aria-pressed="true"]{background:#f0ce85;color:#182f25;border-color:#ffe3ab}
+.skill-toggle[aria-pressed="true"] .sk-knob{background:#182f25}
+.skill-toggle[aria-pressed="true"] .sk-knob:after{left:20px;background:#ffd481}
+.skill-play{flex:0 0 auto;display:flex;align-items:center;min-height:48px;padding:8px 14px;border-radius:12px;background:#2f6d4b;color:#fff;font-weight:800;text-decoration:none;border:1px solid #6ee2a1}
+.skill-explain{flex:1 1 100%;margin:0;font-size:12px;color:var(--muted)}
+.skill-card .card-top,.secret-card .card-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.skill-help{font-size:13px;line-height:1.35;color:#d8eadc;margin:6px 0 10px}
+.sk-palette{display:grid;grid-template-columns:1fr;gap:6px;margin-bottom:10px}
+.sk-zone{min-width:0;display:flex;align-items:center;gap:6px;padding:5px;border-radius:12px;border:2px solid transparent;background:#0f201a}
+.sk-zone.active{border-color:#fff}
+.sk-swatch{flex:1;min-width:0;display:flex;align-items:center;gap:8px;min-height:46px;padding:6px 8px;border-radius:9px;border:1px solid #618776;background:#1c4331;color:#fff;font-weight:800;font-size:15px}
+.sk-swatch i{flex:none;width:24px;height:24px;border:2px solid #000;border-radius:4px}
+.sk-val{flex:none;display:flex;align-items:center;gap:2px;font-weight:800;color:var(--gold)}
+.sk-val input{width:84px!important;max-width:84px;min-height:46px;font-size:17px;font-weight:800;text-align:center;padding:4px}
+.sk-tools{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.sk-seg{display:flex;align-items:center;gap:4px;flex:1 1 auto}
+.sk-seg span{font-size:12px;font-weight:800;color:var(--muted);padding:0 4px;min-width:28px;text-align:center}
+.sk-seg button{min-height:44px;min-width:44px;padding:6px 10px;border-radius:10px;border:1px solid #618776;background:#1c4331;color:#fff;font-weight:800;font-size:15px}
+.sk-seg button[aria-pressed="true"]{background:#f0ce85;color:#182f25;border-color:#ffe3ab}
+.sk-gridwrap{width:100%;overflow:hidden;border-radius:12px;background:#0a1712;border:1px solid var(--border);padding:1px;display:flex;justify-content:center}
+.sk-gridwrap.zoomed{overflow:auto;max-height:70vh;justify-content:flex-start;-webkit-overflow-scrolling:touch}
+#skGrid{display:block;touch-action:none;image-rendering:pixelated;cursor:crosshair}
+.sk-legend{margin:6px 0}
+.sk-rings{margin:8px 0;border:1px solid var(--border);border-radius:12px;padding:8px 10px}
+.sk-rings summary{font-weight:800;min-height:36px;display:flex;align-items:center;cursor:pointer}
+.sk-ring{display:grid;grid-template-columns:1fr 1.3fr 52px;align-items:center;gap:8px;margin:8px 0;font-size:13px}
+.sk-ring output{font-weight:800;color:var(--gold);text-align:right}
+.sk-btn{min-height:44px;padding:8px 14px;border-radius:10px;border:1px solid #ffe3ab;background:#f0ce85;color:#182f25;font-weight:800;margin:4px 0}
+.sk-table{width:100%;border-collapse:collapse;font-size:13px;margin-top:6px}
+.sk-table th,.sk-table td{padding:5px 4px;border-bottom:1px solid #ffffff14;text-align:right}
+.sk-table th:first-child,.sk-table td:first-child{text-align:left}
+.sk-table i{display:inline-block;width:12px;height:12px;border:1px solid #000;margin-right:6px;vertical-align:-1px}
+.sk-check{display:flex!important;align-items:center;gap:8px;font-weight:800;min-height:40px}
+.sk-check input{width:22px;height:22px;min-height:0;accent-color:#6ee2a1}
+.sec-grid{display:grid;grid-template-columns:1fr auto;gap:8px 10px;align-items:center;font-size:13px}
+.sec-grid select{min-height:44px}
+.sk-money{display:flex;align-items:center;gap:2px;font-weight:800;color:var(--gold)}
+.sk-money input{width:84px!important;max-width:84px;min-height:44px;font-size:16px;text-align:center}
+.skill-note{display:none;margin:0 0 8px;padding:8px 10px;border-radius:10px;background:#3a2f12;color:#ffe3ab;font-size:12px;font-weight:700}
+.skill-on .skill-odds .skill-note{display:block}
+.skill-on .skill-odds>:not(.skill-note){opacity:.45}
+.sk-swatch small{font-size:10px;font-weight:700;color:#ffe3ab;margin-left:2px}
+.sk-shells{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;margin:0 0 10px;font-weight:800;font-size:14px}.sk-shells input{width:84px!important;max-width:84px;min-height:46px;font-size:17px;font-weight:800;text-align:center}.sk-shells small{grid-column:1/-1;font-weight:500}
+
+.skill-on .skill-hide{display:none!important}
+.skill-play-card{padding-left:2px!important;padding-right:2px!important}
+.skill-play-card .card-top{padding:0 6px}
+.sk-open{color:var(--gold);font-weight:800;text-decoration:none}
+#skFrame{display:block;width:100%;height:640px;border:0;background:transparent;margin:6px 0 4px}
+.sk-playset{margin:8px 4px 0;border:1px solid var(--border);border-radius:12px;padding:8px 10px}
+.sk-playset summary{font-weight:800;min-height:38px;display:flex;align-items:center;cursor:pointer}
+.sk-slider{display:grid;grid-template-columns:1fr auto;gap:4px 8px;align-items:center;margin:10px 0;font-size:13px;font-weight:700}
+.sk-slider output{color:var(--gold);font-weight:800}
+.sk-slider input{grid-column:1/-1;width:100%;min-height:32px;accent-color:#ffd481}
 </style>
 </head>
 <body>
 <div class="wrap">
 <header class="header">
 <div class="brand"><div class="brand-mark">$</div><div><small>QUILL PRODUCTIONS</small><h1>Cardboard to Cash</h1></div></div>
-<div class="header-right"><span class="version-badge" title="Lucky Buck simulator version">v3.3.3</span><span class="save" id="saveStatus">Loading…</span></div>
+<div class="header-right"><span class="version-badge" title="Lucky Buck simulator version">v3.4.0</span><span class="save" id="saveStatus">Loading…</span></div>
 </header>
 
 <section class="hero">
@@ -1730,6 +1789,144 @@ paneButtons.forEach((b,i)=>b.addEventListener('click',()=>{if(fit){fit=false;rai
 byId('v3Fit').addEventListener('click',e=>{fit=!fit;rail.classList.toggle('v3-fitmode',fit);e.currentTarget.setAttribute('aria-pressed',String(fit));e.currentTarget.textContent=fit?'Normal size':'Fit Both';if(fit)rail.scrollTo({left:0,behavior:'instant'})});
 rail.addEventListener('scroll',()=>{if(!fit)setActive(rail.scrollLeft>=rail.clientWidth*.5?1:0)},{passive:true});
 // Never scroll the whole page horizontally or alter the existing simulator payout rules.
+})();
+
+</script>
+<script>
+/* Lucky Buck shared skill settings (used by calculator AND ticket). One grid applies to all three balloons. */
+const LB_SKILL_KEY='lucky-buck-skill-v1',LB_CALC_KEY='quill-lucky-buck-v2';
+const LB_GW=37,LB_GH=45,LB_CX=18,LB_CY=22;
+const LB_MASK='.............................................................................................................................................................................................................................................#######...........................###ooooooo###......................##ooooooooooooo##...................#ooooooooooooooooo#.................#ooooooooooooooooooo#...............#ooooooooooooooooooooo#.............#ooooooooooooooooooooooo#...........#ooooooooooooooooooooooooo#.........#ooooooooooooooooooooooooooo#........#ooooooooooooooooooooooooooo#.......#oooooooo#ooooooooooo#oooooooo#......#oooooooo##ooooooooo##oooooooo#......#ooooooooo##ooooooo##ooooooooo#.....#ooooooooooo##ooooo##ooooooooooo#....#oooooooooooo##ooo##oooooooooooo#....#ooooooooooooo#####ooooooooooooo#....#oooooooooooooo#o#oooooooooooooo#....#ooooooooooooo#####ooooooooooooo#....#oooooooooooo##ooo##oooooooooooo#....#ooooooooooo##ooooo##ooooooooooo#.....#ooooooooo##ooooooo##ooooooooo#......#oooooooo##ooooooooo##oooooooo#......#oooooooo#ooooooooooo#oooooooo#.......#ooooooooooooooooooooooooooo#........#ooooooooooooooooooooooooooo#.........#ooooooooooooooooooooooooo#...........#ooooooooooooooooooooooo#.............#ooooooooooooooooooooo#...............#ooooooooooooooooooo#.................#ooooooooooooooooo#...................##ooooooooooooo##......................###ooooooo###...........................##ooo##...............................#ooo#.................................###.....................................................................................................................................................................';
+const LB_ZONES=['G','N','Y','R'];
+const LB_ZONE_INFO={G:{name:'Gold',col:'#f5b81c'},N:{name:'Green',col:'#35c759'},Y:{name:'Yellow',col:'#fff06a'},R:{name:'Red',col:'#ef3b3b'}};
+function lbRingGrid(g,n,y){let s='';for(let j=0;j<LB_GH;j++)for(let i=0;i<LB_GW;i++){if(LB_MASK[j*LB_GW+i]==='.'){s+='.';continue}const d=Math.hypot(i-LB_CX,j-LB_CY);s+=d<=g?'G':d<=n?'N':d<=y?'Y':'R'}return s}
+/* Gold = Buck's Secret spot. Default: the single dead-centre pixel. */
+/* Play settings shared by the calculator sliders and the ticket. */
+const LB_PLAY_DEFAULTS={speed:1.6,movement:100,wobble:20,lift:130,size:100,sound:true};
+const LB_PLAY_RANGES={speed:[0.3,2.2],movement:[30,120],wobble:[0,40],lift:[0,220],size:[70,130]};
+function lbCleanPlay(p){p=p||{};const o={};for(const k in LB_PLAY_RANGES){const x=Number(p[k]),[lo,hi]=LB_PLAY_RANGES[k];o[k]=Number.isFinite(x)?Math.min(hi,Math.max(lo,x)):LB_PLAY_DEFAULTS[k];}o.sound=p.sound!==false;return o}
+function lbSkillDefaults(){return {version:2,skillOn:false,rings:{gold:0,green:6.5,yellow:11.5},grid:lbRingGrid(0,6.5,11.5),values:{G:25,N:5,Y:1,R:0},shells:5,play:{...LB_PLAY_DEFAULTS},secret:{on:true,amount:1,max:2}}}
+function lbLoadSkill(){const d=lbSkillDefaults();try{const v=JSON.parse(localStorage.getItem(LB_SKILL_KEY)||'null');if(!v||typeof v!=='object'||v.version!==2)return d;
+ let grid=d.grid;if(typeof v.grid==='string'&&v.grid.length===LB_GW*LB_GH){grid='';for(let k=0;k<v.grid.length;k++){const m=LB_MASK[k]==='.',c=v.grid[k];grid+=m?'.':(LB_ZONES.includes(c)?c:'R')}}
+ const num=(x,f,lo,hi)=>{x=Number(x);return Number.isFinite(x)?Math.min(hi,Math.max(lo,x)):f};
+ const values={};for(const z of LB_ZONES)values[z]=num(v.values?.[z],d.values[z],0,100000);
+ const s=v.secret||{};
+ return {version:2,skillOn:v.skillOn===true,rings:{gold:num(v.rings?.gold,0,0,20),green:num(v.rings?.green,6.5,0,25),yellow:num(v.rings?.yellow,11.5,0,25)},grid,values,play:lbCleanPlay(v.play),shells:Math.round(num(v.shells,5,1,20)),
+  secret:{on:s.on!==false,amount:num(s.amount,1,0,1000),max:num(s.max,2,0,10000)}};
+ }catch(e){return d}}
+function lbSaveSkill(v){try{localStorage.setItem(LB_SKILL_KEY,JSON.stringify(v));return true}catch(e){return false}}
+function lbIsGold(S,c){return c.cx>=0&&c.cx<LB_GW&&c.cy>=0&&c.cy<LB_GH&&S.grid[c.cy*LB_GW+c.cx]==='G'}
+
+/* Skill switch, balloon target-zone painter, Buck's Secret settings (calculator side). */
+(()=>{'use strict';
+const TICKET_URL='ticket-1.0.0.html';
+const $=id=>document.getElementById(id);
+let S=lbLoadSkill(),brush='G',brushSize=1,zoom=1,moveMode=false;
+const persist=()=>{lbSaveSkill(S)};
+/* ---------- markup ---------- */
+const bar=document.createElement('section');bar.className='skill-bar';bar.id='skillBar';
+bar.innerHTML='<button type="button" id="skillToggle" class="skill-toggle" aria-pressed="false"><span class="sk-knob"></span><span class="sk-text">🎯 Skill mode: <b>OFF</b></span></button>'+
+ '<a class="skill-play" id="skillPlay" href="'+TICKET_URL+'">🎟️ Play ticket</a>'+
+ '<p class="skill-explain" id="skillExplain"></p>';
+const card=document.createElement('section');card.className='card skill-card';card.id='skillCard';
+card.innerHTML='<div class="card-top"><h3>🎯 Balloon target zones</h3><span class="muted tiny">One grid · all 3 balloons</span></div>'+
+ '<p class="skill-help">Pick a color, then tap or drag on the balloon. Each square is one real pixel of the balloon. Where the crosshair’s centre pixel lands decides that balloon’s number. <b>Your worst shot sets the prize:</b> 5, 5, 1 pays $1; any $0 shot means no prize.</p>'+
+ '<div class="sk-palette" id="skPalette">'+LB_ZONES.map(z=>'<div class="sk-zone" data-zone="'+z+'"><button type="button" class="sk-swatch" data-zone="'+z+'" aria-label="Paint '+LB_ZONE_INFO[z].name+'"><i style="background:'+LB_ZONE_INFO[z].col+'"></i>'+LB_ZONE_INFO[z].name+(z==='G'?' <small>Buck’s Secret</small>':'')+'</button><label class="sk-val"><span>$</span><input type="number" inputmode="decimal" min="0" step="1" data-val="'+z+'" aria-label="'+LB_ZONE_INFO[z].name+' prize in dollars"></label></div>').join('')+'</div>'+
+ '<div class="sk-tools"><div class="sk-seg" role="group" aria-label="Brush size"><span>Brush</span><button type="button" data-brush="1" aria-pressed="true">1</button><button type="button" data-brush="3" aria-pressed="false">3×3</button><button type="button" data-brush="5" aria-pressed="false">5×5</button></div>'+
+ '<div class="sk-seg" role="group" aria-label="Zoom"><button type="button" id="skZoomOut" aria-label="Zoom out">−</button><span id="skZoomLabel">1×</span><button type="button" id="skZoomIn" aria-label="Zoom in">+</button><button type="button" id="skMove" aria-pressed="false">✋ Move</button></div></div>'+
+ '<div class="sk-shells"><label for="skShells">Shells per ticket</label><input type="number" id="skShells" inputmode="numeric" min="1" max="20" step="1"><small class="tiny muted">Each shot uses one, hit or miss. Balloons left when you run out count as $0.</small></div>'+
+ '<div class="sk-gridwrap" id="skWrap"><canvas id="skGrid" aria-label="Balloon target zone grid. Tap squares to paint."></canvas></div>'+
+ '<p class="tiny muted sk-legend">White dot = dead-centre pixel. Gold squares = Buck’s Secret.</p>'+
+ '<details class="sk-rings"><summary>Quick rings (bullseye range)</summary>'+
+ [['gold','Gold (Buck’s Secret) size',0,10],['green','Green ring size',0,18],['yellow','Yellow ring size',0,18]].map(([k,l,lo,hi])=>'<div class="sk-ring"><label for="skR_'+k+'">'+l+'</label><input type="range" id="skR_'+k+'" min="'+lo+'" max="'+hi+'" step="0.5"><output id="skO_'+k+'"></output></div>').join('')+
+ '<button type="button" id="skRepaint" class="sk-btn">Repaint as rings</button><small class="tiny muted">Repainting replaces hand-painted squares. Sizes are in pixels from the centre; gold 0 = dead-centre pixel only.</small></details>'+
+ '<div class="sk-stats" id="skStats"></div>';
+const secret=document.createElement('section');secret.className='card secret-card';secret.id='secretCard';
+secret.innerHTML='<div class="card-top"><h3>🦌 Buck’s Secret</h3><span class="muted tiny">Skill ON or OFF</span></div>'+
+ '<p class="skill-help">The <b>gold</b> squares on the balloon grid are Buck’s Secret (default: the dead-centre pixel only). <b>Skill ON:</b> a gold hit shows the gold prize. <b>Skill OFF:</b> a gold hit pays extra on top of the ticket, even on a losing ticket.</p><p class="tiny muted" id="secGoldInfo"></p>'+
+ '<label class="sk-check"><input type="checkbox" id="secOn"> Buck’s Secret on</label>'+
+ '<div class="sec-grid">'+
+ '<label for="secAmount">Skill OFF: extra per gold hit</label><span class="sk-money">$<input type="number" id="secAmount" inputmode="decimal" min="0" step="1"></span>'+
+ '<label for="secMax">Skill OFF: most extra per ticket</label><span class="sk-money">$<input type="number" id="secMax" inputmode="decimal" min="0" step="1"></span></div>';
+/* place: bar under the header; zone card first in the ticket column; secret card after modifiers */
+const header=document.querySelector('.header');
+const anchor=document.querySelector('.v3-switch')||header;anchor.insertAdjacentElement('afterend',bar);
+const col=$('v3TicketCol');if(col)col.prepend(card);else bar.insertAdjacentElement('afterend',card);
+const mod=$('modifierEditor');if(mod)mod.insertAdjacentElement('afterend',secret);else card.insertAdjacentElement('afterend',secret);
+/* odds-driven cards get a note in Skill mode */
+const oddsCard=[...document.querySelectorAll('.card h3')].find(h=>/Prize odds editor/.test(h.textContent))?.closest('.card');
+for(const c of [oddsCard,mod].filter(Boolean)){c.classList.add('skill-odds');const n=document.createElement('div');n.className='skill-note';n.textContent='🎯 Skill mode is on: the ticket ignores these odds. Switch Skill off to use them.';c.prepend(n);}
+
+/* ---------- big playable ticket + play sliders (Skill mode) ---------- */
+const play=document.createElement('section');play.className='card skill-play-card';play.id='skillPlayCard';
+const SL=[['speed','Balloon movement speed',0.3,2.2,0.1,v=>Number(v).toFixed(1)+'×'],['movement','Balloon movement distance',30,120,5,v=>v+'%'],['size','Balloon size',70,130,5,v=>v+'%'],['wobble','Crosshair pattern size (∞ then 8)',0,40,1,v=>v+'px'],['lift','Crosshair height above finger',0,220,10,v=>v+'px']];
+play.innerHTML='<div class="card-top"><h3>🎟️ Play Lucky Buck (Skill)</h3><a class="tiny sk-open" href="'+TICKET_URL+'">Open full screen ↗</a></div>'+
+ '<iframe id="skFrame" title="Playable Lucky Buck ticket" scrolling="no"></iframe>'+
+ '<details class="sk-playset" open><summary>🎛️ Play settings</summary>'+SL.map(([k,l,lo,hi,st])=>'<div class="sk-slider"><label for="skP_'+k+'">'+l+'</label><output id="skPO_'+k+'"></output><input type="range" id="skP_'+k+'" min="'+lo+'" max="'+hi+'" step="'+st+'"></div>').join('')+
+ '<label class="sk-check"><input type="checkbox" id="skP_sound"> Sound effects</label>'+
+ '<button type="button" class="sk-btn" id="skPReset">Reset play settings</button></details>';
+const scratchCard=document.querySelector('.showcase-center > .card');
+/* Ticket goes first in Skill mode so it is easy to play; the zone grid follows. */card.insertAdjacentElement('beforebegin',play);scratchCard?.classList.add('skill-hide');
+document.getElementById('shotCalculator')?.classList.add('skill-hide');
+const frame=$('skFrame');
+function fitFrame(){try{const d=frame.contentDocument,pg=d&&d.querySelector('.page');if(pg)frame.style.height=Math.ceil(pg.getBoundingClientRect().height)+2+'px';}catch(e){}}
+frame.addEventListener('load',()=>{fitFrame();try{const W=frame.contentWindow;new W.ResizeObserver(fitFrame).observe(frame.contentDocument.querySelector('.page'));}catch(e){}});
+function loadFrame(){if(!frame.getAttribute('src'))frame.src=TICKET_URL+(TICKET_URL.includes('?')?'&':'?')+'embed=1';}
+function syncPlay(){for(const [k,,,,,f] of SL){const i=$('skP_'+k);if(document.activeElement!==i)i.value=S.play[k];$('skPO_'+k).textContent=f(i.value);}$('skP_sound').checked=S.play.sound;}
+for(const [k,,,,,f] of SL)$('skP_'+k).addEventListener('input',e=>{S.play[k]=Number(e.target.value);$('skPO_'+k).textContent=f(e.target.value);persist();});
+$('skP_sound').addEventListener('change',e=>{S.play.sound=e.target.checked;persist();});
+$('skPReset').addEventListener('click',()=>{S.play={...LB_PLAY_DEFAULTS};persist();syncPlay();});
+/* ---------- grid drawing ---------- */
+const cv=$('skGrid'),ctx=cv.getContext('2d'),wrap=$('skWrap');
+let cell=10;
+function size(){const w=Math.max(200,wrap.clientWidth-2);cell=Math.max(6,Math.floor(w*zoom/LB_GW));cv.width=cell*LB_GW;cv.height=cell*LB_GH;cv.style.width=cv.width+'px';cv.style.height=cv.height+'px';draw();}
+function draw(){ctx.clearRect(0,0,cv.width,cv.height);const g=Math.max(1,Math.round(cell/9));
+ for(let j=0;j<LB_GH;j++)for(let i=0;i<LB_GW;i++){const k=j*LB_GW+i,z=S.grid[k];if(z==='.')continue;ctx.fillStyle=LB_ZONE_INFO[z].col;ctx.fillRect(i*cell,j*cell,cell-g,cell-g);
+  if(LB_MASK[k]==='#'){ctx.fillStyle='#0006';ctx.fillRect(i*cell,j*cell,cell-g,cell-g);}}
+ ctx.fillStyle='#fff';ctx.beginPath();ctx.arc((LB_CX+.5)*cell-g/2,(LB_CY+.5)*cell-g/2,Math.max(2,cell*.22),0,Math.PI*2);ctx.fill();
+ ctx.strokeStyle='#000';ctx.lineWidth=Math.max(1,cell*.08);ctx.beginPath();ctx.arc((LB_CX+.5)*cell-g/2,(LB_CY+.5)*cell-g/2,Math.max(2,cell*.22),0,Math.PI*2);ctx.stroke();}
+function paintAt(e){const r=cv.getBoundingClientRect();const i=Math.floor((e.clientX-r.left)/r.width*LB_GW),j=Math.floor((e.clientY-r.top)/r.height*LB_GH);const h=(brushSize-1)/2;let changed=false;const a=S.grid.split('');
+ for(let y=j-h;y<=j+h;y++)for(let x=i-h;x<=i+h;x++){if(x<0||y<0||x>=LB_GW||y>=LB_GH)continue;const k=y*LB_GW+x;if(a[k]==='.'||a[k]===brush)continue;a[k]=brush;changed=true;}
+ if(changed){S.grid=a.join('');draw();}return changed;}
+let painting=false,dirty=false;
+cv.addEventListener('pointerdown',e=>{if(moveMode)return;painting=true;dirty=paintAt(e)||dirty;cv.setPointerCapture?.(e.pointerId);e.preventDefault();});
+cv.addEventListener('pointermove',e=>{if(!painting)return;dirty=paintAt(e)||dirty;e.preventDefault();});
+const endPaint=()=>{if(!painting)return;painting=false;if(dirty){persist();stats();}dirty=false;};
+cv.addEventListener('pointerup',endPaint);cv.addEventListener('pointercancel',endPaint);
+/* ---------- stats ---------- */
+function stats(){const cnt={G:0,N:0,Y:0,R:0};let tot=0;for(const c of S.grid)if(c!=='.'){cnt[c]++;tot++;}
+ /* worst-shot rule: prize = lowest of the three balloon values */let win=0,ev=0;for(const a of LB_ZONES)for(const b of LB_ZONES)for(const c of LB_ZONES){const p=cnt[a]*cnt[b]*cnt[c]/tot**3,v=Math.min(S.values[a],S.values[b],S.values[c]);if(v>0){win+=p;ev+=p*v;}}
+ const gi=$('secGoldInfo');if(gi)gi.textContent='Gold area now: '+cnt.G+' square'+(cnt.G===1?'':'s')+(cnt.G===1&&S.grid[LB_CY*LB_GW+LB_CX]==='G'?' (dead-centre pixel)':'')+'. Turn Skill on to paint it bigger or smaller.';
+ $('skStats').innerHTML='<table class="sk-table"><tr><th>Zone</th><th>Prize</th><th>Squares</th><th>Balloon</th></tr>'+LB_ZONES.map(z=>'<tr><td><i style="background:'+LB_ZONE_INFO[z].col+'"></i>'+LB_ZONE_INFO[z].name+'</td><td>$'+S.values[z]+'</td><td>'+cnt[z]+'</td><td>'+(cnt[z]/tot*100).toFixed(1)+'%</td></tr>').join('')+'</table>'+
+  '<p class="tiny muted">If all 3 shots hit random spots on the balloon (no misses): win '+(win*100).toFixed(2)+'% of tickets, average prize $'+ev.toFixed(3)+' per ticket (Buck’s Secret not included). Better aim = better results.</p>';}
+/* ---------- controls ---------- */
+function syncUI(){const on=S.skillOn;document.body.classList.toggle('skill-on',on);$('skillToggle').setAttribute('aria-pressed',String(on));$('skillToggle').querySelector('b').textContent=on?'ON':'OFF';
+ $('skillExplain').textContent=on?'ON: where you hit each balloon decides its number (the grid below). Prize odds are not used.':'OFF: the ticket uses the prize odds and Luck settings in this calculator.';
+ card.classList.toggle('hidden',!on);play.classList.toggle('hidden',!on);if(on)loadFrame();syncPlay();
+ for(const b of card.querySelectorAll('.sk-swatch'))b.setAttribute('aria-pressed',String(b.dataset.zone===brush));
+ for(const z of card.querySelectorAll('.sk-zone'))z.classList.toggle('active',z.dataset.zone===brush);
+ for(const i of card.querySelectorAll('[data-val]'))if(document.activeElement!==i)i.value=S.values[i.dataset.val];
+ if(document.activeElement!==$('skShells'))$('skShells').value=S.shells;
+ for(const k of ['gold','green','yellow']){$('skR_'+k).value=S.rings[k];$('skO_'+k).textContent=S.rings[k]+' px';}
+ $('secOn').checked=S.secret.on;$('secAmount').value=S.secret.amount;$('secMax').value=S.secret.max;
+ for(const id of ['secAmount','secMax'])$(id).disabled=!S.secret.on;
+ $('skZoomLabel').textContent=zoom+'×';$('skMove').setAttribute('aria-pressed',String(moveMode));cv.style.touchAction=moveMode?'auto':'none';wrap.classList.toggle('zoomed',zoom>1);}
+$('skillToggle').addEventListener('click',()=>{S.skillOn=!S.skillOn;persist();syncUI();if(S.skillOn)size();});
+card.addEventListener('click',e=>{const sw=e.target.closest('.sk-swatch');if(sw){brush=sw.dataset.zone;moveMode=false;syncUI();}
+ const br=e.target.closest('[data-brush]');if(br){brushSize=Number(br.dataset.brush);for(const b of card.querySelectorAll('[data-brush]'))b.setAttribute('aria-pressed',String(b===br));}});
+card.addEventListener('input',e=>{const z=e.target.dataset?.val;if(z){const v=Number(e.target.value);if(Number.isFinite(v)&&v>=0){S.values[z]=v;persist();stats();}}
+ const m=/^skR_(\w+)$/.exec(e.target.id||'');if(m){S.rings[m[1]]=Number(e.target.value);$('skO_'+m[1]).textContent=S.rings[m[1]]+' px';persist();}});
+$('skShells').addEventListener('input',e=>{const v=Math.round(Number(e.target.value));if(v>=1&&v<=20){S.shells=v;persist();}});
+$('skRepaint').addEventListener('click',()=>{const r=S.rings;const g=r.gold,n=Math.max(g,r.green),y=Math.max(n,r.yellow);S.grid=lbRingGrid(g,n,y);persist();draw();stats();});
+$('skZoomIn').addEventListener('click',()=>{zoom=Math.min(3,zoom+1);syncUI();size();});
+$('skZoomOut').addEventListener('click',()=>{zoom=Math.max(1,zoom-1);if(zoom===1)moveMode=false;syncUI();size();});
+$('skMove').addEventListener('click',()=>{moveMode=!moveMode;syncUI();});
+$('secOn').addEventListener('change',e=>{S.secret.on=e.target.checked;persist();syncUI();});
+for(const id of ['secAmount','secMax'])$(id).addEventListener('input',e=>{const v=Number(e.target.value);if(Number.isFinite(v)&&v>=0){S.secret[id==='secAmount'?'amount':'max']=v;persist();}});
+window.addEventListener('resize',()=>{if(S.skillOn)size();});
+window.addEventListener('storage',e=>{if(e.key===LB_SKILL_KEY){S=lbLoadSkill();syncUI();if(S.skillOn)size();stats();}});
+syncUI();stats();if(S.skillOn)requestAnimationFrame(size);
+window.__luckyBuckSkill={get:()=>S};
 })();
 
 </script>
