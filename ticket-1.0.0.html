@@ -93,7 +93,8 @@
 <details class="tune" id="tune"><summary>⚙️ Testing controls (optional)</summary><div class="tuneBody">
 <div class="field"><div><label for="speed">Balloon movement speed</label><output id="speedOut">1.0×</output></div><input id="speed" type="range" min="0.3" max="2.2" step="0.1" value="1"></div>
 <div class="field"><div><label for="movement">Balloon movement distance</label><output id="movementOut">100%</output></div><input id="movement" type="range" min="30" max="120" step="5" value="100"></div>
-<div class="field"><div><label for="wobble">Crosshair wobble</label><output id="wobbleOut">10px</output></div><input id="wobble" type="range" min="0" max="24" step="1" value="10"></div>
+<div class="field"><div><label for="wobble">Crosshair pattern size (∞ then 8)</label><output id="wobbleOut">16px</output></div><input id="wobble" type="range" min="0" max="40" step="1" value="16"></div>
+<div class="field"><div><label for="lift">Crosshair height above finger</label><output id="liftOut">150px</output></div><input id="lift" type="range" min="0" max="220" step="10" value="150"></div>
 <div class="field"><label for="force">Test next ticket outcome</label><select id="force"><option value="normal">Natural odds (default)</option><option value="lose">Force losing ticket</option><option value="1">Force $1 winner</option><option value="5">Force $5 winner</option><option value="25">Force $25 winner</option></select></div>
 <label class="field" style="display:flex;align-items:center;gap:7px"><input type="checkbox" id="sound" checked> <span style="font-size:12px">Play sound effects</span></label>
 <p class="small">Ticket odds are currently 75% lose, 17% $1, 6.5% $5, 1.5% $25. This first build tests motion and aiming; the complete simulator modifiers and Rescue Bonus have <b>not</b> been ported or verified here yet. All money is imaginary.</p>
@@ -126,7 +127,7 @@ function setFlip(v){if(flipState===v||card.classList.contains('flipping'))return
 flip.addEventListener('click',e=>{e.stopPropagation();setFlip(true)});
 $('flipBack').addEventListener('click',()=>setFlip(false));
 btn.addEventListener('click',()=>{stopAim();resetForTicket()});
-function locate(e){const r=front.getBoundingClientRect();return{x:clamp((e.clientX-r.left)/r.width,.02,.98),y:clamp((e.clientY-r.top)/r.height,.17,.87)}}
+function locate(e){const r=front.getBoundingClientRect(),lift=Number($('lift').value)||0;/* crosshair sits `lift` px above the finger */return{x:clamp((e.clientX-r.left)/r.width,.02,.98),y:clamp((e.clientY-r.top-lift)/r.height,.17,.87)}}
 function stopAim(){hold=false;pointer=null;holdId=null;cross.classList.remove('show')}
 front.addEventListener('pointerdown',e=>{if(e.target.closest('button')||flipState)return;if(!purchased||completed){updateLabel('Buy a test ticket first!');return;}if(e.pointerType==='mouse'&&e.button!==0)return;hold=true;pointer=locate(e);aim=pointer;shotStart=performance.now();holdId=e.pointerId;front.setPointerCapture?.(e.pointerId);cross.classList.add('show');e.preventDefault();});
 front.addEventListener('pointermove',e=>{if(!hold||e.pointerId!==holdId)return;pointer=locate(e);aim=pointer;e.preventDefault()});
@@ -144,9 +145,9 @@ if(popped===3){completed=true;setTimeout(()=>{if(ticketResult.winning>0){total+=
 }
 function loop(now){const dt=clamp((now-lastFrame)/1000,0,.06);lastFrame=now;elapsed+=dt*Number($('speed').value);const move=Number($('movement').value)/100;
 for(let i=0;i<3;i++){const b=balloons[i],p=positions[i];if(!b.popped){const t=elapsed*Math.PI*2/p.period+p.phase;b.x=p.x+move*p.dx*Math.sin(t*.75+Math.sin(t)*.16);b.y=p.y+move*p.dy*Math.sin(t+Math.cos(t*.67)*.14);b.node.style.left=(b.x*100)+'%';b.node.style.top=(b.y*100)+'%';}}
-if(hold&&pointer){const wobble=Number($('wobble').value);const sec=now*.001;const w=front.clientWidth||400,h=front.clientHeight||550;reticle.x=clamp(aim.x+(Math.sin(sec*9.7)*.65+Math.sin(sec*17.7)*.35)*wobble/w,.03,.97);reticle.y=clamp(aim.y+(Math.sin(sec*12.8+1.1)*.70+Math.sin(sec*21.2)*.30)*wobble/h,.17,.82);cross.style.left=(reticle.x*100)+'%';cross.style.top=(reticle.y*100)+'%';}
+if(hold&&pointer){const A=Number($('wobble').value);const w=front.clientWidth||400,h=front.clientHeight||550;/* Crosshair traces a cycle of shapes: infinity sign, then figure 8, then repeat. Each shape is one loop of PERIOD seconds, starting from the aim point; both shapes cross the centre with the same speed and direction, so the switch is seamless. */const PERIOD=2.4,t=Math.max(0,now-shotStart)/1000*2*Math.PI/PERIOD,shape=Math.floor(t/(2*Math.PI))%2;const ox=shape===0?Math.sin(t):.5*Math.sin(2*t),oy=shape===0?.5*Math.sin(2*t):Math.sin(t);reticle.x=clamp(aim.x+ox*A/w,.03,.97);reticle.y=clamp(aim.y-oy*A/h,.17,.82);cross.style.left=(reticle.x*100)+'%';cross.style.top=(reticle.y*100)+'%';}
 requestAnimationFrame(loop)}
-for(const [id,suffix] of [['speed','×'],['movement','%'],['wobble','px']]){const input=$(id),out=$(id+'Out');const show=()=>out.textContent=(id==='speed'?Number(input.value).toFixed(1):input.value)+suffix;input.addEventListener('input',show);show()}
+for(const [id,suffix] of [['speed','×'],['movement','%'],['wobble','px'],['lift','px']]){const input=$(id),out=$(id+'Out');const show=()=>out.textContent=(id==='speed'?Number(input.value).toFixed(1):input.value)+suffix;input.addEventListener('input',show);show()}
 window.__luckyBuckPlaytest={getState:()=>({purchased,completed,count,total,popped:balloons.filter(b=>b.popped).length,balloons:balloons.map(b=>({x:b.x,y:b.y,popped:b.popped})),flipState}),buy:resetForTicket,shoot};
 /* The back shows the very same original artwork image as the front (frame + logo). */
 {const bb=document.getElementById('backBase'),fb=front.querySelector('img.base');if(bb&&fb)bb.src=fb.getAttribute('src');}
