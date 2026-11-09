@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#142b24">
+<title>Fossil Finders — Scratch-Off Saga Simulator</title>
+<style>
+:root{color-scheme:dark;--bg:#10271f;--panel:#18372b;--line:#678867;--gold:#f6cc71;--ink:#f7f2e6;--muted:#b5cebf}
+*{box-sizing:border-box}
+body{margin:0;color:var(--ink);background:radial-gradient(circle at 50% -20%,#396959 0%,transparent 55%),#10271f;font:15px/1.45 system-ui,-apple-system,sans-serif}
+button,input,select{font:inherit}button,select{cursor:pointer}a{color:var(--gold)}input{color:var(--ink)}
+.wrap{max-width:1180px;margin:0 auto;padding:16px 14px 64px}
+header{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+header small{font-size:11px;letter-spacing:1.1px;color:var(--gold);font-weight:850}
+h1{margin:2px 0;font-size:clamp(24px,4vw,34px);line-height:1.1}
+.breadcrumb{font-size:12px;color:var(--muted)}.version{background:#234838;border:1px solid #72967b;padding:5px 9px;border-radius:99px;font-size:11px}
+.ticket-nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:16px;padding:14px;background:var(--panel);border:1px solid #40684d;border-radius:16px}
+.ticket-nav label{color:var(--gold);font-size:12px;font-weight:800;letter-spacing:.8px}.ticket-nav select{background:#234b35;border:1px solid #8eae7d;color:white;border-radius:9px;padding:10px;min-width:190px}
+.layout{display:grid;grid-template-columns:minmax(270px,.95fr) minmax(290px,1fr);gap:16px;align-items:start}
+.card{background:#17342a;border:1px solid #456751;border-radius:16px;box-shadow:0 12px 28px #0004;padding:16px;min-width:0}
+.card h2{color:var(--gold);font-size:18px;margin:0 0 8px}.small{font-size:12px;color:var(--muted);margin:4px 0 10px}
+.ticket-scene{position:relative;max-width:450px;margin:auto;perspective:1400px;aspect-ratio:2/3}
+.ticket-inner{position:relative;width:100%;height:100%;transition:transform .65s;transform-style:preserve-3d}
+.ticket-scene.flipped .ticket-inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;overflow:hidden;border-radius:10px;background:#0e1d15;outline:1px solid #ae8840;display:grid;place-items:center}
+.face.back{transform:rotateY(180deg)}
+.face img{width:100%;height:100%;object-fit:contain}
+.image-fallback{position:absolute;inset:0;display:none;place-items:center;text-align:center;padding:30px;background:linear-gradient(160deg,#386d4c,#9d673e);color:white;font-weight:800;line-height:1.5}
+.face img:not([src]) + .image-fallback{display:grid}
+.controls{display:flex;justify-content:center;gap:10px;margin:14px auto 0;max-width:450px}
+.btn{border:1px solid #bc9751;background:#f4ca73;color:#30220d;border-radius:10px;padding:11px 15px;font-weight:850;min-height:44px}
+.btn.secondary{color:#f6e5bd;background:#234838;border-color:#73946b}.btn:disabled{opacity:.55;cursor:not-allowed}
+.fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.field{display:grid;gap:4px;font-size:12px;color:#d5e3d5}
+.field input{min-width:0;width:100%;padding:10px 8px;border:1px solid #6c8870;border-radius:8px;background:#102820;text-align:right;font-size:15px;font-variant-numeric:tabular-nums}
+.row-name{grid-column:1/-1;font-size:12px;letter-spacing:.6px;font-weight:800;color:#f9d17e;margin:9px 0 0;border-bottom:1px solid #416648;padding-bottom:5px}
+.stack{display:grid;gap:12px}
+.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{padding:10px 5px;text-align:center;background:#10271f;border-radius:9px;border:1px solid #32543c}
+.stat strong{font-size:21px;display:block;color:var(--gold)}.stat span{font-size:11px;color:var(--muted)}
+.tip{background:#214537;border-left:3px solid #e4be76;padding:10px 12px;border-radius:5px;font-size:12px;color:#d9e8dc}
+a.back-link{display:inline-flex;margin-top:14px;font-size:13px}
+@media(max-width:760px){.layout{grid-template-columns:1fr}.wrap{padding:12px 10px 40px}.card{padding:12px}.ticket-scene{max-width:min(100%,390px)}}
+@media(prefers-reduced-motion:reduce){.ticket-inner{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><div><small>SCRATCH-OFF SAGA · TICKET #2</small><h1>Fossil Finders</h1><div class="breadcrumb">Independent design simulator · $1 per ticket</div></div><span class="version">v0.0 · Artwork setup</span></header>
+<nav class="ticket-nav" aria-label="Your tickets"><label for="ticket-menu">YOUR TICKETS</label><select id="ticket-menu"><option value="lucky">Lucky Buck · $1</option><option value="fossil" selected>Fossil Finders · $1</option></select><a href="./">Back to main calculator</a></nav>
+<div class="layout">
+<section class="card" aria-label="Fossil Finders ticket artwork">
+<h2>Scratch a Ticket</h2><p class="small">Approved front and back art; all dig spaces are intentionally empty.</p>
+<div id="ticketScene" class="ticket-scene"><div class="ticket-inner">
+<div class="face front"><img src="assets/fossil-finders-front.webp" alt="Fossil Finders approved front artwork with twelve blank excavation squares"><div class="image-fallback">Fossil Finders front artwork<br>Asset loading unavailable</div></div>
+<div class="face back"><img src="assets/fossil-finders-back.webp" alt="Fossil Finders approved back artwork with one blank cream instructions panel"><div class="image-fallback">Fossil Finders back artwork<br>Asset loading unavailable</div></div>
+</div></div>
+<div class="controls"><button id="flip" class="btn secondary" type="button">↻ Flip Ticket</button><button class="btn" disabled type="button" title="Gameplay has not been implemented">Buy One Ticket · $1</button></div>
+<p class="small" style="text-align:center">Purchases, digging, fossil reveals, payouts and animations are not implemented yet.</p>
+</section>
+<div class="stack">
+<section class="card"><h2>Fossil Value Editor</h2><p class="small">Each of the twelve future fossil-value fields starts at $0. Fossil art and names are deliberately unassigned.</p><div class="fields" id="values"></div></section>
+<section class="card"><h2>Prize &amp; Odds Settings</h2><p class="small">Blank starting values only; they do not generate tickets or imply win probabilities yet.</p>
+<div class="fields">
+<label class="field">Super jackpot $<input type="number" min="0" step="0.01" data-setting="jackpot" value="0"></label>
+<label class="field">Standard win odds<input type="number" min="0" step="0.01" data-setting="odds" value="0"></label>
+<label class="field">Special function %<input type="number" min="0" step="0.01" data-setting="bonus" value="0"></label>
+</div><p class="small" id="savedStatus" aria-live="polite">Separate local settings; Lucky Buck is untouched.</p></section>
+<section class="card"><h2>Simulation Results</h2><div class="summary"><div class="stat"><strong>0</strong><span>Tickets</span></div><div class="stat"><strong>$0</strong><span>Winnings</span></div><div class="stat"><strong>$0</strong><span>Net</span></div></div><p class="tip">Gameplay intentionally inactive. We will design each fossil and its animation separately, with overlays on the permanent background artwork.</p></section>
+</div></div><a href="./" class="back-link">← Lucky Buck / main calculator</a></div>
+<script>
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id)}, KEY="quill-fossil-finders-ticket2-v0";
+var state={values:Array(12).fill(0),jackpot:0,odds:0,bonus:0};
+try{var stored=JSON.parse(localStorage.getItem(KEY)||"null");if(stored&&Array.isArray(stored.values)&&stored.values.length===12){state.values=stored.values.map(function(n){return Number.isFinite(+n)&&+n>=0?+n:0});["jackpot","odds","bonus"].forEach(function(k){if(Number.isFinite(+stored[k])&&+stored[k]>=0)state[k]=+stored[k]})}}catch(e){}
+var host=$("values");
+for(var row=0;row<4;row++){
+ var title=document.createElement("div");title.className="row-name";title.textContent="Soil layer "+(row+1);host.appendChild(title);
+ for(var col=0;col<3;col++){
+  var index=row*3+col,field=document.createElement("label");field.className="field";field.textContent="Slot "+(index+1)+" · $";
+  var input=document.createElement("input");input.type="number";input.min="0";input.step="0.01";input.value=state.values[index];
+  input.dataset.index=index;field.appendChild(input);host.appendChild(field);
+ }
+}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(state));$("savedStatus").textContent="● Fossil Finders settings saved locally";}catch(e){$("savedStatus").textContent="⚠ Could not save locally; values remain for this session."}}
+host.addEventListener("input",function(e){var n=Number(e.target.value),i=Number(e.target.dataset.index);if(Number.isInteger(i)&&i>=0&&i<12&&Number.isFinite(n)&&n>=0){state.values[i]=n;persist()}});
+document.querySelectorAll("[data-setting]").forEach(function(input){input.value=state[input.dataset.setting];input.addEventListener("input",function(){var n=Number(input.value);if(Number.isFinite(n)&&n>=0){state[input.dataset.setting]=n;persist()}})});
+$("flip").addEventListener("click",function(){$("ticketScene").classList.toggle("flipped");$("flip").textContent=$("ticketScene").classList.contains("flipped")?"↻ Show Front":"↻ Flip Ticket"});
+$("ticket-menu").addEventListener("change",function(e){if(e.target.value==="lucky")location.href="./"});
+})();
+</script>
+</body></html>
