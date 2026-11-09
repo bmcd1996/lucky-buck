@@ -622,7 +622,7 @@ body.setup-open{overflow:hidden}.card-top .ticket-gear+h3{margin-right:auto}
 <div class="wrap">
 <header class="header">
 <div class="brand"><div class="brand-mark">$</div><div><small>QUILL PRODUCTIONS</small><h1>Cardboard to Cash</h1></div></div>
-<div class="header-right"><span class="version-badge" title="Lucky Buck simulator version">v3.5.0</span><span class="save" id="saveStatus">Loading…</span></div>
+<div class="header-right"><span class="version-badge" title="Lucky Buck simulator version">v3.6.0</span><span class="save" id="saveStatus">Loading…</span></div>
 </header>
 
 <section class="hero">
@@ -1859,7 +1859,7 @@ for(const c of [oddsCard,mod].filter(Boolean)){c.classList.add('skill-odds');con
 
 /* ---------- big playable ticket + play sliders (Skill mode) ---------- */
 const play=document.createElement('section');play.className='card skill-play-card';play.id='skillPlayCard';
-const SL=[['speed','Balloon movement speed',0.3,2.2,0.1,v=>Number(v).toFixed(1)+'×'],['movement','Balloon movement distance',30,120,5,v=>v+'%'],['size','Balloon size',70,130,5,v=>v+'%'],['wobble','Crosshair pattern size (∞ then 8)',0,40,1,v=>v+'px'],['lift','Crosshair height above finger',0,220,10,v=>v+'px']];
+const SL=[['speed','Balloon movement speed',0.3,2.2,0.1,v=>Number(v).toFixed(1)+'×'],['movement','Balloon movement distance',30,120,5,v=>v+'%'],['size','Balloon size',70,130,5,v=>v+'%'],['wobble','Crosshair clover size',0,40,1,v=>v+'px'],['lift','Crosshair height above finger',0,220,10,v=>v+'px']];
 play.innerHTML='<div class="card-top"><h3>🎟️ Play Lucky Buck (Skill)</h3><span class="sk-top-actions"><a class="tiny sk-open" href="'+TICKET_URL+'">Full screen ↗</a><button type="button" class="sk-hide" id="skHideTicket" aria-expanded="true">Hide ticket ▴</button></span></div>'+
  '<iframe id="skFrame" title="Playable Lucky Buck ticket" scrolling="no"></iframe>'+
  '<details class="sk-playset" open><summary>🎛️ Play settings</summary>'+SL.map(([k,l,lo,hi,st])=>'<div class="sk-slider"><label for="skP_'+k+'">'+l+'</label><output id="skPO_'+k+'"></output><input type="range" id="skP_'+k+'" min="'+lo+'" max="'+hi+'" step="'+st+'"></div>').join('')+
