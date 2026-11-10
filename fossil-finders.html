@@ -50,7 +50,9 @@ html.embedded body { padding: 0; }
 .fossil-overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 4; image-rendering: pixelated; }
 .ticket.flipped .fossil-overlay { display: none; }
 .ticket { will-change: transform; }
-.cell .cover { touch-action: none; cursor: crosshair; }
+.cell .cover { touch-action: none; cursor: pointer; }
+.pick-overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 6; image-rendering: pixelated; }
+.ticket.flipped .pick-overlay { display: none; }
 .cell .cover.gone { display: none; }
 .cell.locked .cover { pointer-events: none; cursor: default; }
 .cell .letter {
@@ -604,6 +606,110 @@ window.FF_FOSSILS = {
 })();
 </script>
 <script>
+// Fossil Finders: pickaxe digging (replaces scratching). Tap a spot: a little pixel pickaxe strikes it,
+// cracks spread, and the cover crumbles into falling chunks to reveal what's underneath.
+(() => {
+'use strict';
+const STYLES = { auto3: { hits: 3, auto: true }, tap3: { hits: 3, auto: false }, tap1: { hits: 1, auto: true } };
+let style = 'auto3';
+let canvas = null, ctx = null, running = false, swings = [], bits = [], blocks = [];
+const HIT_MS = 230;
+
+// pixel pickaxe, drawn once: handle straight up from the hand (pivot at the bottom), curved iron head on top
+const PICK = (() => {
+  const S = 4, W = 22, H = 24, cv = document.createElement('canvas'); cv.width = W * S; cv.height = H * S;
+  const x = cv.getContext('2d'), px = (i, j, c) => { x.fillStyle = c; x.fillRect(i * S, j * S, S, S); };
+  for (let j = 5; j < 23; j++) { px(10, j, '#1c0f08'); px(11, j, j % 3 ? '#9a6634' : '#7a4a24'); px(12, j, '#5c3a18'); px(13, j, '#1c0f08'); }
+  for (let i = 10; i <= 13; i++) px(i, 23, '#1c0f08');
+  const head = [[1, 6], [2, 5], [3, 4], [4, 3], [5, 3], [6, 2], [7, 2], [8, 2], [9, 2], [10, 2], [11, 2], [12, 2], [13, 2], [14, 2], [15, 2], [16, 3], [17, 3], [18, 4], [19, 5], [20, 6]];
+  for (const [i, j] of head) { px(i, j - 1, '#1c0f08'); px(i, j, '#d6dde3'); px(i, j + 1, '#8c99a6'); px(i, j + 2, '#1c0f08'); }
+  for (let i = 9; i <= 14; i++) { px(i, 1, '#1c0f08'); px(i, 2, '#eef3f6'); px(i, 3, '#8c99a6'); px(i, 4, '#5e6873'); px(i, 5, '#1c0f08'); }
+  return { cv, tip: { x: 1 * S + 2 - W * S / 2, y: 7 * S - H * S }, pivot: { x: W * S / 2, y: H * S } };
+})();
+
+function init(ticket) {
+  canvas = document.createElement('canvas'); canvas.className = 'pick-overlay'; canvas.width = 1024; canvas.height = 1536;
+  ctx = canvas.getContext('2d'); ctx.imageSmoothingEnabled = false; ticket.append(canvas);
+  if (!running) { running = true; requestAnimationFrame(loop); }
+}
+const rot = (v, a) => ({ x: v.x * Math.cos(a) - v.y * Math.sin(a), y: v.x * Math.sin(a) + v.y * Math.cos(a) });
+
+function crack(cover, hx, hy) {
+  const c = cover.getContext('2d'); c.save(); c.globalCompositeOperation = 'source-over'; c.lineCap = 'square';
+  const n = 3 + Math.floor(Math.random() * 2);
+  for (let k = 0; k < n; k++) {
+    let x = hx, y = hy, ang = Math.random() * Math.PI * 2; const len = 4 + Math.floor(Math.random() * 4);
+    c.beginPath(); c.moveTo(x, y);
+    for (let s = 0; s < len; s++) { ang += (Math.random() - .5) * 1.1; x += Math.cos(ang) * 10; y += Math.sin(ang) * 10; c.lineTo(Math.round(x / 2) * 2, Math.round(y / 2) * 2); }
+    c.strokeStyle = 'rgba(20,10,4,.85)'; c.lineWidth = 4; c.stroke(); c.strokeStyle = 'rgba(255,235,190,.25)'; c.lineWidth = 1.5; c.stroke();
+  }
+  c.restore();
+}
+function chips(x, y, cover, n) {
+  let cols = ['#7a4a24', '#c9a46a', '#5a3a1c'];
+  for (let k = 0; k < n; k++) { const a = -Math.PI * Math.random(), sp = 120 + Math.random() * 200;
+    bits.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, t0: performance.now(), life: 420, col: cols[k % 3], size: 4 + (k % 2) * 2 }); }
+}
+function crumble(job) {
+  const { cover, rect } = job, snap = document.createElement('canvas'); snap.width = cover.width; snap.height = cover.height;
+  snap.getContext('2d').drawImage(cover, 0, 0); cover.getContext('2d').clearRect(0, 0, cover.width, cover.height);
+  const cols = 6, rows = 4, now = performance.now(), cx = rect.w / 2, cy = rect.h / 2;
+  for (let i = 0; i < cols; i++) for (let j = 0; j < rows; j++) {
+    const w = rect.w / cols, h = rect.h / rows, bx = i * w, by = j * h, dx = bx + w / 2 - cx, dy = by + h / 2 - cy;
+    blocks.push({ img: snap, sx: bx, sy: by, w: Math.ceil(w) + 1, h: Math.ceil(h) + 1, x: rect.x + bx, y: rect.y + by,
+      vx: dx * 2.4 + (Math.random() - .5) * 90, vy: -140 - Math.random() * 160 + dy * 1.2, vr: (Math.random() - .5) * 8, t0: now + Math.random() * 60, life: 720 });
+  }
+  for (let k = 0; k < 16; k++) { const a = Math.PI + Math.random() * Math.PI, sp = 60 + Math.random() * 120;
+    bits.push({ x: rect.x + rect.w / 2 + (Math.random() - .5) * rect.w * .8, y: rect.y + rect.h * .7, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .5, t0: now, life: 520, col: ['#d9c4a0', '#bfa47c', '#efe0c0'][k % 3], size: 6, dust: true }); }
+}
+function strike(job) {
+  const hit = job.hitsDone, rect = job.rect;
+  const tx = rect.x + rect.w * (.42 + .16 * Math.random()), ty = rect.y + rect.h * (.4 + .2 * Math.random());
+  swings.push({ job, tx, ty, t0: performance.now(), last: hit === job.total - 1 });
+}
+function loop(now) {
+  ctx.clearRect(0, 0, 1024, 1536);
+  // pickaxe swings: raise (60%), strike (25%), rebound (15%)
+  swings = swings.filter((s) => {
+    const k = (now - s.t0) / HIT_MS; if (k >= 1) return false;
+    const aHit = -.35, aUp = aHit - 1.25;
+    let a = k < .55 ? aUp + (aHit - aUp) * .15 * (k / .55) : k < .8 ? aUp + (aHit - aUp) * (.15 + .85 * Math.pow((k - .55) / .25, 2)) : aHit - .18 * Math.sin((k - .8) / .2 * Math.PI);
+    if (k >= .8 && !s.hit) { s.hit = true; const j = s.job; crack(j.cover, s.tx - j.rect.x, s.ty - j.rect.y); chips(s.tx, s.ty, j.cover, 8);
+      j.cover.style.transform = `translate(${(Math.random() - .5) * 4}px, ${(Math.random() - .5) * 3}px)`; setTimeout(() => (j.cover.style.transform = ''), 70);
+      j.hitsDone++; if (j.hitsDone >= j.total) { setTimeout(() => { crumble(j); j.busy = false; j.onBroken(); }, 90); } else if (j.auto) setTimeout(() => strike(j), 40); else j.busy = false; }
+    const tip = rot(PICK.tip, aHit), pivot = { x: s.tx - tip.x, y: s.ty - tip.y };
+    ctx.save(); ctx.translate(pivot.x, pivot.y); ctx.rotate(a); ctx.drawImage(PICK.cv, -PICK.pivot.x, -PICK.pivot.y); ctx.restore();
+    return true;
+  });
+  blocks = blocks.filter((b) => {
+    const t = (now - b.t0) / 1000; if (t < 0) { ctx.drawImage(b.img, b.sx, b.sy, b.w, b.h, b.x, b.y, b.w, b.h); return true; }
+    const k = t * 1000 / b.life; if (k >= 1) return false;
+    ctx.save(); ctx.globalAlpha = k < .6 ? 1 : 1 - (k - .6) / .4;
+    ctx.translate(b.x + b.w / 2 + b.vx * t, b.y + b.h / 2 + b.vy * t + 900 * t * t); ctx.rotate(b.vr * t);
+    ctx.drawImage(b.img, b.sx, b.sy, b.w, b.h, -b.w / 2, -b.h / 2, b.w, b.h); ctx.restore(); return true;
+  });
+  bits = bits.filter((p) => { const t = (now - p.t0) / 1000, k = t * 1000 / p.life; if (k >= 1) return false;
+    ctx.globalAlpha = 1 - k; ctx.fillStyle = p.col; ctx.fillRect(Math.round((p.x + p.vx * t) / 2) * 2, Math.round((p.y + p.vy * t + (p.dust ? 120 : 700) * t * t) / 2) * 2, p.size, p.size); return true; });
+  ctx.globalAlpha = 1;
+  requestAnimationFrame(loop);
+}
+const jobs = new WeakMap();
+window.FF_PICK = {
+  init,
+  setStyle(n) { if (STYLES[n]) style = n; return style; },
+  getStyle: () => style,
+  // tap a cover: returns false if busy. onBroken runs when the cover crumbles away.
+  tap(cover, rect, onBroken, forceAuto) {
+    let j = jobs.get(cover);
+    if (!j) { const st = STYLES[style]; j = { cover, rect, total: st.hits, auto: st.auto || !!forceAuto, hitsDone: 0, busy: false, onBroken }; jobs.set(cover, j); }
+    if (forceAuto) j.auto = true;
+    if (j.busy || j.hitsDone >= j.total) return false;
+    j.busy = true; strike(j); return true;
+  },
+};
+})();
+</script>
+<script>
 if (window.self !== window.top) document.documentElement.classList.add('embedded');
 (() => {
   // ---- Ticket geometry, in pixels of the 1024 x 1536 front art ----
@@ -672,6 +778,7 @@ if (window.self !== window.top) document.documentElement.classList.add('embedded
     forceBoard(b) { ticket.classList.remove('flipped'); finishWaiting = false; buildTicket(b); },
     dig(r, c) { const el = cellsEl.children[r * 3 + c]; if (el && el.dig) el.dig(); },
     ancientFx: (name) => FF_FOSSILS.setAncientFx(name),
+    digStyle: (name) => FF_PICK.setStyle(name),
     skull: (v) => FF_FOSSILS.setSkull(v),
     look: (v) => FF_FOSSILS.setLook(v),
     simulate(n = 10000) {
@@ -713,9 +820,9 @@ if (window.self !== window.top) document.documentElement.classList.add('embedded
   const prizeEl = document.getElementById('prize');
   const newBtn = document.getElementById('newBtn');
   const art = document.getElementById('frontImg');
-  const BRUSH = 30; // radius in art pixels
   let board, picks, paidFor, done, finishWaiting = false;
   FF_FOSSILS.init(ticket, cellsEl);
+  FF_PICK.init(ticket);
 
   function buildTicket(forced) {
     board = forced || newBoard(); picks = [null, null, null, null]; paidFor = false; done = false;
@@ -750,46 +857,27 @@ if (window.self !== window.top) document.documentElement.classList.add('embedded
 
   function attachScratch(cell, cover, r, c) {
     const ctx = cover.getContext('2d', { willReadFrequently: true });
-    let last = null, strokes = 0;
-    const toArt = (e) => { const b = cover.getBoundingClientRect(); return [(e.clientX - b.left) / b.width * cover.width, (e.clientY - b.top) / b.height * cover.height]; };
-    const scratch = (p) => {
-      ctx.globalCompositeOperation = 'destination-out';
-      ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = BRUSH * 2;
-      ctx.beginPath();
-      if (last) { ctx.moveTo(last[0], last[1]); ctx.lineTo(p[0], p[1]); ctx.stroke(); }
-      else { ctx.arc(p[0], p[1], BRUSH, 0, Math.PI * 2); ctx.fill(); }
-      last = p;
-      if (++strokes % 4 === 0) check();
-    };
-    const check = () => {
-      const f = clearedFraction(cover);
-      if (picks[r] === null && f > 0.04) choose();
-      if (f > 0.55) reveal();
-    };
+    const rect = { x: COLS[c][0], y: ROWS[r][0], w: COLS[c][1] - COLS[c][0], h: ROWS[r][1] - ROWS[r][0] };
     const choose = () => {
       picks[r] = c;
       if (!paidFor) { paidFor = true; stats.spent += 1; saveStats(); renderStats(); }
       rowCells(r).forEach((el, i) => { if (i !== c) el.classList.add('locked'); });
       if (FF_FOSSILS.has(board[r][c])) FF_FOSSILS.assign(cell);
     };
-    cell.dig = () => { if (done || cell.classList.contains('locked') && picks[r] !== c) return; if (picks[r] === null) choose(); ctx.clearRect(0, 0, cover.width, cover.height); reveal(); };
     const reveal = () => {
       if (cover.classList.contains('gone')) return;
       cover.classList.add('gone'); cell.classList.add('locked');
       if (FF_FOSSILS.has(board[r][c])) FF_FOSSILS.onReveal(r, c, cell);
       if (picks.every((p) => p !== null) && rowsRevealed()) finish();
     };
-    cover.addEventListener('pointerdown', (e) => {
-      if (done || cell.classList.contains('locked')) return;
-      e.preventDefault(); cover.setPointerCapture(e.pointerId); last = null; scratch(toArt(e));
-    });
-    cover.addEventListener('pointermove', (e) => {
-      if (!cover.hasPointerCapture(e.pointerId)) return;
-      e.preventDefault(); scratch(toArt(e));
-    });
-    const end = (e) => { if (cover.hasPointerCapture(e.pointerId)) { cover.releasePointerCapture(e.pointerId); check(); } last = null; };
-    cover.addEventListener('pointerup', end);
-    cover.addEventListener('pointercancel', end);
+    // dig with the pickaxe: the first tap picks this spot; the cover crumbles away after the last hit
+    const dig = (auto) => {
+      if (done || cover.classList.contains('gone') || (picks[r] !== null && picks[r] !== c)) return;
+      if (picks[r] === null) choose();
+      FF_PICK.tap(cover, rect, () => { ctx.clearRect(0, 0, cover.width, cover.height); reveal(); }, auto);
+    };
+    cell.dig = () => dig(true);
+    cover.addEventListener('pointerdown', (e) => { e.preventDefault(); dig(false); });
   }
 
   function rowsRevealed() {
