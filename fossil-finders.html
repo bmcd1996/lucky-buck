@@ -281,7 +281,7 @@ function skullShapes(v, cx, cy, open) {
 
 // Brachiosaurus: front legs longer than the back legs (back slopes down to the hips), deep ribcage, long tail,
 // very long neck held high, small skull with a domed nasal crest. Frame: 4 px units from art (B_LEFT, B_TOP).
-const B_LEFT = 40, B_TOP = 652, B_W = 110, B_H = 118, B_PIVOT = { x: 40 + 48 * 4, y: 652 + 80 * 4 };
+const B_LEFT = 40, B_TOP = 652, B_W = 110, B_H = 136, B_PIVOT = { x: 40 + 48 * 4, y: 652 + 80 * 4 };
 function makeBrachy() {
   K = 1; OY = 0;
   const frame = (layers) => raster(B_W, B_H, layers);
@@ -291,8 +291,10 @@ function makeBrachy() {
     cap(48, 84, 50, 95.5, 2.5), cap(50, 95.5, 50, 106, 2.0), cap(47, 108, 53.5, 108, 1.25),
     cap(20.5, 90, 19, 98, 2.7), cap(19, 98, 20, 106, 2.1), cap(16.5, 108, 23.5, 108, 1.25)];
   const ribcage = [cap(23, 86.5, 47, 80.5, 1.8), ...spines(25, 86, 46, 80.6, 7), ...ribs(27, 86, 45, 81.2, 7, 12, .9)];
-  const tail = [cap(19, 87, 11, 89.5, 1.9), cap(11, 89.5, 5.5, 95, 1.5), cap(5.5, 95, 3.5, 103, 1.15), cap(3.5, 103, 6.5, 110.5, .9),
-    cap(6.5, 110.5, 13, 113.5, .65), ...spines(16, 87.6, 7, 92.5, 4)];
+  const tail = [ // long sweep: down the left side, under the third case and along the bottom case, tapering to a whip tip
+    cap(19, 87, 11, 90, 2.0), cap(11, 90, 5, 96, 1.7), cap(5, 96, 3, 105, 1.45), cap(3, 105, 4, 114, 1.2), cap(4, 114, 8, 122, .98),
+    cap(8, 122, 16, 128, .8), cap(16, 128, 27, 131, .65), cap(27, 131, 38, 131, .5), cap(38, 131, 46, 128.5, .38),
+    ...spines(16, 87.6, 7, 93, 4)];
   const neck = [cap(48, 80, 61, 73.5, 3.8), cap(61, 73.5, 72, 64, 3.3), cap(72, 64, 77.5, 48, 2.9), cap(77.5, 48, 76.5, 32, 2.5),
     cap(76.5, 32, 79, 19, 2.2), cap(79, 19, 86, 12.5, 1.9), ...spines(51, 77.6, 77, 34, 9)];
   const skull = [ell(92, 11.5, 4.6, 3.0), ell(91.2, 8.2, 2.6, 2.2), cap(93, 12.6, 101, 13.2, 1.9), cap(90, 14.8, 100, 15.4, .9)];
