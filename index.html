@@ -622,7 +622,7 @@ body.setup-open{overflow:hidden}.card-top .ticket-gear+h3{margin-right:auto}
 <div class="wrap">
 <header class="header">
 <div class="brand"><div class="brand-mark">$</div><div><small>QUILL PRODUCTIONS</small><h1>Cardboard to Cash</h1></div></div>
-<div class="header-right"><span class="version-badge" title="Lucky Buck simulator version">v3.8.2</span><span class="save" id="saveStatus">Loading…</span></div>
+<div class="header-right"><span class="version-badge" title="Lucky Buck simulator version">v3.8.3</span><span class="save" id="saveStatus">Loading…</span></div>
 </header>
 
 <section class="hero">
@@ -1960,6 +1960,7 @@ body.ff-mode #v3TicketCol>*:not(.hero):not(#ffPanel){display:none!important}
 body.ff-mode .v3-rail{overflow:visible!important;transform:none!important}
 body.ff-mode #v3TicketCol{width:100%!important;max-width:560px;margin:0 auto}
 body.ff-mode #quickEditTicket,body.ff-mode .hero .hero-price,body.ff-mode .hero [class*="price"]:not(.ticket-cost){display:none!important}
+body.ff-mode .hero .ticket-logo-heading img{max-height:128px;max-width:min(100%,200px)}
 #ffPanel{display:none;padding:0;background:none;border:0;box-shadow:none}
 body.ff-mode #ffPanel{display:block}
 #ffFrame{display:block;width:100%;height:880px;border:0;background:transparent}
@@ -1994,7 +1995,7 @@ function enter(){
  on=true;try{localStorage.setItem(KEY,'1')}catch(e){}
  panel();
  if(!saved)saved={src:img.getAttribute('src'),alt:img.alt,imgHidden:img.classList.contains('hidden'),titleHidden:title.classList.contains('hidden')};
- img.src='fossil-finders-logo.png';img.alt='Fossil Finders logo';img.classList.remove('hidden');title.classList.add('hidden');
+ img.src='fossil-finders-logo.png?v=383';img.alt='Fossil Finders logo';img.classList.remove('hidden');title.classList.add('hidden');
  document.body.classList.add('ff-mode');
  const rail=document.getElementById('v3Rail');if(rail)rail.scrollLeft=0;
  addOption();
