@@ -379,11 +379,33 @@ function makeBrachy() {
     { map: frame([['b', ribcage]]), opt: SOLID },
     { map: frame([['b', tail]]), opt: SOLID },
     [{ map: frame([['b', neck]]), opt: SOLID }, { map: frame([['b', skull], ['e', holes], ['y', eye], ['u', pupil]]), opt: SOLID }],
-  ] };
+  ],
+  // for the win animation: neck alone, side skull alone, and a front-facing skull looking at the camera
+  neck: { map: frame([['b', neck]]), opt: SOLID },
+  side: { map: frame([['b', skull], ['e', holes], ['y', eye], ['u', pupil]]), opt: SOLID },
+  front: (() => { const cx = 88.6, cy = 9.6;
+    return { map: frame([
+      ['b', [ell(cx, cy - 1.2, 5.2, 3.9), ell(cx, cy - 5, 2.2, 1.8), ell(cx, cy + 2.4, 3.6, 2.7), cap(cx - 2.8, cy + 4.7, cx + 2.8, cy + 4.7, 1.0)]],
+      ['e', [ell(cx - 2.3, cy - .9, 1.35, 1.3), ell(cx + 2.3, cy - .9, 1.35, 1.3), ell(cx - .75, cy - 5.1, .45, .45), ell(cx + .75, cy - 5.1, .45, .45), cap(cx - 2.1, cy + 3.7, cx + 2.1, cy + 3.7, .38)]],
+      ['y', [ell(cx - 2.3, cy - .9, .95, .92), ell(cx + 2.3, cy - .9, .95, .92)]],
+      ['u', [ell(cx - 2.2, cy - .8, .5, .55), ell(cx + 2.2, cy - .8, .5, .55)]],
+      ['t', [-1.4, -.45, .45, 1.4].map((d) => cap(cx + d, cy + 3.4, cx + d, cy + 4.0, .35))]]), opt: SOLID }; })(),
+  };
 }
 let BRACHY = null, bPlaced = [];
 let brachyWin = 'sway';   // win animation: sway · stomp · nod · bellow · whip
-const BWIN_MS = 1300;
+const BWIN_MS = 1300, SWAY_MS = 2200;
+// neck bends in a wave from its base to the head; the head turns to face the camera for the middle of the move
+function drawLivingNeck(e) {
+  const N = BRACHY.neck, SD = BRACHY.side, FR = BRACHY.front, env = Math.sin(Math.PI * Math.min(1, e * 1.05)), base = N.y + N.cv.height;
+  const off = (y) => { const h = Math.max(0, Math.min(1, (base - y) / N.cv.height)); return 30 * env * Math.pow(h, 1.6) * Math.sin(e * Math.PI * 3 - h * 1.4); };
+  const lift = (y) => { const h = Math.max(0, Math.min(1, (base - y) / N.cv.height)); return -10 * env * h * Math.sin(e * Math.PI * 1.5); };
+  for (let y = 0; y < N.cv.height; y += 4) { const ay = N.y + y; octx.drawImage(N.cv, 0, y, N.cv.width, 4, N.x + Math.round(off(ay) / 2) * 2, ay + Math.round(lift(ay) / 2) * 2, N.cv.width, 4); }
+  const hy = SD.y + SD.cv.height / 2, dx = Math.round(off(hy) / 2) * 2, dy = Math.round(lift(hy) / 2) * 2;
+  const facing = e > .18 && e < .78;
+  if (facing) { const bob = Math.round(3 * Math.sin((e - .18) / .6 * Math.PI * 4)); octx.drawImage(FR.cv, FR.x + dx, FR.y + dy + bob); }
+  else octx.drawImage(SD.cv, SD.x + dx, SD.y + dy);
+}
 function makeCarno() {
   K = CK; OY = 10;
   const farLeg = jointLeg([[19.5, 12, 1.0], [17.2, 18.4, .9], [14.2, 23.6, .72], [14.8, 26.6, .6]], 27.2, [-1.2, .8, 2.6], .42);
@@ -461,7 +483,7 @@ function build() {
   PACHY = makePachy(1);
   for (const k in PACHY) PACHY[k].front = frontOf(PACHY[k].skull, PACHY[k].skullAt);
   sprites = ORDER.map(([who, part]) => ({ who, part, img: renderPart(PACHY[who][part], part === 'body' ? SOLID : OPT, false) }));
-  BRACHY = { parts: makeBrachy().parts.map((q) => Array.isArray(q) ? cropFrame(q, null, B_LEFT, B_TOP) : cropFrame(q.map, q.opt, B_LEFT, B_TOP)) };
+  BRACHY = { ...(() => { const m = makeBrachy(), c = (q) => Array.isArray(q) ? cropFrame(q, null, B_LEFT, B_TOP) : cropFrame(q.map, q.opt, B_LEFT, B_TOP); return { parts: m.parts.map(c), neck: c(m.neck), side: c(m.side), front: c(m.front) }; })() };
   const c = makeCarno();
   CARNO = { parts: c.parts.map((p) => cropFrame(p.map, p.opt)), ancient: cropFrame(c.ancient) };
 }
@@ -573,7 +595,7 @@ function bolt(x0, y0, x1, y1, now) { // a jagged pixel lightning bolt, as short-
 }
 function idle(now) {
   return !flying && finds.every((f) => f.left) && floaters.length === 0 && (scootDone || scootStart === null || placed.length < 3)
-    && (!morph || now - morph.t0 > morph.dur) && wins.every((w) => now - w.t0 > ({ butt: 1100, ancient: 900, brachy: 1400 }[w.kind] || 700));
+    && (!morph || now - morph.t0 > morph.dur) && wins.every((w) => now - w.t0 > ({ butt: 1100, ancient: 900, brachy: 2300 }[w.kind] || 700));
 }
 function ready(f) { return f.dino === 'P' ? f.i === placed.length : f.dino === 'B' ? f.i === bPlaced.length : f.i === cPlaced.length; }
 function storm(fx, k, now) {
@@ -642,17 +664,19 @@ function loop(now) {
     if (fx2 === 'storm') { shake(12, now); sparks(headX, headY + 20, 18, now); }
   }
   // Brachiosaurus on the third stand, with its win animation (style picked by the owner)
-  const bw = wins.find((w) => w.kind === 'brachy'), be = bw && now > bw.t0 ? Math.min(1, (now - bw.t0) / BWIN_MS) : 0, bOn = bw && now > bw.t0 && be < 1;
+  const bw = wins.find((w) => w.kind === 'brachy'), be = bw && now > bw.t0 ? Math.min(1, (now - bw.t0) / (brachyWin === 'sway' ? SWAY_MS : BWIN_MS)) : 0, bOn = bw && now > bw.t0 && be < 1;
   const HIP = { x: B_LEFT + 19 * 4, y: B_TOP + 87 * 4 }, HEAD = { x: B_LEFT + 92 * 4, y: B_TOP + 11 * 4 }, TIP = { x: B_LEFT + 46 * 4, y: B_TOP + 128 * 4 };
   let neckA = 0, tailA = 0, dyAll = 0;
   if (bOn) {
-    if (brachyWin === 'sway') neckA = -.07 * Math.sin(be * Math.PI * 2) * (1 - be);
+
     if (brachyWin === 'nod') neckA = .1 * Math.sin(be * Math.PI * 4) * (1 - be);
     if (brachyWin === 'bellow') neckA = -.1 * Math.sin(Math.min(1, be * 1.6) * Math.PI);
     if (brachyWin === 'whip') tailA = .2 * Math.sin(be * Math.PI * 3) * (1 - be);
     if (brachyWin === 'stomp') { const h = be < .3 ? Math.sin(be / .3 * Math.PI / 2) : be < .4 ? 1 - (be - .3) / .1 : be < .6 ? .35 * Math.sin((be - .4) / .2 * Math.PI) : 0; dyAll = -Math.round(18 * h / 2) * 2; }
   }
+  const living = bOn && brachyWin === 'sway';
   for (const i of [...bPlaced].sort((a, b) => a - b)) {
+    if (i === 3 && living) { drawLivingNeck(be); continue; }
     const p = BRACHY.parts[i], pv = i === 3 ? B_PIVOT : HIP, ang = i === 3 ? neckA : i === 2 ? tailA : 0;
     if (ang) { octx.save(); octx.translate(pv.x, pv.y + dyAll); octx.rotate(ang); octx.drawImage(p.cv, p.x - pv.x, p.y - pv.y); octx.restore(); }
     else octx.drawImage(p.cv, p.x, p.y + dyAll);
@@ -712,7 +736,7 @@ window.FF_FOSSILS = {
     if (!running) { running = true; requestAnimationFrame(loop); }
   },
   setBrachyWin(v) { brachyWin = v; return v; },
-  setLegs(v) { brachyLegs = v; BRACHY = { parts: makeBrachy().parts.map((q) => Array.isArray(q) ? cropFrame(q, null, B_LEFT, B_TOP) : cropFrame(q.map, q.opt, B_LEFT, B_TOP)) }; return v; },
+  setLegs(v) { brachyLegs = v; BRACHY = { ...(() => { const m = makeBrachy(), c = (q) => Array.isArray(q) ? cropFrame(q, null, B_LEFT, B_TOP) : cropFrame(q.map, q.opt, B_LEFT, B_TOP); return { parts: m.parts.map(c), neck: c(m.neck), side: c(m.side), front: c(m.front) }; })() }; return v; },
   setLook(v) { ancientLook = v; const c = makeCarno(); CARNO = { parts: c.parts.map((q) => cropFrame(q.map, q.opt)), ancient: cropFrame(c.ancient) }; return v; },
   setSkull(v) { carnoSkull = v; const c = makeCarno(); CARNO = { parts: c.parts.map((q) => cropFrame(q.map, q.opt)), ancient: cropFrame(c.ancient) }; return v; },
   setAncientFx(name) { if (FX[name]) ancientFx = name; return ancientFx; },
