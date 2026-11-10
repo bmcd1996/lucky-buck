@@ -169,7 +169,7 @@ function renderPart(map, opt, withRock) {
   const g = grid(map), H = g.length, W = g[0].length, P = withRock ? 3 : 1, S = opt.scale, pal = opt.pal;
   const cv = document.createElement('canvas'); cv.width = (W + 2 * P) * S; cv.height = (H + 2 * P) * S;
   const c = cv.getContext('2d');
-  const filled = (x, y) => y >= 0 && y < H && x >= 0 && x < W && 'bdntk'.includes(g[y][x]);
+  const filled = (x, y) => y >= 0 && y < H && x >= 0 && x < W && 'bdntkagorf'.includes(g[y][x]);
   const px = (x, y, col) => { c.fillStyle = col; c.fillRect((x + P) * S, (y + P) * S, S, S); };
   if (withRock) { // rock matrix around the bones
     for (let y = -P; y < H + P; y++) for (let x = -P; x < W + P; x++) {
@@ -189,9 +189,15 @@ function renderPart(map, opt, withRock) {
   }
   // bone
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-    const ch = g[y][x]; if (!'bdntk'.includes(ch)) continue;
+    const ch = g[y][x]; if (!'bdntkagorf'.includes(ch)) continue;
     if (ch === 'k') { px(x, y, !filled(x, y - 1) ? '#b3a99c' : !filled(x, y + 1) ? '#0d0b0a' : !filled(x - 1, y) || !filled(x + 1, y) ? '#5e5650' : (x + y) % 5 === 0 ? '#4d4641' : '#2e2926'); continue; }   // epic black horns with a grey sheen
-    if (ch === 't') { px(x, y, '#b98d55'); continue; }   // teeth: darker aged tan, not white
+    if (ch === 't') { px(x, y, opt.teeth || '#b98d55'); continue; }   // teeth: darker aged tan, not white
+    const edge3 = (hi, mid, lo) => !filled(x, y - 1) ? hi : !filled(x, y + 1) ? lo : mid;
+    if (ch === 'a') { px(x, y, edge3('#e6c48c', '#a9824d', '#6a4824')); continue; }                 // armor spikes and studs: darker, tougher bone
+    if (ch === 'g') { px(x, y, edge3('#fff0a8', (x + y) % 4 === 0 ? '#ffe07a' : '#f1c454', '#a8761a')); continue; } // gold
+    if (ch === 'o') { px(x, y, hash(x, y, 4) < .5 ? '#ffb02e' : '#ff7a1a'); continue; }             // lava
+    if (ch === 'r') { px(x, y, hash(x, y, 6) < .5 ? '#ff3b2a' : '#ff8a5a'); continue; }             // glowing red eyes
+    if (ch === 'f') { px(x, y, edge3('#f4e2b8', '#e2c995', '#b9935c')); continue; }                 // saber fangs (ivory-tan)
     let col = ch === 'd' ? pal.far : pal.base;
     if (ch !== 'd') {
       if (!filled(x, y + 1)) col = pal.shade; else if (!filled(x, y - 1)) col = pal.hi;
@@ -201,6 +207,7 @@ function renderPart(map, opt, withRock) {
     if (opt.form === 'hollow' && inner && ch !== 'd') col = pal.inner;
     if (opt.form === 'dirty' && hash(x, y, 3) < .16) col = pal.dirt;
     if (opt.form === 'rock' && hash(x, y, 5) < .1) col = pal.shade;
+    if (opt.lava && ch !== 'e' && ((((x + 2 * y) % 4 === 0) && hash(x >> 1, y >> 1, 9) < .75) || (((2 * x + 3 * y) % 5 === 0) && hash(x >> 1, y >> 1, 3) < .6))) col = hash(x, y, 8) < .5 ? '#ff7a1a' : '#ffc23a';
     px(x, y, col);
   }
   return { cv, W, H, P };
@@ -225,6 +232,9 @@ const C_W = 50, C_H = 39, C_FEET = 936, C_LEFT = Math.round(164 - 25 * CK * S), 
 // Carnotaurus skull designs. cx, cy = middle of the braincase; open = jaws open (Ancient attack pose).
 // Real skull: very short and deep, blunt snout, thick horns over the eyes, big opening in front of the eye, slim lower jaw.
 let carnoSkull = 2;   // owner's pick: bull horns
+let ancientLook = 'armor';
+const OBSIDIAN = { form: 'segmented', scale: 4, pal: { base: '#2e2926', hi: '#7a7068', shade: '#141110', far: '#1f1b19', line: '#000000', gap: '#0d0b0a' } };
+const GOLDTRIM = { form: 'segmented', scale: 4, pal: { base: '#d8b27a', hi: '#ffe08a', shade: '#c08a22', far: '#8e6638', line: '#1c0f08', gap: '#7a5a1c' } };
 function skullShapes(v, cx, cy, open) {
   const bone = [], holes = [], teeth = [], knobs = [];
   let snoutEnd;
@@ -275,11 +285,33 @@ function makeCarno() {
   const torso = [cap(21, 11, 32, 9, 1.3), ...spines(17, 11.4, 32, 8.6, 6), ...ribs(22, 11, 31, 9.2, 5, 5.6, .5),
     cap(24, 16.6, 30.5, 15.8, .45), cap(31, 12, 32.5, 14.4, .5), cap(32.5, 14.4, 33.3, 15, .4), cap(32, 9, 36, 6.5, 1.1)];
   const sk = skullShapes(carnoSkull, 40, 6, false), ak = skullShapes(carnoSkull, 40, 15.5, true);
-  const blackHorns = (cx, cy) => [ // long buffalo sweep: one horn curls back and up, the other up and forward, sharp tips
-    cap(cx - 1, cy - 2.6, cx - 4.5, cy - 4.6, 1.45), cap(cx - 4.5, cy - 4.6, cx - 6.6, cy - 8, 1.15), cap(cx - 6.6, cy - 8, cx - 6.2, cy - 11.4, .85), cap(cx - 6.2, cy - 11.4, cx - 4.8, cy - 13.4, .55),
-    cap(cx + 1.2, cy - 2.6, cx - .6, cy - 6, 1.5), cap(cx - .6, cy - 6, cx - .2, cy - 9.8, 1.15), cap(cx - .2, cy - 9.8, cx + 1.8, cy - 12.4, .85), cap(cx + 1.8, cy - 12.4, cx + 3.8, cy - 13.4, .55)];
-  const bigHorns = blackHorns(40, 6);
-  // Ancient attack pose: head low, jaws open, tail raised, wide stride, big horns
+  // ---- Ancient looks: what the 4th piece is, and what the skeleton becomes ----
+  const spikeRow = (ax, ay, bx, by, n, h, r) => { const o = []; for (let i = 0; i < n; i++) { const t = (i + .5) / n, x = ax + (bx - ax) * t, y = ay + (by - ay) * t; o.push(cap(x, y, x - .5, y - h, r)); } return o; };
+  const studs = (ax, ay, bx, by, n, r) => { const o = []; for (let i = 0; i < n; i++) { const t = (i + .5) / n; o.push(ell(ax + (bx - ax) * t, ay + (by - ay) * t - .6, r, r)); } return o; };
+  const crown = (cx, cy) => [cap(cx - 1.8, cy - 3, cx + 2.2, cy - 3.3, .6), cap(cx - 1.4, cy - 3.2, cx - 1.8, cy - 5.2, .5), cap(cx + .2, cy - 3.4, cx + .2, cy - 6, .55), cap(cx + 1.8, cy - 3.4, cx + 2.3, cy - 5.3, .5)];
+  const look = ancientLook;
+  const ancientExtra = [], ancientOpts = { body: OPT, head: SOLID };
+  let piece4;
+  if (look === 'armor') {        // bony spikes and studs down the back, neck and tail (real Carnotaurus had rows of bony bumps)
+    piece4 = [...spikeRow(17, 10.6, 32, 7.8, 6, 2.2, .62), ...spikeRow(32.3, 8, 35.5, 5.7, 2, 1.6, .5), ...studs(5, 12.6, 16, 10.4, 4, .55)];
+    ancientExtra.push(['a', [...spikeRow(16, 8.4, 32, 10.6, 6, 2.4, .65), ...spikeRow(32.5, 11.4, 35.5, 14, 2, 1.7, .5), ...studs(7, 2.8, 15, 6.4, 4, .55)]]);
+  } else if (look === 'obsidian') { // a black crystal lands on the head; the whole skeleton turns obsidian with red eyes
+    piece4 = [cap(40.4, 2.2, 40.4, -.8, .95), cap(39.2, 2.6, 38.4, .6, .6), cap(41.6, 2.6, 42.5, .8, .6)];
+    ancientOpts.body = OBSIDIAN; ancientOpts.head = { ...OBSIDIAN, form: 'solid', teeth: '#6b625a' };
+    ancientExtra.push(['r', [ell(40.8, 14.8, .85, .85)]]);
+  } else if (look === 'lava') {   // a glowing lava core lands on the hips; cracks of lava spread through every bone
+    piece4 = [ell(21, 10.6, 2.4, 1.9)];
+    ancientOpts.body = { ...OPT, lava: true }; ancientOpts.head = { ...SOLID, lava: true };
+  } else if (look === 'crown') {  // a golden crown lands on the skull; bones get a gold trim
+    piece4 = crown(40, 6);
+    ancientOpts.body = GOLDTRIM; ancientOpts.head = { ...GOLDTRIM, form: 'solid' };
+    ancientExtra.push(['g', crown(40, 15.5)]);
+  } else {                        // saber fangs: huge fangs and a heavier jaw
+    piece4 = [cap(44, 8.4, 44.3, 11.4, .6), cap(42, 8.6, 42.2, 10.8, .5)];
+    ancientExtra.push(['b', [cap(38.5, 18.6, 46.4, 22.4, 1.25)]], ['f', [cap(44.2, 17.2, 44.5, 20.6, .62), cap(42.2, 17.6, 42.4, 20, .5), cap(46, 22, 46.2, 19.4, .5)]]);
+  }
+  const piece4Char = { armor: 'a', obsidian: 'k', lava: 'o', crown: 'g', saber: 'f' }[look];
+  // Ancient attack pose: head low, jaws open, tail raised, wide stride
   const aFar = [cap(20, 11, 17, 17, 1.05), cap(17, 17, 14.5, 23, .8), cap(14.5, 23, 14, 26.6, .7), cap(13, 27.1, 17, 27.1, .55)];
   const aBone = [cap(21, 10, 13, 7, 1.3), cap(13, 7, 7, 3.5, .9), cap(7, 3.5, 3, 2.5, .62), cap(3, 2.5, 1, 3.6, .45),
     ell(21, 10.8, 2.6, 1.7), cap(21.5, 11.5, 23.5, 16, .6), cap(22.8, 16.2, 24.6, 16.4, .5),
@@ -292,9 +324,14 @@ function makeCarno() {
       { map: frame([['d', farLeg], ['b', legs]]), opt: OPT },
       { map: frame([['b', torso]]), opt: OPT },
       { map: frame([['n', sk.knobs], ['b', sk.bone], ['e', sk.holes], ['t', sk.teeth]]), opt: SOLID },
-      { map: frame([['k', bigHorns]]), opt: SOLID },
+      { map: frame([[piece4Char, piece4]]), opt: SOLID },
     ],
-    ancient: [{ map: frame([['d', aFar], ['b', aBone]]), opt: OPT }, { map: frame([['n', ak.knobs], ['b', ak.bone], ['e', ak.holes], ['t', ak.teeth], ['k', blackHorns(40, 15.5)]]), opt: SOLID }],
+    ancient: [
+      { map: frame([['d', aFar], ['b', aBone]]), opt: ancientOpts.body },
+      { map: frame([['n', ak.knobs], ['b', ak.bone], ['e', ak.holes], ['t', ak.teeth]]), opt: ancientOpts.head },
+      ...(look === 'obsidian' || look === 'lava' ? [] : []),
+      ...ancientExtra.map((l) => ({ map: frame([l]), opt: l[0] === 'b' ? ancientOpts.head : SOLID })),
+    ],
   };
 }
 // render a map in the Carno frame and crop it to its bones; x/y = top-left on the ticket
@@ -372,7 +409,7 @@ function winOffset(who, now) {
       } else if (!w.text) { w.text = true; const h = headTop('B', now); money('+$1', h.x + 20, h.y, now); }
     }
     if ((w.kind === 'carno' || w.kind === 'ancient') && who === 'C') {
-      if (!w.text) { w.text = true; money(w.kind === 'carno' ? '+$5' : '+$25', C_LEFT + 40 * CK * S, C_TOP + 10, now + 120, w.kind === 'ancient'); }
+      if (!w.text) { w.text = true; money(w.kind === 'carno' ? '+$5' : '+$25', C_LEFT + 40 * CK * S, C_TOP + 40, now + 120, w.kind === 'ancient'); }
       const len = w.kind === 'ancient' ? 700 : 560, amp = w.kind === 'ancient' ? 6 : 4;
       if (e < len) dx += Math.sin(e / 30) * amp * (1 - e / len);
     }
@@ -455,7 +492,7 @@ function loop(now) {
   const cdx = winOffset('C', now);
   const k = morph ? Math.min(1, Math.max(0, (now - morph.t0) / morph.dur)) : 0;
   const switched = morph && k >= morph.at, fx = morph ? morph.fx : null, A = CARNO.ancient;
-  const headX = C_LEFT + 40 * CK * S, headY = C_TOP + 40;
+  const headX = C_LEFT + 40 * CK * S, headY = C_TOP + 85;
   let dy = 0, oldAlpha = 1, newAlpha = 0;
   if (morph && now >= morph.t0) {
     if (fx === 'hop') { dy = -Math.round(14 * Math.sin(Math.PI * k) / 2) * 2; oldAlpha = 1 - k; newAlpha = k; }
@@ -480,6 +517,9 @@ function loop(now) {
   }
   if (morph && switched && !morph.landed) {
     morph.landed = true;
+    if (ancientLook === 'lava') for (let n = 0; n < 24; n++) effects.push({ x: A.x + Math.random() * A.cv.width, y: A.y + Math.random() * A.cv.height, vx: (Math.random() - .5) * 40, vy: -40 - Math.random() * 80, t0: now + Math.random() * 400, life: 700, col: Math.random() < .5 ? '#ff7a1a' : '#ffc23a', size: 4, nograv: true });
+    if (ancientLook === 'obsidian') sparks(headX + 6, headY + 6, 14, now);
+    if (ancientLook === 'crown') for (let n = 0; n < 20; n++) effects.push({ x: A.x + Math.random() * A.cv.width, y: A.y - 10 - Math.random() * 30, vx: 0, vy: 50 + Math.random() * 50, t0: now + Math.random() * 300, life: 700, col: Math.random() < .5 ? '#fff6c8' : '#ffd34a', size: 4 });
     const fx2 = morph.fx;
     if (fx2 === 'hop') { shake(9, now); puff(A.x + A.cv.width / 2, C_FEET - 4, 20, 90, now); sparks(headX - 8, headY + 10, 12, now); }
     if (fx2 === 'roar') { shake(13, now); effects.push({ ring: true, x: headX + 30, y: headY + 30, t0: now, life: 560, col: '#ffe9a8', size: 0 }); effects.push({ ring: true, x: headX + 30, y: headY + 30, t0: now + 120, life: 560, col: '#ffb12a', size: 0 }); sparks(headX + 30, headY + 30, 14, now); }
@@ -531,6 +571,7 @@ window.FF_FOSSILS = {
     ticket.append(overlay);
     if (!running) { running = true; requestAnimationFrame(loop); }
   },
+  setLook(v) { ancientLook = v; const c = makeCarno(); CARNO = { parts: c.parts.map((q) => cropFrame(q.map, q.opt)), ancient: cropFrame(c.ancient) }; return v; },
   setSkull(v) { carnoSkull = v; const c = makeCarno(); CARNO = { parts: c.parts.map((q) => cropFrame(q.map, q.opt)), ancient: cropFrame(c.ancient) }; return v; },
   setAncientFx(name) { if (FX[name]) ancientFx = name; return ancientFx; },
   reset() { next = { P: 0, C: 0 }; finds = []; placed = []; cPlaced = []; flying = null; effects = []; floaters = []; wins = []; ghosts = []; scootStart = null; scootDone = false; morph = null; idleWaiters = []; },
@@ -631,6 +672,7 @@ if (window.self !== window.top) document.documentElement.classList.add('embedded
     dig(r, c) { const el = cellsEl.children[r * 3 + c]; if (el && el.dig) el.dig(); },
     ancientFx: (name) => FF_FOSSILS.setAncientFx(name),
     skull: (v) => FF_FOSSILS.setSkull(v),
+    look: (v) => FF_FOSSILS.setLook(v),
     simulate(n = 10000) {
       const t = {}, cat = { lose: 0, pachy1: 0, pachy2: 0, carno: 0, ancient: 0, brachy: 0, amber: 0 }; let paid = 0;
       for (let i = 0; i < n; i++) {
