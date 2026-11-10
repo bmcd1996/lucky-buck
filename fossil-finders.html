@@ -374,11 +374,25 @@ if (window.self !== window.top) document.documentElement.classList.add('embedded
   const COLS = [[300, 506], [521, 729], [746, 961]];           // the three dig spots (left label box is not playable)
   const ROWS = [[699, 827], [848, 978], [1000, 1132], [1155, 1292]]; // green, clay, brown, gray
 
-  // ---- Odds (approved design, Nov 10 2026) ----
-  const ORDINARY = { P: 0.30, C: 0.30, B: 0.40 };
+  // ---- Odds (approved design, Nov 10 2026). Editable from the simulator's Fossil odds sliders. ----
+  const DEFAULT_ODDS = { P: 30, C: 30, B: 40, bed: 8, amber: 3 };   // per-spot % on ordinary tickets; % of tickets
   const PACHY_BED = { P: 0.75, B: 0.15, C: 0.10 };
-  const PACHY_BED_RATE = 0.08;
-  const AMBER_RATE = 0.03; // tickets with one hidden amber (player finds it about 1 time in 3)
+  const ODDS_KEY = 'fossil-finders-odds';
+  let ORDINARY, PACHY_BED_RATE, AMBER_RATE, ODDS;
+  function cleanOdds(o) {
+    const num = (v, lo, hi, d) => (typeof v === 'number' && isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d);
+    const r = { P: num(o && o.P, 0, 100, DEFAULT_ODDS.P), C: num(o && o.C, 0, 100, DEFAULT_ODDS.C), B: num(o && o.B, 0, 100, DEFAULT_ODDS.B),
+      bed: num(o && o.bed, 0, 50, DEFAULT_ODDS.bed), amber: num(o && o.amber, 0, 30, DEFAULT_ODDS.amber) };
+    if (r.P + r.C + r.B <= 0) Object.assign(r, { P: DEFAULT_ODDS.P, C: DEFAULT_ODDS.C, B: DEFAULT_ODDS.B });
+    return r;
+  }
+  function applyOdds(o) {
+    ODDS = cleanOdds(o);
+    const t = ODDS.P + ODDS.C + ODDS.B;
+    ORDINARY = { P: ODDS.P / t, C: ODDS.C / t, B: ODDS.B / t };
+    PACHY_BED_RATE = ODDS.bed / 100; AMBER_RATE = ODDS.amber / 100; // amber tickets: player finds it about 1 time in 3
+  }
+  try { applyOdds(JSON.parse(localStorage.getItem(ODDS_KEY))); } catch (e) { applyOdds(DEFAULT_ODDS); }
 
   const rnd = () => (crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296);
   const draw = (p) => { let r = rnd(); for (const k in p) { if ((r -= p[k]) < 0) return k; } return Object.keys(p).pop(); };
@@ -409,15 +423,25 @@ if (window.self !== window.top) document.documentElement.classList.add('embedded
   window.__fossilFinders = {
     newBoard, payout, fossils: () => FF_FOSSILS.state(), board: () => board,
     simulate(n = 10000) {
-      const t = {}; let paid = 0;
+      const t = {}, cat = { lose: 0, pachy1: 0, pachy2: 0, carno: 0, ancient: 0, brachy: 0, amber: 0 }; let paid = 0;
       for (let i = 0; i < n; i++) {
         const b = newBoard(); const f = b.map((r) => r[Math.floor(rnd() * 3)]);
         const d = payout(f); paid += d; t[d] = (t[d] || 0) + 1;
+        const k = (s) => f.filter((x) => x === s).length;
+        if (k('A')) cat.amber++;
+        else if (k('P') === 4) cat.pachy2++; else if (k('P') >= 2) cat.pachy1++;
+        else if (k('C') === 4) cat.ancient++; else if (k('C') === 3) cat.carno++;
+        else if (k('B') === 4) cat.brachy++; else cat.lose++;
       }
       const pct = {}; for (const k in t) pct['$' + k] = +(100 * t[k] / n).toFixed(2);
-      return { tickets: n, percentByPrize: pct, avgPaid: +(paid / n).toFixed(3) };
-    }
+      const share = {}; for (const k in cat) share[k] = cat[k] / n;
+      return { tickets: n, percentByPrize: pct, share, avgPaid: +(paid / n).toFixed(3) };
+    },
+    getOdds: () => ({ ...ODDS }),
+    defaults: () => ({ ...DEFAULT_ODDS }),
+    setOdds(o) { applyOdds(o); try { localStorage.setItem(ODDS_KEY, JSON.stringify(ODDS)); } catch (e) {} return { ...ODDS }; },
   };
+  window.addEventListener('storage', (e) => { if (e.key === ODDS_KEY) { try { applyOdds(JSON.parse(e.newValue)); } catch (err) {} } });
 
   // ---- Session stats (kept in this browser only) ----
   const KEY = 'fossil-finders-preview-stats';

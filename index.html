@@ -1964,6 +1964,18 @@ body.ff-mode .hero .ticket-logo-heading img{max-height:128px;max-width:min(100%,
 #ffPanel{display:none;padding:0;background:none;border:0;box-shadow:none}
 body.ff-mode #ffPanel{display:block}
 #ffFrame{display:block;width:100%;height:880px;border:0;background:transparent}
+#ffOdds{margin-top:12px}
+#ffOdds .ffo-row{display:grid;grid-template-columns:minmax(0,1fr) 64px;gap:4px 10px;align-items:center;padding:8px 0;border-bottom:1px solid #2b493c}
+#ffOdds label{font-weight:750;font-size:14px}
+#ffOdds label small{display:block;font-weight:500;color:var(--muted);font-size:11.5px}
+#ffOdds output{font-weight:850;font-variant-numeric:tabular-nums;text-align:right;color:var(--gold)}
+#ffOdds input[type=range]{grid-column:1/-1;padding:0;accent-color:#65d993;width:100%;height:28px;border:0;background:transparent}
+#ffOdds .ffo-group{font-size:11px;letter-spacing:1.4px;color:var(--gold);font-weight:800;margin:12px 0 0}
+#ffOdds .ffo-results{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 14px;margin-top:8px;font-size:13px}
+#ffOdds .ffo-results div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid #2b493c;padding:5px 0}
+#ffOdds .ffo-results b{font-variant-numeric:tabular-nums}
+#ffOdds .ffo-pay{grid-column:1/-1;font-size:15px;border-bottom:0!important;padding-top:8px!important}
+#ffOdds .ffo-pay b{color:var(--green);font-size:18px}
 </style>
 <script>
 (()=>{'use strict';
@@ -1986,10 +1998,55 @@ function panel(){
   p=document.createElement('section');p.id='ffPanel';p.setAttribute('aria-label','Fossil Finders ticket');
   frame=document.createElement('iframe');frame.id='ffFrame';frame.title='Fossil Finders ticket';frame.src='fossil-finders.html';
   p.append(frame);
+  p.append(oddsCard());
  }
  const hero=document.querySelector('.hero');
  if(hero&&p.previousElementSibling!==hero)hero.after(p);
  return p;
+}
+// Fossil odds sliders: per-spot bone odds and amber, saved for the Fossil Finders ticket (applies from the next ticket).
+const ODDS_KEY='fossil-finders-odds',ODDS_DEFAULT={P:30,C:30,B:40,bed:8,amber:3};
+let odds=null,simTimer=null;
+function loadOdds(){let o=null;try{o=JSON.parse(localStorage.getItem(ODDS_KEY))}catch(e){}const ok=o&&['P','C','B','bed','amber'].every(k=>typeof o[k]==='number'&&isFinite(o[k]));return ok?{...o}:{...ODDS_DEFAULT};}
+function oddsCard(){
+ odds=loadOdds();
+ const c=document.createElement('section');c.className='card';c.id='ffOdds';c.setAttribute('aria-label','Fossil odds');
+ const row=(id,label,hint,min,max,step)=>'<div class="ffo-row"><label for="'+id+'">'+label+'<small>'+hint+'</small></label><output id="'+id+'Out" for="'+id+'"></output><input type="range" id="'+id+'" min="'+min+'" max="'+max+'" step="'+step+'"></div>';
+ c.innerHTML='<div class="card-top"><h3>Fossil odds</h3><button class="btn mini ghost" type="button" id="ffoReset">Reset</button></div>'+
+  '<p class="tiny muted" style="margin:-8px 0 4px">Changes apply from the next ticket. The three bones always add up to 100%.</p>'+
+  '<div class="ffo-group">EACH SPOT ON AN ORDINARY TICKET</div>'+
+  row('ffoP','Pachy bone','P',0,100,1)+row('ffoC','Carnotaurus bone','C',0,100,1)+row('ffoB','Brachiosaurus bone','B',0,100,1)+
+  '<div class="ffo-group">SPECIAL TICKETS</div>'+
+  row('ffoAmber','Amber','% of tickets with one amber hidden in a random spot (you find it about 1 in 3 times)',0,20,.5)+
+  row('ffoBed','Pachy bed','% of tickets where most spots are Pachy bones (75% P, 15% B, 10% C)',0,30,1)+
+  '<div class="ffo-group">WHAT PLAYERS GET <span id="ffoN" style="color:var(--muted);letter-spacing:0;font-weight:600"></span></div><div class="ffo-results" id="ffoRes"></div>';
+ const bones=['P','C','B'];
+ const sync=()=>{for(const k of bones){c.querySelector('#ffo'+k).value=odds[k];c.querySelector('#ffo'+k+'Out').textContent=Math.round(odds[k])+'%';}
+  c.querySelector('#ffoAmber').value=odds.amber;c.querySelector('#ffoAmberOut').textContent=odds.amber+'%';
+  c.querySelector('#ffoBed').value=odds.bed;c.querySelector('#ffoBedOut').textContent=odds.bed+'%';};
+ const setBone=(k,v)=>{ // keep P + C + B = 100 by sharing the rest between the other two in proportion
+  v=Math.max(0,Math.min(100,Math.round(v)));const others=bones.filter(x=>x!==k),rest=100-v,sum=others.reduce((a,x)=>a+odds[x],0);
+  const a=sum>0?Math.round(rest*odds[others[0]]/sum):Math.round(rest/2);odds[k]=v;odds[others[0]]=a;odds[others[1]]=rest-a;};
+ for(const k of bones)c.querySelector('#ffo'+k).addEventListener('input',e=>{setBone(k,Number(e.target.value));sync();saveOdds();});
+ c.querySelector('#ffoAmber').addEventListener('input',e=>{odds.amber=Number(e.target.value);sync();saveOdds();});
+ c.querySelector('#ffoBed').addEventListener('input',e=>{odds.bed=Number(e.target.value);sync();saveOdds();});
+ c.querySelector('#ffoReset').addEventListener('click',()=>{odds={...ODDS_DEFAULT};sync();saveOdds();});
+ sync();setTimeout(simulateOdds,300);
+ return c;
+}
+function saveOdds(){
+ try{localStorage.setItem(ODDS_KEY,JSON.stringify(odds))}catch(e){}
+ const w=frame&&frame.contentWindow;try{w&&w.__fossilFinders&&w.__fossilFinders.setOdds(odds)}catch(e){}
+ clearTimeout(simTimer);simTimer=setTimeout(simulateOdds,180);
+}
+function simulateOdds(){
+ const w=frame&&frame.contentWindow,box=document.getElementById('ffoRes');if(!box)return;
+ let r=null;try{if(w&&w.__fossilFinders&&w.__fossilFinders.setOdds){w.__fossilFinders.setOdds(odds);r=w.__fossilFinders.simulate(20000);}}catch(e){}
+ if(!r||!r.share){setTimeout(simulateOdds,400);return;}
+ const pct=v=>(v*100).toFixed(v<.01?2:1)+'%',one=v=>v>0?'1 in '+Math.round(1/v).toLocaleString():'never';
+ const rows=[['Lose','lose'],['Pachy $1','pachy1'],['Two Pachys $2','pachy2'],['Carnotaurus $5','carno'],['Ancient Carno $30','ancient'],['Brachiosaurus $10','brachy'],['Amber $25+','amber']];
+ box.innerHTML=rows.map(x=>'<div><span>'+x[0]+'</span><b title="'+one(r.share[x[1]])+'">'+pct(r.share[x[1]])+'</b></div>').join('')+'<div class="ffo-pay"><span>Average paid per $1 ticket</span><b>$'+r.avgPaid.toFixed(2)+'</b></div>';
+ const n=document.getElementById('ffoN');if(n)n.textContent='· 20,000 test tickets';
 }
 function enter(){
  on=true;try{localStorage.setItem(KEY,'1')}catch(e){}
