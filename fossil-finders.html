@@ -224,7 +224,7 @@ const CX = 164, FEET = 782, REVEAL_HOLD = 380, HOP_MS = 820, SCOOT = 380;
 const ORDER = [['A', 'body'], ['A', 'skull'], ['B', 'body'], ['B', 'skull']];
 let PACHY = null, sprites = null, CARNO = null, overlay = null, octx = null, ticketEl = null, cellsEl = null;
 let finds = [], placed = [], cPlaced = [], flying = null, effects = [], floaters = [], wins = [], ghosts = [];
-let next = { P: 0, C: 0 }, scootStart = null, scootDone = false, morph = null, shakeT = 0, shakeAmp = 0, idleWaiters = [], running = false;
+let next = { P: 0, C: 0, B: 0 }, scootStart = null, scootDone = false, morph = null, shakeT = 0, shakeAmp = 0, idleWaiters = [], running = false;
 
 // Carnotaurus: short deep skull with two horns over the eyes, tiny stubby arms, long legs, long tail; walks on two legs.
 // Standing pose (facing right) is split in three finds; the 4th find is a pair of big horns that turns it Ancient (attack pose).
@@ -278,6 +278,33 @@ function skullShapes(v, cx, cy, open) {
   }
   return { bone, holes, teeth, knobs };
 }
+
+// Brachiosaurus: front legs longer than the back legs (back slopes down to the hips), deep ribcage, long tail,
+// very long neck held high, small skull with a domed nasal crest. Frame: 4 px units from art (B_LEFT, B_TOP).
+const B_LEFT = 40, B_TOP = 652, B_W = 110, B_H = 118, B_PIVOT = { x: 40 + 48 * 4, y: 652 + 80 * 4 };
+function makeBrachy() {
+  K = 1; OY = 0;
+  const frame = (layers) => raster(B_W, B_H, layers);
+  const legsFar = [cap(44.5, 84, 43.5, 96, 2.2), cap(43.5, 96, 43, 106, 1.8), cap(40.5, 108, 46, 108, 1.1),
+    cap(25, 90, 26, 98, 2.3), cap(26, 98, 26.5, 106, 1.9), cap(23.5, 108, 29.5, 108, 1.1)];
+  const legs = [ell(47.5, 83, 4.2, 3.2), ell(21.5, 88.5, 5.4, 3.6),
+    cap(48, 84, 50, 95.5, 2.5), cap(50, 95.5, 50, 106, 2.0), cap(47, 108, 53.5, 108, 1.25),
+    cap(20.5, 90, 19, 98, 2.7), cap(19, 98, 20, 106, 2.1), cap(16.5, 108, 23.5, 108, 1.25)];
+  const ribcage = [cap(23, 86.5, 47, 80.5, 1.8), ...spines(25, 86, 46, 80.6, 7), ...ribs(27, 86, 45, 81.2, 7, 12, .9)];
+  const tail = [cap(19, 87, 11, 89.5, 1.9), cap(11, 89.5, 5.5, 95, 1.5), cap(5.5, 95, 3.5, 103, 1.15), cap(3.5, 103, 6.5, 110.5, .9),
+    cap(6.5, 110.5, 13, 113.5, .65), ...spines(16, 87.6, 7, 92.5, 4)];
+  const neck = [cap(48, 80, 61, 73.5, 3.8), cap(61, 73.5, 72, 64, 3.3), cap(72, 64, 77.5, 48, 2.9), cap(77.5, 48, 76.5, 32, 2.5),
+    cap(76.5, 32, 79, 19, 2.2), cap(79, 19, 86, 12.5, 1.9), ...spines(51, 77.6, 77, 34, 9)];
+  const skull = [ell(92, 11.5, 4.6, 3.0), ell(91.2, 8.2, 2.6, 2.2), cap(93, 12.6, 101, 13.2, 1.9), cap(90, 14.8, 100, 15.4, .9)];
+  const holes = [ell(89.6, 10.9, .8, .8), ell(92.4, 7.6, .65, .65), cap(91.5, 14, 101, 14.3, .35)];
+  return { parts: [
+    { map: frame([['d', legsFar], ['b', legs]]), opt: OPT },
+    { map: frame([['b', ribcage]]), opt: OPT },
+    { map: frame([['b', tail]]), opt: OPT },
+    [{ map: frame([['b', neck]]), opt: OPT }, { map: frame([['b', skull], ['e', holes]]), opt: SOLID }],
+  ] };
+}
+let BRACHY = null, bPlaced = [];
 function makeCarno() {
   K = CK; OY = 10;
   const farLeg = [cap(19.5, 12, 17.2, 18.4, 1.0), ell(17.2, 18.4, .95, .95), cap(17.2, 18.4, 14.2, 23.6, .75), cap(14.2, 23.6, 14.8, 26.6, .65), cap(13.8, 27.1, 17.6, 27.1, .5)];
@@ -338,7 +365,7 @@ function makeCarno() {
   };
 }
 // render a map in the Carno frame and crop it to its bones; x/y = top-left on the ticket
-function cropFrame(map, opt) {
+function cropFrame(map, opt, left = C_LEFT, top = C_TOP) {
   const layers = typeof map[0] === 'object' ? map : [{ map, opt }];
   const first = renderPart(layers[0].map, layers[0].opt, false).cv, full = document.createElement('canvas');
   full.width = first.width; full.height = first.height; const fx = full.getContext('2d');
@@ -348,13 +375,14 @@ function cropFrame(map, opt) {
   const cx = x0 * S, cy = y0 * S, w = (x1 - x0 + 3) * S, h = (y1 - y0 + 3) * S;
   const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
   cv.getContext('2d').drawImage(full, cx, cy, w, h, 0, 0, w, h);
-  return { cv, x: C_LEFT - S + cx, y: C_TOP - S + cy };
+  return { cv, x: left - S + cx, y: top - S + cy };
 }
 
 function build() {
   PACHY = makePachy(1);
   for (const k in PACHY) PACHY[k].front = frontOf(PACHY[k].skull, PACHY[k].skullAt);
   sprites = ORDER.map(([who, part]) => ({ who, part, img: renderPart(PACHY[who][part], OPT, false) }));
+  BRACHY = { parts: makeBrachy().parts.map((q) => Array.isArray(q) ? cropFrame(q, null, B_LEFT, B_TOP) : cropFrame(q.map, q.opt, B_LEFT, B_TOP)) };
   const c = makeCarno();
   CARNO = { parts: c.parts.map((p) => cropFrame(p.map, p.opt)), ancient: cropFrame(c.ancient) };
 }
@@ -378,7 +406,7 @@ function target(i, now) {
 // a find's picture and where it lands
 function pieceOf(f, now) {
   if (f.dino === 'P') { const t = target(f.i, now); return { cv: sprites[f.i].img.cv, x: t.x, y: t.y, mirror: t.mirror }; }
-  const p = CARNO.parts[f.i]; return { cv: p.cv, x: p.x, y: p.y, mirror: false };
+  const p = (f.dino === 'B' ? BRACHY : CARNO).parts[f.i]; return { cv: p.cv, x: p.x, y: p.y, mirror: false };
 }
 function cellRect(r, c) { const [x0, x1] = COLS[c], [y0, y1] = ROWS[r]; return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 }; }
 function drawSprite(cv, x, y, mirror, ctx = octx) {
@@ -439,6 +467,9 @@ function landed(f, now) {
       for (let k = 0; k < 8; k++) effects.push({ x: a.x + ac.width * (.2 + Math.random() * .6), y: a.y + ac.height - S * 2, vx: 40 + Math.random() * 90, vy: -20 - Math.random() * 40, t0: now + 40, life: 380, col: ['#d9c4a0', '#bfa47c', '#efe0c0'][k % 3], size: 4 });
     }
     if (i === 3) wins.push({ kind: 'butt', t0: now + 260 });
+  } else if (f.dino === 'B') {
+    bPlaced.push(f.i);
+    if (bPlaced.length === 4) wins.push({ kind: 'brachy', t0: now + 260 });
   } else {
     cPlaced.push(f.i);
     if (f.i === 2) wins.push({ kind: 'carno', t0: now + 220 });
@@ -463,9 +494,9 @@ function bolt(x0, y0, x1, y1, now) { // a jagged pixel lightning bolt, as short-
 }
 function idle(now) {
   return !flying && finds.every((f) => f.left) && floaters.length === 0 && (scootDone || scootStart === null || placed.length < 3)
-    && (!morph || now - morph.t0 > morph.dur) && wins.every((w) => now - w.t0 > ({ butt: 1100, ancient: 900 }[w.kind] || 700));
+    && (!morph || now - morph.t0 > morph.dur) && wins.every((w) => now - w.t0 > ({ butt: 1100, ancient: 900, brachy: 1200 }[w.kind] || 700));
 }
-function ready(f) { return f.dino === 'P' ? f.i === placed.length : f.i === cPlaced.length; }
+function ready(f) { return f.dino === 'P' ? f.i === placed.length : f.dino === 'B' ? f.i === bPlaced.length : f.i === cPlaced.length; }
 function storm(fx, k, now) {
   if (fx !== 'storm' || !morph || now < morph.t0 || k >= 1) return false;
   const dim = k < .1 ? k / .1 : k > .85 ? (1 - k) / .15 : 1;
@@ -485,8 +516,9 @@ function loop(now) {
   else if (ticketEl.style.transform) ticketEl.style.transform = '';
   // faded fossils in spots that weren't picked
   for (const g of ghosts) {
-    const r = cellRect(g.r, g.c), cv = g.letter === 'C' ? CARNO.parts[2].cv : sprites[1].img.cv;
-    octx.globalAlpha = .4; drawSprite(cv, r.x + (r.w - cv.width) / 2, r.y + (r.h - cv.height) / 2, false); octx.globalAlpha = 1;
+    const r = cellRect(g.r, g.c), cv = g.letter === 'C' ? CARNO.parts[2].cv : g.letter === 'B' ? BRACHY.parts[3].cv : sprites[1].img.cv;
+    const k = Math.min(1, (r.w - 16) / cv.width, (r.h - 16) / cv.height), w = cv.width * k, h = cv.height * k;
+    octx.globalAlpha = .4; octx.drawImage(cv, r.x + (r.w - w) / 2, r.y + (r.h - h) / 2, w, h); octx.globalAlpha = 1;
   }
   // Pachy skeletons on the top stand (bodies first)
   const order = [...placed].sort((a, b) => (sprites[a].part === 'skull') - (sprites[b].part === 'skull'));
@@ -530,13 +562,23 @@ function loop(now) {
     if (fx2 === 'stomp') { shake(15, now); puff(A.x + A.cv.width * .3, C_FEET - 4, 18, 120, now); puff(A.x + A.cv.width * .7, C_FEET - 4, 18, 120, now); }
     if (fx2 === 'storm') { shake(12, now); sparks(headX, headY + 20, 18, now); }
   }
+  // Brachiosaurus on the third stand; on its win the neck sways up and back
+  for (const i of [...bPlaced].sort((a, b) => a - b)) {
+    const p = BRACHY.parts[i];
+    let a = 0; const w = wins.find((w) => w.kind === 'brachy'); if (w && now > w.t0) { const e = (now - w.t0) / 1100; if (e < 1) a = -.07 * Math.sin(e * Math.PI * 2) * (1 - e); }
+    if (i === 3 && a) { octx.save(); octx.translate(B_PIVOT.x, B_PIVOT.y); octx.rotate(a); octx.drawImage(p.cv, p.x - B_PIVOT.x, p.y - B_PIVOT.y); octx.restore(); }
+    else octx.drawImage(p.cv, p.x + (w && i !== 3 ? 0 : 0), p.y);
+  }
+  for (const w of wins) if (w.kind === 'brachy' && !w.text && now > w.t0) { w.text = true; shake(8, now); money('+$10', B_LEFT + 92 * 4, B_TOP + 4, now + 380); puff(B_LEFT + 33 * 4, B_TOP + 108 * 4, 18, 80, now); }
   // the fossil in flight
   if (flying) {
     const f = flying.f, pc = pieceOf(f, now), cv = pc.cv, r = cellRect(f.r, f.c);
     const t = Math.min(1, (now - flying.t0) / HOP_MS);
     const q = hop({ x: r.x + r.w / 2, y: r.y + r.h / 2 }, { x: pc.x + cv.width / 2, y: pc.y + cv.height / 2 }, t);
     if (q.second && !flying.puffed) { flying.puffed = true; puff(q.x, q.y + cv.height / 2, 6, 60, now); }
-    drawSprite(cv, q.x - cv.width / 2, q.y - cv.height / 2, pc.mirror);
+    if (f.dino === 'B') { const k0 = Math.min(1, (r.w - 12) / cv.width, (r.h - 12) / cv.height), k = k0 + (1 - k0) * t, w = cv.width * k, h = cv.height * k;
+      octx.drawImage(cv, q.x - w / 2, q.y - h / 2, w, h); }
+    else drawSprite(cv, q.x - cv.width / 2, q.y - cv.height / 2, pc.mirror);
     if (t >= 1) landed(f, now);
   }
   // dust and sparks
@@ -577,9 +619,9 @@ window.FF_FOSSILS = {
   setLook(v) { ancientLook = v; const c = makeCarno(); CARNO = { parts: c.parts.map((q) => cropFrame(q.map, q.opt)), ancient: cropFrame(c.ancient) }; return v; },
   setSkull(v) { carnoSkull = v; const c = makeCarno(); CARNO = { parts: c.parts.map((q) => cropFrame(q.map, q.opt)), ancient: cropFrame(c.ancient) }; return v; },
   setAncientFx(name) { if (FX[name]) ancientFx = name; return ancientFx; },
-  reset() { next = { P: 0, C: 0 }; finds = []; placed = []; cPlaced = []; flying = null; effects = []; floaters = []; wins = []; ghosts = []; scootStart = null; scootDone = false; morph = null; idleWaiters = []; },
+  reset() { next = { P: 0, C: 0, B: 0 }; finds = []; placed = []; cPlaced = []; bPlaced = []; flying = null; effects = []; floaters = []; wins = []; ghosts = []; scootStart = null; scootDone = false; morph = null; idleWaiters = []; },
   // letters that are shown as fossils (other finds stay letters for now)
-  has(letter) { return letter === 'P' || letter === 'C'; },
+  has(letter) { return letter === 'P' || letter === 'C' || letter === 'B'; },
   // a fossil spot: canvas the size of the cell, drawn when its spot is first scratched
   prepCell(cell, w, h, letter) { const cv = document.createElement('canvas'); cv.className = 'fossil'; cv.width = w; cv.height = h; cv.dataset.letter = letter || 'P'; cell.insertBefore(cv, cell.querySelector('.cover')); return cv; },
   // when a fossil spot is first scratched it gets that dinosaur's next piece, so scratching uncovers it
@@ -589,7 +631,7 @@ window.FF_FOSSILS = {
     cv.dataset.i = String(i);
     const ctx = cv.getContext('2d'); ctx.imageSmoothingEnabled = false;
     if (L === 'P') { const s = sprites[i]; drawSprite(s.img.cv, (cv.width - s.img.cv.width) / 2, (cv.height - s.img.cv.height) / 2, s.who === 'B', ctx); }
-    else { const p = CARNO.parts[i].cv, k = Math.min(1, (cv.width - 12) / p.width, (cv.height - 12) / p.height), w = Math.round(p.width * k), h = Math.round(p.height * k);
+    else { const p = (L === 'B' ? BRACHY : CARNO).parts[i].cv, k = Math.min(1, (cv.width - 12) / p.width, (cv.height - 12) / p.height), w = Math.round(p.width * k), h = Math.round(p.height * k);
       ctx.drawImage(p, Math.round((cv.width - w) / 2), Math.round((cv.height - h) / 2), w, h); }
   },
   onReveal(r, c, cell) {
@@ -601,7 +643,7 @@ window.FF_FOSSILS = {
   ghost(r, c, letter) { ghosts.push({ r, c, letter: letter || 'P' }); },
   whenIdle(fn) { idleWaiters.push(fn); },
   isIdle() { return idle(performance.now()); },
-  state() { return { finds: finds.length, placed: placed.length, carno: cPlaced.length, ancient: !!(morph && morph.landed), flying: !!flying, scoot: scootDone ? 'done' : scootStart ? 'moving' : 'middle', wins: wins.map((w) => w.kind) }; },
+  state() { return { finds: finds.length, placed: placed.length, carno: cPlaced.length, brachy: bPlaced.length, ancient: !!(morph && morph.landed), flying: !!flying, scoot: scootDone ? 'done' : scootStart ? 'moving' : 'middle', wins: wins.map((w) => w.kind) }; },
 };
 })();
 </script>
