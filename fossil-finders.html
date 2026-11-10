@@ -189,7 +189,7 @@ function renderPart(map, opt, withRock) {
   // bone
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
     const ch = g[y][x]; if (!'bdnt'.includes(ch)) continue;
-    if (ch === 't') { px(x, y, '#fff6dc'); continue; }
+    if (ch === 't') { px(x, y, '#b98d55'); continue; }   // teeth: darker aged tan, not white
     let col = ch === 'd' ? pal.far : pal.base;
     if (ch !== 'd') {
       if (!filled(x, y + 1)) col = pal.shade; else if (!filled(x, y - 1)) col = pal.hi;
@@ -222,7 +222,7 @@ const C_W = 50, C_H = 29, C_FEET = 936, C_LEFT = Math.round(164 - 25 * CK * S), 
 
 // Carnotaurus skull designs. cx, cy = middle of the braincase; open = jaws open (Ancient attack pose).
 // Real skull: very short and deep, blunt snout, thick horns over the eyes, big opening in front of the eye, slim lower jaw.
-let carnoSkull = 1;
+let carnoSkull = 5;
 function skullShapes(v, cx, cy, open) {
   const bone = [], holes = [], teeth = [], knobs = [];
   let snoutEnd;
@@ -239,19 +239,26 @@ function skullShapes(v, cx, cy, open) {
     bone.push(ell(cx - .5, cy + .4, 4, 2.8), cap(cx, cy + .9, cx + 7, cy + 1.7, 1.5));
     bone.push(cap(cx - 1.2, cy - 2, cx - 2.1, cy - 3.7, .62), cap(cx + .8, cy - 2.2, cx + 1.1, cy - 3.9, .62));
     holes.push(ell(cx + .6, cy - .3, .8, .8), ell(cx + 3.8, cy + 1, .9, .55)); snoutEnd = 8.2;
+  } else if (v === 5) { // Museum skull (owner's reference): long box skull, stubby horns at the back, three big windows, holed lower jaw
+    bone.push(cap(cx - 3.4, cy - .2, cx + 4.6, cy + .2, 2.7), ell(cx + 5, cy + .6, 1.6, 2.1));
+    bone.push(ell(cx - 2.7, cy - 2.9, 1.0, 1.0), ell(cx - .3, cy - 3.2, 1.1, 1.0));
+    holes.push(ell(cx - 1.8, cy - .2, .55, 1.25), ell(cx + .5, cy - .1, .6, 1.25), ell(cx + 3.1, cy - .1, 1.0, 1.25));
+    snoutEnd = 6.4;
   } else { // Bumpy: rounded head covered in bony bumps with a heavy brow
     bone.push(ell(cx, cy, 4.6, 3.2), cap(cx, cy + 1, cx + 6, cy + 1.6, 1.9), cap(cx - .4, cy - 2, cx + 2.4, cy - 1.8, .7));
     bone.push(cap(cx - 1.5, cy - 2.4, cx - 2.6, cy - 4.6, .75), cap(cx + .6, cy - 2.7, cx + .8, cy - 4.9, .75));
     knobs.push(ell(cx - 4, cy - 1, .6, .6), ell(cx - 3.2, cy - 2.6, .6, .6), ell(cx + 2.8, cy - 2.6, .55, .55), ell(cx + 4.2, cy - 1.4, .55, .55), ell(cx - 4.4, cy + 1, .55, .55));
     holes.push(ell(cx + 1, cy - .4, .85, .85), ell(cx + 3.6, cy + .9, .75, .6)); snoutEnd = 7.4;
   }
-  const n = v === 3 ? 7 : 6, tx0 = cx - 1.2, tx1 = cx + snoutEnd - 1;
+  const n = v === 3 ? 7 : v === 5 ? 5 : 6, tx0 = v === 5 ? cx + 1 : cx - 1.2, tx1 = cx + snoutEnd - 1;
   if (!open) { // shut: slim lower jaw, dark mouth line, row of teeth across it
-    bone.push(cap(cx - 2, cy + 3.2, cx + snoutEnd - 1.2, cy + 4.1, .9));
+    bone.push(v === 5 ? cap(cx - 3.6, cy + 3.3, cx + snoutEnd - 1, cy + 3.5, 1.05) : cap(cx - 2, cy + 3.2, cx + snoutEnd - 1.2, cy + 4.1, .9));
+    if (v === 5) holes.push(ell(cx - 1.6, cy + 3.5, .55, .45));
     holes.push(cap(tx0 - .4, cy + 3.2, tx1 + .4, cy + 2.9, .4));
     for (let i = 0; i < n; i++) { const x = tx0 + (tx1 - tx0) * i / (n - 1); teeth.push(cap(x, cy + 2.75, x + .15, cy + 3.55, .42)); }
   } else { // open: lower jaw dropped, teeth on both jaws
-    bone.push(cap(cx - 1.5, cy + 2.6, cx + snoutEnd - 1.4, cy + 6.3, .9));
+    bone.push(cap(cx - 1.5, cy + 2.6, cx + snoutEnd - 1.4, cy + 6.3, v === 5 ? 1.05 : .9));
+    if (v === 5) holes.push(ell(cx + .4, cy + 3.9, .5, .4));
     for (let i = 0; i < n - 2; i++) { const t = (i + .5) / (n - 2), x = cx + .8 + (snoutEnd - 1.8) * t; teeth.push(cap(x, cy + 2.4, x + .1, cy + 3.2, .4)); }
     for (let i = 0; i < n - 2; i++) { const t = (i + .5) / (n - 2), x = cx + .2 + (snoutEnd - 2.2) * t, y = cy + 3.4 + 2.6 * t; teeth.push(cap(x, y, x + .1, y - .8, .4)); }
   }
