@@ -232,7 +232,7 @@ const C_W = 50, C_H = 39, C_FEET = 936, C_LEFT = Math.round(164 - 25 * CK * S), 
 // Carnotaurus skull designs. cx, cy = middle of the braincase; open = jaws open (Ancient attack pose).
 // Real skull: very short and deep, blunt snout, thick horns over the eyes, big opening in front of the eye, slim lower jaw.
 let carnoSkull = 2;   // owner's pick: bull horns
-let ancientLook = 'armor';
+let ancientLook = 'armorlava';   // owner's pick: bony back armor + lava cracks
 const OBSIDIAN = { form: 'segmented', scale: 4, pal: { base: '#2e2926', hi: '#7a7068', shade: '#141110', far: '#1f1b19', line: '#000000', gap: '#0d0b0a' } };
 const GOLDTRIM = { form: 'segmented', scale: 4, pal: { base: '#d8b27a', hi: '#ffe08a', shade: '#c08a22', far: '#8e6638', line: '#1c0f08', gap: '#7a5a1c' } };
 function skullShapes(v, cx, cy, open) {
@@ -292,8 +292,9 @@ function makeCarno() {
   const look = ancientLook;
   const ancientExtra = [], ancientOpts = { body: OPT, head: SOLID };
   let piece4;
-  if (look === 'armor') {        // bony spikes and studs down the back, neck and tail (real Carnotaurus had rows of bony bumps)
+  if (look === 'armor' || look === 'armorlava') {        // bony spikes and studs down the back, neck and tail (real Carnotaurus had rows of bony bumps)
     piece4 = [...spikeRow(17, 10.6, 32, 7.8, 6, 2.2, .62), ...spikeRow(32.3, 8, 35.5, 5.7, 2, 1.6, .5), ...studs(5, 12.6, 16, 10.4, 4, .55)];
+    if (look === 'armorlava') { ancientOpts.body = { ...OPT, lava: true }; ancientOpts.head = { ...SOLID, lava: true }; }
     ancientExtra.push(['a', [...spikeRow(16, 8.4, 32, 10.6, 6, 2.4, .65), ...spikeRow(32.5, 11.4, 35.5, 14, 2, 1.7, .5), ...studs(7, 2.8, 15, 6.4, 4, .55)]]);
   } else if (look === 'obsidian') { // a black crystal lands on the head; the whole skeleton turns obsidian with red eyes
     piece4 = [cap(40.4, 2.2, 40.4, -.8, .95), cap(39.2, 2.6, 38.4, .6, .6), cap(41.6, 2.6, 42.5, .8, .6)];
@@ -310,7 +311,7 @@ function makeCarno() {
     piece4 = [cap(44, 8.4, 44.3, 11.4, .6), cap(42, 8.6, 42.2, 10.8, .5)];
     ancientExtra.push(['b', [cap(38.5, 18.6, 46.4, 22.4, 1.25)]], ['f', [cap(44.2, 17.2, 44.5, 20.6, .62), cap(42.2, 17.6, 42.4, 20, .5), cap(46, 22, 46.2, 19.4, .5)]]);
   }
-  const piece4Char = { armor: 'a', obsidian: 'k', lava: 'o', crown: 'g', saber: 'f' }[look];
+  const piece4Char = { armorlava: 'a', armor: 'a', obsidian: 'k', lava: 'o', crown: 'g', saber: 'f' }[look];
   // Ancient attack pose: head low, jaws open, tail raised, wide stride
   const aFar = [cap(20, 11, 17, 17, 1.05), cap(17, 17, 14.5, 23, .8), cap(14.5, 23, 14, 26.6, .7), cap(13, 27.1, 17, 27.1, .55)];
   const aBone = [cap(21, 10, 13, 7, 1.3), cap(13, 7, 7, 3.5, .9), cap(7, 3.5, 3, 2.5, .62), cap(3, 2.5, 1, 3.6, .45),
@@ -517,7 +518,7 @@ function loop(now) {
   }
   if (morph && switched && !morph.landed) {
     morph.landed = true;
-    if (ancientLook === 'lava') for (let n = 0; n < 24; n++) effects.push({ x: A.x + Math.random() * A.cv.width, y: A.y + Math.random() * A.cv.height, vx: (Math.random() - .5) * 40, vy: -40 - Math.random() * 80, t0: now + Math.random() * 400, life: 700, col: Math.random() < .5 ? '#ff7a1a' : '#ffc23a', size: 4, nograv: true });
+    if (ancientLook === 'lava' || ancientLook === 'armorlava') for (let n = 0; n < 24; n++) effects.push({ x: A.x + Math.random() * A.cv.width, y: A.y + Math.random() * A.cv.height, vx: (Math.random() - .5) * 40, vy: -40 - Math.random() * 80, t0: now + Math.random() * 400, life: 700, col: Math.random() < .5 ? '#ff7a1a' : '#ffc23a', size: 4, nograv: true });
     if (ancientLook === 'obsidian') sparks(headX + 6, headY + 6, 14, now);
     if (ancientLook === 'crown') for (let n = 0; n < 20; n++) effects.push({ x: A.x + Math.random() * A.cv.width, y: A.y - 10 - Math.random() * 30, vx: 0, vy: 50 + Math.random() * 50, t0: now + Math.random() * 300, life: 700, col: Math.random() < .5 ? '#fff6c8' : '#ffd34a', size: 4 });
     const fx2 = morph.fx;
