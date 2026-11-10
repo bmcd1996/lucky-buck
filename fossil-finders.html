@@ -46,6 +46,10 @@ html.embedded body { padding: 0; }
 .cell { position: absolute; border-radius: 8% / 12%; overflow: hidden; container-type: size; }
 .cell canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .cell .under { filter: brightness(0.42) saturate(0.85); }
+.cell canvas.fossil { image-rendering: pixelated; }
+.fossil-overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 4; image-rendering: pixelated; }
+.ticket.flipped .fossil-overlay { display: none; }
+.ticket { will-change: transform; }
 .cell .cover { touch-action: none; cursor: crosshair; }
 .cell .cover.gone { display: none; }
 .cell.locked .cover { pointer-events: none; cursor: default; }
@@ -92,6 +96,277 @@ button:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
 </div>
 
 <script>
+// Fossil Finders: Pachy fossils (v3.9.0). Skeleton art is built from bone shapes and drawn as chunky pixels.
+(() => {
+'use strict';
+const COLS = [[300, 506], [521, 729], [746, 961]];
+const ROWS = [[699, 827], [848, 978], [1000, 1132], [1155, 1292]];
+function cap(ax, ay, bx, by, r) { return { k: 'cap', ax, ay, bx, by, r }; }
+function ell(cx, cy, rx, ry) { return { k: 'ell', cx, cy, rx, ry }; }
+function inside(sh, x, y) {
+  if (sh.k === 'ell') { const dx = (x - sh.cx) / sh.rx, dy = (y - sh.cy) / sh.ry; return dx * dx + dy * dy <= 1; }
+  const vx = sh.bx - sh.ax, vy = sh.by - sh.ay, L = vx * vx + vy * vy || 1;
+  const t = Math.max(0, Math.min(1, ((x - sh.ax) * vx + (y - sh.ay) * vy) / L));
+  const dx = x - (sh.ax + vx * t), dy = y - (sh.ay + vy * t); return dx * dx + dy * dy <= sh.r * sh.r;
+}
+let K = 1; // detail factor: 1 = chunky (4 px blocks), 4/3 = finer (3 px blocks), same size on the card
+function sc(sh) { return sh.k === 'ell' ? { k: 'ell', cx: sh.cx * K, cy: sh.cy * K, rx: sh.rx * K, ry: sh.ry * K } : { k: 'cap', ax: sh.ax * K, ay: sh.ay * K, bx: sh.bx * K, by: sh.by * K, r: sh.r * K }; }
+function raster(W0, H0, layers0) { // layers: [char, shapes[]] painted in order
+  const W = Math.round(W0 * K), H = Math.round(H0 * K), layers = layers0.map(([c, shs]) => [c, shs.map(sc)]);
+  const g = Array.from({ length: H }, () => Array(W).fill('.'));
+  for (const [ch, shapes] of layers) for (let y = 0; y < H; y++) for (let x = 0; x < W; x++)
+    if (shapes.some((sh) => inside(sh, x + .5, y + .5))) g[y][x] = ch;
+  return g.map((r) => r.join(''));
+}
+function ribs(ax, ay, bx, by, n, len, r) {
+  const out = [];
+  for (let i = 1; i <= n; i++) { const t = i / (n + 1), x = ax + (bx - ax) * t, y = ay + (by - ay) * t; out.push(cap(x, y, x + len * .18, y + len, r)); }
+  return out;
+}
+function spines(ax, ay, bx, by, n) {
+  const out = [];
+  for (let i = 1; i <= n; i++) { const t = i / (n + 1), x = ax + (bx - ax) * t, y = ay + (by - ay) * t; out.push(cap(x, y, x - .3, y - 1.6, .45)); }
+  return out;
+}
+// Pachycephalosaurus: thick domed skull ringed with bony knobs, short beak, short neck, small arms,
+// walked on two stout hind legs, long stiff tail. No horns or frill. Both lean in, domes together.
+function frontOf(skull, at) { let m = 0; skull.forEach((r) => { for (let x = 0; x < r.length; x++) if (r[x] !== '.' && r[x] !== 'e') m = Math.max(m, x); }); return at[0] + m + 1; }
+function makePachy(k) {
+K = k;
+const BODY_A = raster(28, 24, [
+  ['d', [cap(10, 12, 9, 16.5, .8), cap(9, 16.5, 9.5, 20.5, .65), cap(9.5, 20.5, 9, 22.4, .55), cap(8, 22.6, 11.5, 22.6, .5)]],
+  ['b', [cap(1, 15, 6, 13, .6), cap(6, 13, 11, 11, .95), cap(11, 11, 17, 8, 1.05), ell(11, 12, 2.2, 1.3),
+         ...ribs(11, 11, 17, 8, 4, 3.2, .5), ...spines(8, 12, 16, 8.2, 4), cap(17, 8, 20, 5, .95),
+         cap(17, 10, 18.5, 12, .5), cap(18.5, 12, 19.6, 12.6, .4),
+         cap(11, 12, 13, 16.5, .95), cap(13, 16.5, 11.5, 20.5, .72), cap(11.5, 20.5, 11.2, 22.2, .6), cap(10.5, 22.6, 14.6, 22.6, .55)]],
+]);
+const SKULL_A = raster(12, 12, [
+  ['n', [ell(1.7, 3.6, .7, .7), ell(2.6, 1.4, .7, .7), ell(1.6, 6, .7, .7), ell(10.6, 8.6, .55, .55)]],
+  ['b', [ell(6, 4.4, 4.3, 3.7), cap(7, 6.5, 9, 10, 1.45), cap(5.5, 8, 8, 10.5, .75)]],
+  ['e', [ell(6.4, 6.3, .95, .95)]],
+]);
+const BODY_B = raster(28, 24, [ // chunkier, tail flicked up, wide stride
+  ['d', [cap(9.5, 12.5, 7.5, 16.5, .85), cap(7.5, 16.5, 6.5, 20.5, .68), cap(6.5, 20.5, 6.2, 22.4, .58), cap(5, 22.6, 8.6, 22.6, .5)]],
+  ['b', [cap(0.8, 9, 4, 12, .6), cap(4, 12, 10, 11, 1.05), cap(10, 11, 17, 8.5, 1.18), ell(10, 12, 2.4, 1.5),
+         ...ribs(10, 11, 17, 8.5, 5, 3.8, .5), ...spines(6, 11.6, 16, 8.6, 5), cap(17, 8.5, 20, 5.5, 1.02),
+         cap(17, 11, 18, 13, .52), cap(18, 13, 19.2, 13.4, .42),
+         cap(10.5, 12.5, 14, 16.5, 1.02), cap(14, 16.5, 13.5, 20.5, .76), cap(13.5, 20.5, 13.5, 22.2, .6), cap(12.8, 22.6, 16.8, 22.6, .55)]],
+]);
+const SKULL_B = raster(13, 13, [ // bigger dome, crown of knobs
+  ['n', [ell(2, 3, .7, .7), ell(3.6, 1.1, .7, .7), ell(5.8, .6, .65, .65), ell(1.2, 5.5, .7, .7), ell(1.7, 7.8, .7, .7), ell(11.2, 9.6, .55, .55)]],
+  ['b', [ell(6.5, 5, 4.8, 4.0), cap(7.5, 7.5, 9.8, 11, 1.45), cap(6, 9, 8.6, 11.6, .72)]],
+  ['e', [ell(7, 7.2, 1, 1)]],
+]);
+return {
+  A: { body: BODY_A, skull: SKULL_A, skullAt: [Math.round(17 * K), Math.round(-3 * K)] },
+  B: { body: BODY_B, skull: SKULL_B, skullAt: [Math.round(17 * K), Math.round(-3 * K)] },
+};
+}
+function hash(x, y, s) { let h = (x * 374761393 + y * 668265263 + s * 2147483647) | 0; h = (h ^ (h >>> 13)) * 1274126177; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
+function grid(map) { return map.map((r) => r.split('')); }
+function renderPart(map, opt, withRock) {
+  const g = grid(map), H = g.length, W = g[0].length, P = withRock ? 3 : 1, S = opt.scale, pal = opt.pal;
+  const cv = document.createElement('canvas'); cv.width = (W + 2 * P) * S; cv.height = (H + 2 * P) * S;
+  const c = cv.getContext('2d');
+  const filled = (x, y) => y >= 0 && y < H && x >= 0 && x < W && 'bdn'.includes(g[y][x]);
+  const px = (x, y, col) => { c.fillStyle = col; c.fillRect((x + P) * S, (y + P) * S, S, S); };
+  if (withRock) { // rock matrix around the bones
+    for (let y = -P; y < H + P; y++) for (let x = -P; x < W + P; x++) {
+      let near = false;
+      for (let dy = -3; dy <= 3 && !near; dy++) for (let dx = -3; dx <= 3; dx++) if (dx * dx + dy * dy <= 8 && filled(x + dx, y + dy)) { near = true; break; }
+      if (!near) continue;
+      const r = hash(x, y, 7);
+      px(x, y, r < .18 ? pal.rockHi : r > .85 ? pal.rockLo : pal.rock);
+    }
+  }
+  // outline
+  if (pal.line) for (let y = -1; y <= H; y++) for (let x = -1; x <= W; x++) {
+    if (filled(x, y)) continue;
+    let edge = false;
+    for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) if (filled(x + dx, y + dy)) edge = true;
+    if (edge) px(x, y, pal.line);
+  }
+  // bone
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const ch = g[y][x]; if (!'bdn'.includes(ch)) continue;
+    let col = ch === 'd' ? pal.far : pal.base;
+    if (ch !== 'd') {
+      if (!filled(x, y + 1)) col = pal.shade; else if (!filled(x, y - 1)) col = pal.hi;
+    }
+    const inner = filled(x - 1, y) && filled(x + 1, y) && filled(x, y - 1) && filled(x, y + 1);
+    if (opt.form === 'segmented' && ch === 'b' && H > 20 && inner && (x + y) % 3 === 0) col = pal.gap;
+    if (opt.form === 'hollow' && inner && ch !== 'd') col = pal.inner;
+    if (opt.form === 'dirty' && hash(x, y, 3) < .16) col = pal.dirt;
+    if (opt.form === 'rock' && hash(x, y, 5) < .1) col = pal.shade;
+    px(x, y, col);
+  }
+  return { cv, W, H, P };
+}
+
+
+// ---------- Pachy fossils on the ticket (owner's pick: aged tan bones, two hops) ----------
+const OPT = { form: 'segmented', scale: 4, pal: { base: '#d8b27a', hi: '#f0d3a0', shade: '#a77c48', far: '#8e6638', line: '#1c0f08', gap: '#5a3a1c' } };
+const CX = 164, FEET = 782, REVEAL_HOLD = 380, HOP_MS = 820, SCOOT = 380;
+const ORDER = [['A', 'body'], ['A', 'skull'], ['B', 'body'], ['B', 'skull']];
+let PACHY = null, sprites = null, overlay = null, octx = null, ticketEl = null, cellsEl = null;
+let finds = [], placed = [], flying = null, effects = [], floaters = [], wins = [], ghosts = [];
+let nextIndex = 0, scootStart = null, scootDone = false, shakeT = 0, shakeAmp = 0, idleWaiters = [], running = false;
+
+function build() {
+  PACHY = makePachy(1);
+  for (const k in PACHY) PACHY[k].front = frontOf(PACHY[k].skull, PACHY[k].skullAt);
+  sprites = ORDER.map(([who, part]) => ({ who, part, img: renderPart(PACHY[who][part], OPT, false) }));
+}
+function aOffset(now) {
+  const full = Math.round(PACHY.A.front / 2) * OPT.scale;
+  if (scootDone) return 0;
+  if (scootStart === null || now < scootStart) return full;
+  const k = Math.min(1, (now - scootStart) / SCOOT);
+  if (k >= 1) { scootDone = true; return 0; }
+  return Math.round(full * Math.pow(1 - k, 3) / 2) * 2;
+}
+function target(i, now) {
+  const s = sprites[i], p = PACHY[s.who], S = OPT.scale, spr = s.img;
+  const [ox, oy] = s.part === 'body' ? [0, 0] : p.skullAt;
+  const top = FEET - p.body.length * S + (oy - spr.P) * S;
+  if (s.who === 'A') return { x: CX - p.front * S + aOffset(now) + (ox - spr.P) * S, y: top, mirror: false };
+  const R = ox + spr.W + spr.P;
+  return { x: CX + (p.front - R) * S, y: top, mirror: true };
+}
+function cellRect(r, c) { const [x0, x1] = COLS[c], [y0, y1] = ROWS[r]; return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 }; }
+function drawSprite(cv, x, y, mirror, ctx = octx) {
+  ctx.save(); ctx.translate(x + cv.width / 2, y + cv.height / 2); ctx.scale(mirror ? -1 : 1, 1); ctx.drawImage(cv, -cv.width / 2, -cv.height / 2); ctx.restore();
+}
+function puff(x, y, n, sp0, t0) {
+  for (let k = 0; k < n; k++) { const ang = Math.PI + Math.random() * Math.PI, sp = sp0 + Math.random() * sp0;
+    effects.push({ x: x + (Math.random() - .5) * 30, y, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp * .6, t0, life: 320 + Math.random() * 160, col: ['#d9c4a0', '#bfa47c', '#efe0c0'][k % 3], size: 4 }); }
+}
+function headTop(who, now) { const i = who === 'A' ? 1 : 3, t = target(i, now), c = sprites[i].img.cv; return { x: t.x + c.width / 2, y: t.y - 6 }; }
+function winOffset(who, now) {
+  let dx = 0;
+  for (const w of wins) {
+    const e = now - w.t0; if (e < 0) continue;
+    if (w.kind === 'shake' && who === 'A') {
+      if (!w.text) { w.text = true; const h = headTop('A', now); floaters.push({ x: h.x - 20, y: h.y, t0: now + 120 }); }
+      if (e < 560) dx += Math.sin(e / 32) * 4 * (1 - e / 560);
+    }
+    if (w.kind === 'butt') {
+      const dur = 460, n = Math.floor(e / dur), p = (e % dur) / dur;
+      if (n < 2) {
+        let o;
+        if (p < .5) o = -12 * (1 - Math.pow(1 - p / .5, 2)); else if (p < .62) o = -12 + 16 * ((p - .5) / .12); else o = 4 * (1 - (p - .62) / .38);
+        dx += who === 'A' ? o : -o;
+        if (p >= .62 && !w['hit' + n]) { w['hit' + n] = true; shake(5, now);
+          const hy = headTop('A', now).y + 40;
+          for (let k = 0; k < 10; k++) { const ang = Math.random() * Math.PI * 2, sp = 80 + Math.random() * 120;
+            effects.push({ x: CX, y: hy, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, t0: now, life: 300, col: k % 2 ? '#fff6c8' : '#ffd34a', size: 5, nograv: true }); } }
+      } else if (!w.text) { w.text = true; const h = headTop('B', now); floaters.push({ x: h.x + 20, y: h.y, t0: now }); }
+    }
+  }
+  return Math.round(dx / 2) * 2;
+}
+function shake(amp, now) { shakeT = now; shakeAmp = amp; }
+function hop(a, b, t) {
+  const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }, first = t < .5, l = first ? t / .5 : (t - .5) / .5;
+  const from = first ? a : mid, to = first ? mid : b, h = first ? 130 : 95;
+  return { x: from.x + (to.x - from.x) * l, y: from.y + (to.y - from.y) * l - h * 4 * l * (1 - l), second: !first };
+}
+function landed(i, now) {
+  placed.push(i); flying = null;
+  const t = target(i, now), c = sprites[i].img.cv;
+  shake(6, now);
+  puff(t.x + c.width / 2, t.y + c.height - OPT.scale * 2, 14, 70, now);
+  if (i === 1) wins.push({ kind: 'shake', t0: now + 220 });
+  if (i === 2 && !scootDone) {
+    scootStart = now + 40;
+    const a = target(0, now), ac = sprites[0].img.cv;
+    for (let k = 0; k < 8; k++) effects.push({ x: a.x + ac.width * (.2 + Math.random() * .6), y: a.y + ac.height - OPT.scale * 2, vx: 40 + Math.random() * 90, vy: -20 - Math.random() * 40, t0: now + 40, life: 380, col: ['#d9c4a0', '#bfa47c', '#efe0c0'][k % 3], size: 4 });
+  }
+  if (i === 3) wins.push({ kind: 'butt', t0: now + 260 });
+}
+function idle(now) {
+  return !flying && finds.every((f) => f.left) && floaters.length === 0 && (scootDone || scootStart === null || placed.length < 3)
+    && wins.every((w) => now - w.t0 > (w.kind === 'butt' ? 1100 : 700));
+}
+function loop(now) {
+  const f = finds.find((f) => !f.left && now - f.t0 > REVEAL_HOLD && f.i === placed.length);
+  if (!flying && f) { f.left = true; f.cv.getContext('2d').clearRect(0, 0, f.cv.width, f.cv.height); flying = { i: f.i, t0: now, from: f }; }
+  octx.clearRect(0, 0, 1024, 1536);
+  // shake the whole ticket briefly on each landing
+  if (shakeAmp && now - shakeT < 170) { const k = 1 - (now - shakeT) / 170, px = ticketEl.getBoundingClientRect().width / 1024;
+    ticketEl.style.transform = `translate(${((Math.random() - .5) * shakeAmp * k * 2 * px).toFixed(1)}px, ${((Math.random() - .5) * shakeAmp * k * 2 * px).toFixed(1)}px)`; }
+  else if (ticketEl.style.transform) ticketEl.style.transform = '';
+  // faded fossils in Pachy spots that weren't picked
+  for (const g of ghosts) { const r = cellRect(g.r, g.c), cv = sprites[1].img.cv; octx.globalAlpha = .4; drawSprite(cv, r.x + (r.w - cv.width) / 2, r.y + (r.h - cv.height) / 2, false); octx.globalAlpha = 1; }
+  // skeletons on the stand (bodies first)
+  const order = [...placed].sort((a, b) => (sprites[a].part === 'skull') - (sprites[b].part === 'skull'));
+  for (const i of order) { const t = target(i, now); drawSprite(sprites[i].img.cv, t.x + winOffset(sprites[i].who, now), t.y, t.mirror); }
+  // the fossil in flight
+  if (flying) {
+    const s = sprites[flying.i], cv = s.img.cv, r = cellRect(flying.from.r, flying.from.c), tg = target(flying.i, now);
+    const t = Math.min(1, (now - flying.t0) / HOP_MS);
+    const q = hop({ x: r.x + r.w / 2, y: r.y + r.h / 2 }, { x: tg.x + cv.width / 2, y: tg.y + cv.height / 2 }, t);
+    if (q.second && !flying.puffed) { flying.puffed = true; puff(q.x, q.y + cv.height / 2, 6, 60, now); }
+    drawSprite(cv, q.x - cv.width / 2, q.y - cv.height / 2, s.who === 'B');
+    if (t >= 1) landed(flying.i, now);
+  }
+  // dust and sparks
+  effects = effects.filter((e) => now - e.t0 < e.life);
+  for (const e of effects) {
+    if (now < e.t0) continue;
+    const k = (now - e.t0) / e.life, dt = (now - e.t0) / 1000;
+    octx.globalAlpha = 1 - k; octx.fillStyle = e.col;
+    octx.fillRect(Math.round((e.x + e.vx * dt) / 2) * 2, Math.round((e.y + e.vy * dt + (e.nograv ? 0 : 160 * dt * dt)) / 2) * 2, e.size, e.size);
+  }
+  octx.globalAlpha = 1;
+  // "+$1"
+  floaters = floaters.filter((f) => now - f.t0 < 1300);
+  for (const fl of floaters) {
+    if (now < fl.t0) continue;
+    const k = (now - fl.t0) / 1300, y = fl.y - 46 * (1 - Math.pow(1 - k, 2));
+    octx.globalAlpha = k < .6 ? 1 : 1 - (k - .6) / .4;
+    octx.font = '400 54px "Lilita One", "Arial Black", sans-serif'; octx.textAlign = 'center'; octx.lineJoin = 'round';
+    octx.lineWidth = 10; octx.strokeStyle = '#1c0f08'; octx.strokeText('+$1', fl.x, y);
+    octx.fillStyle = '#ffd34a'; octx.fillText('+$1', fl.x, y);
+  }
+  octx.globalAlpha = 1;
+  if (idleWaiters.length && idle(now)) { const w = idleWaiters; idleWaiters = []; w.forEach((fn) => fn()); }
+  requestAnimationFrame(loop);
+}
+
+window.FF_FOSSILS = {
+  init(ticket, cells) {
+    ticketEl = ticket; cellsEl = cells; build();
+    overlay = document.createElement('canvas'); overlay.className = 'fossil-overlay'; overlay.width = 1024; overlay.height = 1536;
+    octx = overlay.getContext('2d'); octx.imageSmoothingEnabled = false;
+    ticket.append(overlay);
+    if (!running) { running = true; requestAnimationFrame(loop); }
+  },
+  reset() { nextIndex = 0; finds = []; placed = []; flying = null; effects = []; floaters = []; wins = []; ghosts = []; scootStart = null; scootDone = false; idleWaiters = []; },
+  // a cell that holds a Pachy fossil: canvas the size of the cell, drawn when uncovered
+  prepCell(cell, w, h) { const cv = document.createElement('canvas'); cv.className = 'fossil'; cv.width = w; cv.height = h; cell.insertBefore(cv, cell.querySelector('.cover')); return cv; },
+  // when a Pachy spot is first scratched it gets the next fossil (body, skull, body, skull), so scratching uncovers it
+  assign(cell) {
+    const cv = cell.querySelector('canvas.fossil'); if (!cv || cv.dataset.i) return;
+    const i = nextIndex++; if (i >= 4) return;
+    cv.dataset.i = String(i);
+    const s = sprites[i], ctx = cv.getContext('2d'); ctx.imageSmoothingEnabled = false;
+    drawSprite(s.img.cv, (cv.width - s.img.cv.width) / 2, (cv.height - s.img.cv.height) / 2, s.who === 'B', ctx);
+  },
+  onReveal(r, c, cell) {
+    const cv = cell.querySelector('canvas.fossil'); if (!cv) return;
+    if (!cv.dataset.i) this.assign(cell);
+    const i = Number(cv.dataset.i); if (!(i >= 0 && i < 4)) return;
+    finds.push({ i, r, c, cv, t0: performance.now(), left: false });
+  },
+  ghost(r, c) { ghosts.push({ r, c }); },
+  whenIdle(fn) { idleWaiters.push(fn); },
+  isIdle() { return idle(performance.now()); },
+  state() { return { finds: finds.length, placed: placed.length, flying: !!flying, scoot: scootDone ? 'done' : scootStart ? 'moving' : 'middle', wins: wins.map((w) => w.kind) }; },
+};
+})();
+</script>
+<script>
 if (window.self !== window.top) document.documentElement.classList.add('embedded');
 (() => {
   // ---- Ticket geometry, in pixels of the 1024 x 1536 front art ----
@@ -132,7 +407,7 @@ if (window.self !== window.top) document.documentElement.classList.add('embedded
 
   // Test hook: simulate random players (not shown on the page).
   window.__fossilFinders = {
-    newBoard, payout,
+    newBoard, payout, fossils: () => FF_FOSSILS.state(), board: () => board,
     simulate(n = 10000) {
       const t = {}; let paid = 0;
       for (let i = 0; i < n; i++) {
@@ -163,10 +438,12 @@ if (window.self !== window.top) document.documentElement.classList.add('embedded
   const newBtn = document.getElementById('newBtn');
   const art = document.getElementById('frontImg');
   const BRUSH = 30; // radius in art pixels
-  let board, picks, paidFor, done;
+  let board, picks, paidFor, done, finishWaiting = false;
+  FF_FOSSILS.init(ticket, cellsEl);
 
   function buildTicket() {
     board = newBoard(); picks = [null, null, null, null]; paidFor = false; done = false;
+    FF_FOSSILS.reset();
     prizeEl.textContent = ''; prizeEl.className = 'prize';
     newBtn.disabled = true;
     cellsEl.innerHTML = '';
@@ -176,10 +453,11 @@ if (window.self !== window.top) document.documentElement.classList.add('embedded
       cell.className = 'cell';
       Object.assign(cell.style, { left: x0 / ART_W * 100 + '%', top: y0 / ART_H * 100 + '%', width: w / ART_W * 100 + '%', height: h / ART_H * 100 + '%' });
       const under = document.createElement('canvas'); under.className = 'under';
-      const letter = document.createElement('div'); letter.className = 'letter'; letter.textContent = board[r][c];
+      const letter = document.createElement('div'); letter.className = 'letter'; letter.textContent = board[r][c] === 'P' ? '' : board[r][c];
       const cover = document.createElement('canvas'); cover.className = 'cover';
       for (const cv of [under, cover]) { cv.width = w; cv.height = h; cv.getContext('2d').drawImage(art, x0, y0, w, h, 0, 0, w, h); }
       cell.append(under, letter, cover);
+      if (board[r][c] === 'P') FF_FOSSILS.prepCell(cell, w, h);
       cellsEl.append(cell);
       attachScratch(cell, cover, r, c);
     }));
@@ -216,10 +494,12 @@ if (window.self !== window.top) document.documentElement.classList.add('embedded
       picks[r] = c;
       if (!paidFor) { paidFor = true; stats.spent += 1; saveStats(); renderStats(); }
       rowCells(r).forEach((el, i) => { if (i !== c) el.classList.add('locked'); });
+      if (board[r][c] === 'P') FF_FOSSILS.assign(cell);
     };
     const reveal = () => {
       if (cover.classList.contains('gone')) return;
       cover.classList.add('gone'); cell.classList.add('locked');
+      if (board[r][c] === 'P') FF_FOSSILS.onReveal(r, c, cell);
       if (picks.every((p) => p !== null) && rowsRevealed()) finish();
     };
     cover.addEventListener('pointerdown', (e) => {
@@ -241,6 +521,7 @@ if (window.self !== window.top) document.documentElement.classList.add('embedded
 
   function finish() {
     if (done) return;
+    if (!FF_FOSSILS.isIdle()) { if (!finishWaiting) { finishWaiting = true; FF_FOSSILS.whenIdle(() => { finishWaiting = false; finish(); }); } return; }
     done = true;
     const finds = picks.map((c, r) => board[r][c]);
     const d = payout(finds);
@@ -251,12 +532,12 @@ if (window.self !== window.top) document.documentElement.classList.add('embedded
     [...cellsEl.children].forEach((el, i) => {
       const r = Math.floor(i / 3), c = i % 3;
       el.classList.add('locked');
-      if (picks[r] !== c) { el.classList.add('unpicked'); el.querySelector('.cover').classList.add('gone'); }
+      if (picks[r] !== c) { el.classList.add('unpicked'); el.querySelector('.cover').classList.add('gone'); if (board[r][c] === 'P') FF_FOSSILS.ghost(r, c); }
     });
     newBtn.disabled = false;
   }
 
-  newBtn.addEventListener('click', () => { ticket.classList.remove('flipped'); buildTicket(); });
+  newBtn.addEventListener('click', () => { ticket.classList.remove('flipped'); finishWaiting = false; buildTicket(); });
   document.getElementById('flipBadge').addEventListener('click', () => ticket.classList.add('flipped'));
   ticket.querySelector('.back').style.pointerEvents = 'auto';
   ticket.querySelector('.back').addEventListener('click', () => ticket.classList.remove('flipped'));
