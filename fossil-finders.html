@@ -109,8 +109,9 @@ function inside(sh, x, y) {
   const t = Math.max(0, Math.min(1, ((x - sh.ax) * vx + (y - sh.ay) * vy) / L));
   const dx = x - (sh.ax + vx * t), dy = y - (sh.ay + vy * t); return dx * dx + dy * dy <= sh.r * sh.r;
 }
+let OY = 0; // shapes are moved down by OY (room above for tall horns)
 let K = 1; // detail factor: 1 = chunky (4 px blocks), 4/3 = finer (3 px blocks), same size on the card
-function sc(sh) { return sh.k === 'ell' ? { k: 'ell', cx: sh.cx * K, cy: sh.cy * K, rx: sh.rx * K, ry: sh.ry * K } : { k: 'cap', ax: sh.ax * K, ay: sh.ay * K, bx: sh.bx * K, by: sh.by * K, r: sh.r * K }; }
+function sc(sh) { return sh.k === 'ell' ? { k: 'ell', cx: sh.cx * K, cy: (sh.cy + OY) * K, rx: sh.rx * K, ry: sh.ry * K } : { k: 'cap', ax: sh.ax * K, ay: (sh.ay + OY) * K, bx: sh.bx * K, by: (sh.by + OY) * K, r: sh.r * K }; }
 function raster(W0, H0, layers0) { // layers: [char, shapes[]] painted in order
   const W = Math.round(W0 * K), H = Math.round(H0 * K), layers = layers0.map(([c, shs]) => [c, shs.map(sc)]);
   const g = Array.from({ length: H }, () => Array(W).fill('.'));
@@ -132,7 +133,7 @@ function spines(ax, ay, bx, by, n) {
 // walked on two stout hind legs, long stiff tail. No horns or frill. Both lean in, domes together.
 function frontOf(skull, at) { let m = 0; skull.forEach((r) => { for (let x = 0; x < r.length; x++) if (r[x] !== '.' && r[x] !== 'e') m = Math.max(m, x); }); return at[0] + m + 1; }
 function makePachy(k) {
-K = k;
+K = k; OY = 0;
 const BODY_A = raster(28, 24, [
   ['d', [cap(10, 12, 9, 16.5, .8), cap(9, 16.5, 9.5, 20.5, .65), cap(9.5, 20.5, 9, 22.4, .55), cap(8, 22.6, 11.5, 22.6, .5)]],
   ['b', [cap(1, 15, 6, 13, .6), cap(6, 13, 11, 11, .95), cap(11, 11, 17, 8, 1.05), ell(11, 12, 2.2, 1.3),
@@ -168,7 +169,7 @@ function renderPart(map, opt, withRock) {
   const g = grid(map), H = g.length, W = g[0].length, P = withRock ? 3 : 1, S = opt.scale, pal = opt.pal;
   const cv = document.createElement('canvas'); cv.width = (W + 2 * P) * S; cv.height = (H + 2 * P) * S;
   const c = cv.getContext('2d');
-  const filled = (x, y) => y >= 0 && y < H && x >= 0 && x < W && 'bdnt'.includes(g[y][x]);
+  const filled = (x, y) => y >= 0 && y < H && x >= 0 && x < W && 'bdntk'.includes(g[y][x]);
   const px = (x, y, col) => { c.fillStyle = col; c.fillRect((x + P) * S, (y + P) * S, S, S); };
   if (withRock) { // rock matrix around the bones
     for (let y = -P; y < H + P; y++) for (let x = -P; x < W + P; x++) {
@@ -188,7 +189,8 @@ function renderPart(map, opt, withRock) {
   }
   // bone
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-    const ch = g[y][x]; if (!'bdnt'.includes(ch)) continue;
+    const ch = g[y][x]; if (!'bdntk'.includes(ch)) continue;
+    if (ch === 'k') { px(x, y, !filled(x, y - 1) ? '#b3a99c' : !filled(x, y + 1) ? '#0d0b0a' : !filled(x - 1, y) || !filled(x + 1, y) ? '#5e5650' : (x + y) % 5 === 0 ? '#4d4641' : '#2e2926'); continue; }   // epic black horns with a grey sheen
     if (ch === 't') { px(x, y, '#b98d55'); continue; }   // teeth: darker aged tan, not white
     let col = ch === 'd' ? pal.far : pal.base;
     if (ch !== 'd') {
@@ -218,11 +220,11 @@ let next = { P: 0, C: 0 }, scootStart = null, scootDone = false, morph = null, s
 // Carnotaurus: short deep skull with two horns over the eyes, tiny stubby arms, long legs, long tail; walks on two legs.
 // Standing pose (facing right) is split in three finds; the 4th find is a pair of big horns that turns it Ancient (attack pose).
 const CK = 1.12;   // Carno is drawn a bit bigger than the Pachys: head up near the seam between the top two cases
-const C_W = 50, C_H = 29, C_FEET = 936, C_LEFT = Math.round(164 - 25 * CK * S), C_TOP = Math.round(C_FEET - 28 * CK * S);
+const C_W = 50, C_H = 39, C_FEET = 936, C_LEFT = Math.round(164 - 25 * CK * S), C_TOP = Math.round(C_FEET - 38 * CK * S);
 
 // Carnotaurus skull designs. cx, cy = middle of the braincase; open = jaws open (Ancient attack pose).
 // Real skull: very short and deep, blunt snout, thick horns over the eyes, big opening in front of the eye, slim lower jaw.
-let carnoSkull = 5;
+let carnoSkull = 2;   // owner's pick: bull horns
 function skullShapes(v, cx, cy, open) {
   const bone = [], holes = [], teeth = [], knobs = [];
   let snoutEnd;
@@ -265,7 +267,7 @@ function skullShapes(v, cx, cy, open) {
   return { bone, holes, teeth, knobs };
 }
 function makeCarno() {
-  K = CK;
+  K = CK; OY = 10;
   const farLeg = [cap(19.5, 12, 17.2, 18.4, 1.0), ell(17.2, 18.4, .95, .95), cap(17.2, 18.4, 14.2, 23.6, .75), cap(14.2, 23.6, 14.8, 26.6, .65), cap(13.8, 27.1, 17.6, 27.1, .5)];
   const legs = [cap(19.5, 11.2, 11, 11.2, 1.3), cap(11, 11.2, 5, 13.5, .9), cap(5, 13.5, 1.6, 17.5, .62), cap(1.6, 17.5, 1, 19, .45),
     ell(20.5, 11.8, 2.6, 1.7), cap(21, 12.5, 23, 17, .6), cap(22.3, 17.2, 24.2, 17.4, .5),
@@ -273,8 +275,10 @@ function makeCarno() {
   const torso = [cap(21, 11, 32, 9, 1.3), ...spines(17, 11.4, 32, 8.6, 6), ...ribs(22, 11, 31, 9.2, 5, 5.6, .5),
     cap(24, 16.6, 30.5, 15.8, .45), cap(31, 12, 32.5, 14.4, .5), cap(32.5, 14.4, 33.3, 15, .4), cap(32, 9, 36, 6.5, 1.1)];
   const sk = skullShapes(carnoSkull, 40, 6, false), ak = skullShapes(carnoSkull, 40, 15.5, true);
-  ak.bone.push(cap(38.4, 13.1, 36.2, 9.1, .95), cap(40.8, 12.7, 41.5, 8.8, .95));   // Ancient: the big horns from the 4th find
-  const bigHorns = [cap(38.4, 3.6, 36.4, .4, .9), cap(40.8, 3.2, 41.4, .2, .9)];
+  const blackHorns = (cx, cy) => [ // long buffalo sweep: one horn curls back and up, the other up and forward, sharp tips
+    cap(cx - 1, cy - 2.6, cx - 4.5, cy - 4.6, 1.45), cap(cx - 4.5, cy - 4.6, cx - 6.6, cy - 8, 1.15), cap(cx - 6.6, cy - 8, cx - 6.2, cy - 11.4, .85), cap(cx - 6.2, cy - 11.4, cx - 4.8, cy - 13.4, .55),
+    cap(cx + 1.2, cy - 2.6, cx - .6, cy - 6, 1.5), cap(cx - .6, cy - 6, cx - .2, cy - 9.8, 1.15), cap(cx - .2, cy - 9.8, cx + 1.8, cy - 12.4, .85), cap(cx + 1.8, cy - 12.4, cx + 3.8, cy - 13.4, .55)];
+  const bigHorns = blackHorns(40, 6);
   // Ancient attack pose: head low, jaws open, tail raised, wide stride, big horns
   const aFar = [cap(20, 11, 17, 17, 1.05), cap(17, 17, 14.5, 23, .8), cap(14.5, 23, 14, 26.6, .7), cap(13, 27.1, 17, 27.1, .55)];
   const aBone = [cap(21, 10, 13, 7, 1.3), cap(13, 7, 7, 3.5, .9), cap(7, 3.5, 3, 2.5, .62), cap(3, 2.5, 1, 3.6, .45),
@@ -288,9 +292,9 @@ function makeCarno() {
       { map: frame([['d', farLeg], ['b', legs]]), opt: OPT },
       { map: frame([['b', torso]]), opt: OPT },
       { map: frame([['n', sk.knobs], ['b', sk.bone], ['e', sk.holes], ['t', sk.teeth]]), opt: SOLID },
-      { map: frame([['b', bigHorns]]), opt: SOLID },
+      { map: frame([['k', bigHorns]]), opt: SOLID },
     ],
-    ancient: [{ map: frame([['d', aFar], ['b', aBone]]), opt: OPT }, { map: frame([['n', ak.knobs], ['b', ak.bone], ['e', ak.holes], ['t', ak.teeth]]), opt: SOLID }],
+    ancient: [{ map: frame([['d', aFar], ['b', aBone]]), opt: OPT }, { map: frame([['n', ak.knobs], ['b', ak.bone], ['e', ak.holes], ['t', ak.teeth], ['k', blackHorns(40, 15.5)]]), opt: SOLID }],
   };
 }
 // render a map in the Carno frame and crop it to its bones; x/y = top-left on the ticket
