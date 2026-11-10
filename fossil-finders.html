@@ -374,24 +374,31 @@ if (window.self !== window.top) document.documentElement.classList.add('embedded
   const COLS = [[300, 506], [521, 729], [746, 961]];           // the three dig spots (left label box is not playable)
   const ROWS = [[699, 827], [848, 978], [1000, 1132], [1155, 1292]]; // green, clay, brown, gray
 
-  // ---- Odds (approved design, Nov 10 2026). Editable from the simulator's Fossil odds sliders. ----
-  const DEFAULT_ODDS = { P: 30, C: 30, B: 40, bed: 8, amber: 3 };   // per-spot % on ordinary tickets; % of tickets
-  const PACHY_BED = { P: 0.75, B: 0.15, C: 0.10 };
+  // ---- Odds (approved design, Nov 10 2026). The simulator's Fossil odds sliders can change them. ----
+  // P/C/B = % per spot on ordinary tickets. Special dig sites and amber = % of tickets.
+  const DEFAULT_ODDS = { P: 30, C: 30, B: 40, bedP: 8, carno3: 0, ancient: 0, brachy: 0, amber: 3 };
+  const SITES = {
+    bedP:    { all: { P: .75, B: .15, C: .10 } },                                // lots of Pachy bones
+    carno3:  { all: { C: .85, P: .05, B: .10 }, odd: { P: .30, B: .70, C: 0 } },  // 3 rows rich in C, one random row with none
+    ancient: { all: { C: .85, P: .05, B: .10 } },                                // every row rich in C
+    brachy:  { all: { B: .85, P: .07, C: .08 } },                                // every row rich in B
+  };
   const ODDS_KEY = 'fossil-finders-odds';
-  let ORDINARY, PACHY_BED_RATE, AMBER_RATE, ODDS;
+  let ODDS, ORDINARY;
   function cleanOdds(o) {
+    o = o || {};
+    if (typeof o.bed === 'number' && typeof o.bedP !== 'number') o = { ...o, bedP: o.bed };   // older saves
     const num = (v, lo, hi, d) => (typeof v === 'number' && isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d);
-    const r = { P: num(o && o.P, 0, 100, DEFAULT_ODDS.P), C: num(o && o.C, 0, 100, DEFAULT_ODDS.C), B: num(o && o.B, 0, 100, DEFAULT_ODDS.B),
-      bed: num(o && o.bed, 0, 50, DEFAULT_ODDS.bed), amber: num(o && o.amber, 0, 30, DEFAULT_ODDS.amber) };
-    if (r.P + r.C + r.B <= 0) Object.assign(r, { P: DEFAULT_ODDS.P, C: DEFAULT_ODDS.C, B: DEFAULT_ODDS.B });
+    const r = {};
+    for (const k of ['P', 'C', 'B']) r[k] = num(o[k], 0, 100, DEFAULT_ODDS[k]);
+    for (const k of ['bedP', 'carno3', 'ancient', 'brachy']) r[k] = num(o[k], 0, 95, DEFAULT_ODDS[k]);
+    r.amber = num(o.amber, 0, 30, DEFAULT_ODDS.amber);
+    if (r.P + r.C + r.B <= 0) Object.assign(r, { P: 30, C: 30, B: 40 });
+    const sites = r.bedP + r.carno3 + r.ancient + r.brachy;
+    if (sites > 95) for (const k of ['bedP', 'carno3', 'ancient', 'brachy']) r[k] = r[k] * 95 / sites;
     return r;
   }
-  function applyOdds(o) {
-    ODDS = cleanOdds(o);
-    const t = ODDS.P + ODDS.C + ODDS.B;
-    ORDINARY = { P: ODDS.P / t, C: ODDS.C / t, B: ODDS.B / t };
-    PACHY_BED_RATE = ODDS.bed / 100; AMBER_RATE = ODDS.amber / 100; // amber tickets: player finds it about 1 time in 3
-  }
+  function applyOdds(o) { ODDS = cleanOdds(o); const t = ODDS.P + ODDS.C + ODDS.B; ORDINARY = { P: ODDS.P / t, C: ODDS.C / t, B: ODDS.B / t }; }
   try { applyOdds(JSON.parse(localStorage.getItem(ODDS_KEY))); } catch (e) { applyOdds(DEFAULT_ODDS); }
 
   const rnd = () => (crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296);
@@ -399,9 +406,12 @@ if (window.self !== window.top) document.documentElement.classList.add('embedded
 
   // All 12 spots are decided when the ticket is bought and never change afterwards.
   function newBoard() {
-    const odds = rnd() < PACHY_BED_RATE ? PACHY_BED : ORDINARY;
-    const b = ROWS.map(() => COLS.map(() => draw(odds)));
-    if (rnd() < AMBER_RATE) b[Math.floor(rnd() * 4)][Math.floor(rnd() * 3)] = 'A';
+    let rows = [ORDINARY, ORDINARY, ORDINARY, ORDINARY], r = rnd() * 100;
+    for (const k of ['bedP', 'carno3', 'ancient', 'brachy']) {
+      if ((r -= ODDS[k]) < 0) { const st = SITES[k]; rows = [st.all, st.all, st.all, st.all]; if (st.odd) rows[Math.floor(rnd() * 4)] = st.odd; break; }
+    }
+    const b = rows.map((m) => COLS.map(() => draw(m)));
+    if (rnd() < ODDS.amber / 100) b[Math.floor(rnd() * 4)][Math.floor(rnd() * 3)] = 'A';
     return b;
   }
 

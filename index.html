@@ -1971,11 +1971,14 @@ body.ff-mode #ffPanel{display:block}
 #ffOdds output{font-weight:850;font-variant-numeric:tabular-nums;text-align:right;color:var(--gold)}
 #ffOdds input[type=range]{grid-column:1/-1;padding:0;accent-color:#65d993;width:100%;height:28px;border:0;background:transparent}
 #ffOdds .ffo-group{font-size:11px;letter-spacing:1.4px;color:var(--gold);font-weight:800;margin:12px 0 0}
-#ffOdds .ffo-results{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 14px;margin-top:8px;font-size:13px}
-#ffOdds .ffo-results div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid #2b493c;padding:5px 0}
-#ffOdds .ffo-results b{font-variant-numeric:tabular-nums}
-#ffOdds .ffo-pay{grid-column:1/-1;font-size:15px;border-bottom:0!important;padding-top:8px!important}
-#ffOdds .ffo-pay b{color:var(--green);font-size:18px}
+#ffOdds .ffo-results{margin-top:8px;font-size:13px;transition:opacity .15s}
+#ffOdds .ffo-results.ffo-busy{opacity:.5}
+#ffOdds .ffo-pay{display:flex;justify-content:space-between;gap:8px;font-size:15px;padding-top:6px}
+#ffOdds .ffo-pay b{color:var(--green);font-size:18px;font-variant-numeric:tabular-nums}
+#ffOdds .ffo-off{color:#ffb38a!important}
+#ffOdds .ffo-bar{grid-column:1/-1;height:10px;border-radius:99px;background:#0b1c16;border:1px solid #456a57;overflow:hidden}
+#ffOdds .ffo-bar span{display:block;height:100%;background:#9eb8aa}
+#ffOdds .ffo-lose output{color:var(--muted)}
 </style>
 <script>
 (()=>{'use strict';
@@ -2004,49 +2007,129 @@ function panel(){
  if(hero&&p.previousElementSibling!==hero)hero.after(p);
  return p;
 }
-// Fossil odds sliders: per-spot bone odds and amber, saved for the Fossil Finders ticket (applies from the next ticket).
-const ODDS_KEY='fossil-finders-odds',ODDS_DEFAULT={P:30,C:30,B:40,bed:8,amber:3};
-let odds=null,simTimer=null;
-function loadOdds(){let o=null;try{o=JSON.parse(localStorage.getItem(ODDS_KEY))}catch(e){}const ok=o&&['P','C','B','bed','amber'].every(k=>typeof o[k]==='number'&&isFinite(o[k]));return ok?{...o}:{...ODDS_DEFAULT};}
+// Fossil Finders odds solver: turns prize targets into dig-site settings the ticket can use.
+// Exact maths (no sampling): each ticket is a dig site; the 4 picked spots are independent draws from that site's bone mix.
+// Amber tickets hide one amber; the player picks it 1 time in 3, otherwise the ticket plays normally.
+const FF_SOLVER = (() => {
+  // Special dig sites (each a % of tickets). Rows are listed top to bottom; 'X' = one random row gets the odd mix.
+  const SITES = {
+    bedP:    { all: { P: .75, B: .15, C: .10 } },                                   // Pachy bed: lots of Pachy bones
+    carno3:  { all: { C: .85, P: .05, B: .10 }, odd: { P: .30, B: .70, C: 0 } },     // Carno site: 3 rows rich in C, 1 row with none
+    ancient: { all: { C: .85, P: .05, B: .10 } },                                   // Ancient site: every row rich in C
+    brachy:  { all: { B: .85, P: .07, C: .08 } },                                   // Brachy site: every row rich in B
+  };
+  const KEYS = ['lose', 'pachy1', 'pachy2', 'carno', 'ancient', 'brachy'];
+  function classify(f) { const n = (x) => f.filter((y) => y === x).length, P = n('P'), C = n('C'), B = n('B');
+    return P === 4 ? 'pachy2' : P >= 2 ? 'pachy1' : C === 4 ? 'ancient' : C === 3 ? 'carno' : B === 4 ? 'brachy' : 'lose'; }
+  function distRows(rows) { // outcome shares for one pick per row, each row its own bone mix
+    const d = { lose: 0, pachy1: 0, pachy2: 0, carno: 0, ancient: 0, brachy: 0 }, s = ['P', 'C', 'B'];
+    for (const a of s) for (const b of s) for (const c of s) for (const e of s) {
+      const pr = rows[0][a] * rows[1][b] * rows[2][c] * rows[3][e]; if (pr) d[classify([a, b, c, e])] += pr;
+    }
+    return d;
+  }
+  function siteRows(site) { return site.odd ? [site.odd, site.all, site.all, site.all] : [site.all, site.all, site.all, site.all]; }
+  function dist(m) { return distRows([m, m, m, m]); }
+  function three(rows) { // average dino prize from the 3 other picks on an amber win (amber row chosen at random)
+    let v = 0; const s = ['P', 'C', 'B'];
+    for (let skip = 0; skip < 4; skip++) { const r = rows.filter((_, i) => i !== skip);
+      for (const a of s) for (const b of s) for (const c of s) { const f = [a, b, c], n = (x) => f.filter((y) => y === x).length;
+        v += .25 * r[0][a] * r[1][b] * r[2][c] * (n('P') >= 2 ? 1 : n('C') === 3 ? 5 : 0); } }
+    return v;
+  }
+  const PRIZE = { lose: 0, pachy1: 1, pachy2: 2, carno: 5, ancient: 30, brachy: 10 };
+  const SITE_KEYS = ['bedP', 'carno3', 'ancient', 'brachy'];
+  function evaluate(o) { // o: {P,C,B} % per spot on ordinary tickets; bedP, carno3, ancient, brachy, amber = % of tickets
+    const t = o.P + o.C + o.B || 1, ord = { P: o.P / t, C: o.C / t, B: o.B / t };
+    let w0 = 1; const parts = [];
+    for (const k of SITE_KEYS) { const w = (o[k] || 0) / 100; if (w > 0) { parts.push([w, siteRows(SITES[k])]); w0 -= w; } }
+    parts.push([Math.max(0, w0), [ord, ord, ord, ord]]);
+    const a = (o.amber || 0) / 100, base = { lose: 0, pachy1: 0, pachy2: 0, carno: 0, ancient: 0, brachy: 0 }; let amberExtra = 0;
+    for (const [w, rows] of parts) { const d = distRows(rows); for (const k of KEYS) base[k] += w * d[k]; amberExtra += w * three(rows); }
+    const out = {}; for (const k of KEYS) out[k] = (1 - a / 3) * base[k]; out.amber = a / 3;
+    let pay = 0; for (const k of KEYS) pay += out[k] * PRIZE[k]; pay += out.amber * (25 + amberExtra);
+    return { share: out, avgPaid: pay };
+  }
+  function solve(target, start) { // target shares {pachy1,pachy2,carno,ancient,brachy,amber} (0..1); losers = the rest
+    const amber = Math.min(30, target.amber * 3 * 100);
+    const loseT = Math.max(0, 1 - ['pachy1', 'pachy2', 'carno', 'ancient', 'brachy', 'amber'].reduce((p, k) => p + target[k], 0));
+    const mk = (x) => ({ P: x[0], C: x[1], B: x[2], bedP: x[3], carno3: x[4], ancient: x[5], brachy: x[6], amber });
+    const err = (x) => {
+      if (x.some((v) => v < 0) || x[3] + x[4] + x[5] + x[6] > 95 || x[0] + x[1] + x[2] <= 0) return 1e9;
+      const s = evaluate(mk(x)).share; let e = 0;
+      for (const k of ['pachy1', 'pachy2', 'carno', 'ancient', 'brachy']) { const d = s[k] - target[k]; e += d * d / (target[k] + .003); }
+      const dl = s.lose - loseT; return e + dl * dl / (loseT + .003);
+    };
+    const first = start ? [start.P, start.C, start.B, start.bedP || 0, start.carno3 || 0, start.ancient || 0, start.brachy || 0] : [30, 30, 40, 8, 0, 0, 0];
+    let best = first, be = err(best);
+    const seeds = [first, [30, 30, 40, 8, 0, 0, 0], [40, 20, 40, 3, 10, 1, 2], [25, 15, 60, 5, 20, 2, 3], [50, 10, 40, 2, 30, 1, 1], [15, 15, 70, 1, 40, 2, 5]];
+    for (const sd of (start ? seeds.slice(0, 3) : seeds)) {
+      let x = sd.slice(), e = err(x), step = 10;
+      for (let it = 0; it < 1400; it++) {
+        const i = it % 7, y = x.slice(); y[i] += (Math.random() * 2 - 1) * step;
+        const ey = err(y); if (ey < e) { x = y; e = ey; }
+        if (it % 200 === 199) step *= .55;
+      }
+      if (e < be) { best = x; be = e; }
+    }
+    const r = (v) => Math.round(v * 10) / 10, o = mk(best.map(r)); o.amber = r(amber);
+    const t = o.P + o.C + o.B; o.P = r(o.P * 100 / t); o.C = r(o.C * 100 / t); o.B = r(100 - o.P - o.C);
+    return { odds: o, ...evaluate(o) };
+  }
+  return { evaluate, solve, SITES, SITE_KEYS };
+})();
+
+// Fossil odds sliders: set how often each prize happens. Raising a prize takes from the losers (and the other way round).
+// The solver turns the targets into dig-site odds for the ticket; "now" shows what the ticket will really give.
+const ODDS_KEY='fossil-finders-odds',TARGET_KEY='fossil-finders-targets';
+const PRIZES=[['pachy1','Pachy $1',60],['pachy2','Two Pachys $2',20],['carno','Carnotaurus $5',40],['ancient','Ancient Carno $30',10],['brachy','Brachiosaurus $10',20],['amber','Amber $25+',10]];
+const TARGET_DEFAULT={pachy1:35.5,pachy2:3.3,carno:7,ancient:.8,brachy:2.2,amber:1};
+let targets=null,solved=null,solveTimer=null;
+function loadTargets(){let o=null;try{o=JSON.parse(localStorage.getItem(TARGET_KEY))}catch(e){}const ok=o&&PRIZES.every(([k])=>typeof o[k]==='number'&&isFinite(o[k]));return ok?{...o}:{...TARGET_DEFAULT};}
+function loadSolved(){try{const o=JSON.parse(localStorage.getItem(ODDS_KEY));if(o&&typeof o.P==='number')return o}catch(e){}return{P:30,C:30,B:40,bedP:8,carno3:0,ancient:0,brachy:0,amber:3};}
+const sumPrizes=()=>PRIZES.reduce((t,[k])=>t+targets[k],0);
+const fmt=v=>(Math.round(v*10)/10).toFixed(1)+'%';
 function oddsCard(){
- odds=loadOdds();
+ targets=loadTargets();solved=loadSolved();
  const c=document.createElement('section');c.className='card';c.id='ffOdds';c.setAttribute('aria-label','Fossil odds');
- const row=(id,label,hint,min,max,step)=>'<div class="ffo-row"><label for="'+id+'">'+label+'<small>'+hint+'</small></label><output id="'+id+'Out" for="'+id+'"></output><input type="range" id="'+id+'" min="'+min+'" max="'+max+'" step="'+step+'"></div>';
+ const row=(id,label,max)=>'<div class="ffo-row"><label for="ffo_'+id+'">'+label+'<small id="ffo_'+id+'Now"></small></label><output id="ffo_'+id+'Out" for="ffo_'+id+'"></output><input type="range" id="ffo_'+id+'" min="0" max="'+max+'" step="0.1"></div>';
  c.innerHTML='<div class="card-top"><h3>Fossil odds</h3><button class="btn mini ghost" type="button" id="ffoReset">Reset</button></div>'+
-  '<p class="tiny muted" style="margin:-8px 0 4px">Changes apply from the next ticket. The three bones always add up to 100%.</p>'+
-  '<div class="ffo-group">EACH SPOT ON AN ORDINARY TICKET</div>'+
-  row('ffoP','Pachy bone','P',0,100,1)+row('ffoC','Carnotaurus bone','C',0,100,1)+row('ffoB','Brachiosaurus bone','B',0,100,1)+
-  '<div class="ffo-group">SPECIAL TICKETS</div>'+
-  row('ffoAmber','Amber','% of tickets with one amber hidden in a random spot (you find it about 1 in 3 times)',0,20,.5)+
-  row('ffoBed','Pachy bed','% of tickets where most spots are Pachy bones (75% P, 15% B, 10% C)',0,30,1)+
-  '<div class="ffo-group">WHAT PLAYERS GET <span id="ffoN" style="color:var(--muted);letter-spacing:0;font-weight:600"></span></div><div class="ffo-results" id="ffoRes"></div>';
- const bones=['P','C','B'];
- const sync=()=>{for(const k of bones){c.querySelector('#ffo'+k).value=odds[k];c.querySelector('#ffo'+k+'Out').textContent=Math.round(odds[k])+'%';}
-  c.querySelector('#ffoAmber').value=odds.amber;c.querySelector('#ffoAmberOut').textContent=odds.amber+'%';
-  c.querySelector('#ffoBed').value=odds.bed;c.querySelector('#ffoBedOut').textContent=odds.bed+'%';};
- const setBone=(k,v)=>{ // keep P + C + B = 100 by sharing the rest between the other two in proportion
-  v=Math.max(0,Math.min(100,Math.round(v)));const others=bones.filter(x=>x!==k),rest=100-v,sum=others.reduce((a,x)=>a+odds[x],0);
-  const a=sum>0?Math.round(rest*odds[others[0]]/sum):Math.round(rest/2);odds[k]=v;odds[others[0]]=a;odds[others[1]]=rest-a;};
- for(const k of bones)c.querySelector('#ffo'+k).addEventListener('input',e=>{setBone(k,Number(e.target.value));sync();saveOdds();});
- c.querySelector('#ffoAmber').addEventListener('input',e=>{odds.amber=Number(e.target.value);sync();saveOdds();});
- c.querySelector('#ffoBed').addEventListener('input',e=>{odds.bed=Number(e.target.value);sync();saveOdds();});
- c.querySelector('#ffoReset').addEventListener('click',()=>{odds={...ODDS_DEFAULT};sync();saveOdds();});
- sync();setTimeout(simulateOdds,300);
+  '<p class="tiny muted" style="margin:-8px 0 4px">Set how often each prize happens. Raising a prize takes from the losers. Changes apply from the next ticket.</p>'+
+  '<div class="ffo-row ffo-lose"><label>Losers<small id="ffo_loseNow"></small></label><output id="ffo_loseOut"></output><div class="ffo-bar"><span id="ffo_loseBar"></span></div></div>'+
+  PRIZES.map(([k,l,m])=>row(k,l,m)).join('')+
+  '<div class="ffo-results" id="ffoRes"></div><p class="tiny muted" id="ffoSpots" style="margin:6px 0 0"></p>';
+ const sync=()=>{
+  const lose=Math.max(0,100-sumPrizes());
+  c.querySelector('#ffo_loseOut').textContent=fmt(lose);c.querySelector('#ffo_loseBar').style.width=lose+'%';
+  for(const [k] of PRIZES){c.querySelector('#ffo_'+k).value=targets[k];c.querySelector('#ffo_'+k+'Out').textContent=fmt(targets[k]);}
+ };
+ for(const [k] of PRIZES)c.querySelector('#ffo_'+k).addEventListener('input',e=>{
+  const others=sumPrizes()-targets[k];targets[k]=Math.min(Number(e.target.value),Math.round((100-others)*10)/10); // never push losers below 0
+  e.target.value=targets[k];sync();queueSolve();});
+ c.querySelector('#ffoReset').addEventListener('click',()=>{targets={...TARGET_DEFAULT};solved={P:30,C:30,B:40,bedP:8,carno3:0,ancient:0,brachy:0,amber:3};sync();queueSolve(true);});
+ sync();setTimeout(()=>showActual(FF_SOLVER.evaluate(solved)),0);
  return c;
 }
-function saveOdds(){
- try{localStorage.setItem(ODDS_KEY,JSON.stringify(odds))}catch(e){}
- const w=frame&&frame.contentWindow;try{w&&w.__fossilFinders&&w.__fossilFinders.setOdds(odds)}catch(e){}
- clearTimeout(simTimer);simTimer=setTimeout(simulateOdds,180);
+function queueSolve(now){
+ try{localStorage.setItem(TARGET_KEY,JSON.stringify(targets))}catch(e){}
+ const res=document.getElementById('ffoRes');if(res)res.classList.add('ffo-busy');
+ clearTimeout(solveTimer);solveTimer=setTimeout(runSolve,now?0:220);
 }
-function simulateOdds(){
- const w=frame&&frame.contentWindow,box=document.getElementById('ffoRes');if(!box)return;
- let r=null;try{if(w&&w.__fossilFinders&&w.__fossilFinders.setOdds){w.__fossilFinders.setOdds(odds);r=w.__fossilFinders.simulate(20000);}}catch(e){}
- if(!r||!r.share){setTimeout(simulateOdds,400);return;}
- const pct=v=>(v*100).toFixed(v<.01?2:1)+'%',one=v=>v>0?'1 in '+Math.round(1/v).toLocaleString():'never';
- const rows=[['Lose','lose'],['Pachy $1','pachy1'],['Two Pachys $2','pachy2'],['Carnotaurus $5','carno'],['Ancient Carno $30','ancient'],['Brachiosaurus $10','brachy'],['Amber $25+','amber']];
- box.innerHTML=rows.map(x=>'<div><span>'+x[0]+'</span><b title="'+one(r.share[x[1]])+'">'+pct(r.share[x[1]])+'</b></div>').join('')+'<div class="ffo-pay"><span>Average paid per $1 ticket</span><b>$'+r.avgPaid.toFixed(2)+'</b></div>';
- const n=document.getElementById('ffoN');if(n)n.textContent='· 20,000 test tickets';
+function runSolve(){
+ const t={};for(const [k] of PRIZES)t[k]=targets[k]/100;
+ const r=FF_SOLVER.solve(t,solved);solved=r.odds;
+ try{localStorage.setItem(ODDS_KEY,JSON.stringify(solved))}catch(e){}
+ const w=frame&&frame.contentWindow;try{w&&w.__fossilFinders&&w.__fossilFinders.setOdds(solved)}catch(e){}
+ showActual(r);
+}
+function showActual(r){
+ const sh=r.share,box=document.getElementById('ffoRes');if(!box)return;box.classList.remove('ffo-busy');
+ const now=(k)=>{const el=document.getElementById('ffo_'+k+'Now');if(!el)return;const want=k==='lose'?Math.max(0,100-sumPrizes()):targets[k],got=sh[k]*100,off=Math.abs(got-want)>=1;
+  el.textContent='Ticket gives '+fmt(got)+(off?' (closest it can get)':'');el.classList.toggle('ffo-off',off);};
+ now('lose');for(const [k] of PRIZES)now(k);
+ box.innerHTML='<div class="ffo-pay"><span>Average paid per $1 ticket</span><b>$'+r.avgPaid.toFixed(2)+'</b></div>';
+ const o=r.odds||solved,sp=document.getElementById('ffoSpots');
+ if(sp)sp.textContent='Behind the scenes: each spot '+o.P+'% Pachy, '+o.C+'% Carno, '+o.B+'% Brachy · special tickets: Pachy bed '+o.bedP+'%, Carno '+o.carno3+'%, Ancient '+o.ancient+'%, Brachy '+o.brachy+'% · amber on '+o.amber+'% of tickets.';
 }
 function enter(){
  on=true;try{localStorage.setItem(KEY,'1')}catch(e){}
