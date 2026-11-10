@@ -168,7 +168,7 @@ function renderPart(map, opt, withRock) {
   const g = grid(map), H = g.length, W = g[0].length, P = withRock ? 3 : 1, S = opt.scale, pal = opt.pal;
   const cv = document.createElement('canvas'); cv.width = (W + 2 * P) * S; cv.height = (H + 2 * P) * S;
   const c = cv.getContext('2d');
-  const filled = (x, y) => y >= 0 && y < H && x >= 0 && x < W && 'bdn'.includes(g[y][x]);
+  const filled = (x, y) => y >= 0 && y < H && x >= 0 && x < W && 'bdnt'.includes(g[y][x]);
   const px = (x, y, col) => { c.fillStyle = col; c.fillRect((x + P) * S, (y + P) * S, S, S); };
   if (withRock) { // rock matrix around the bones
     for (let y = -P; y < H + P; y++) for (let x = -P; x < W + P; x++) {
@@ -188,7 +188,8 @@ function renderPart(map, opt, withRock) {
   }
   // bone
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-    const ch = g[y][x]; if (!'bdn'.includes(ch)) continue;
+    const ch = g[y][x]; if (!'bdnt'.includes(ch)) continue;
+    if (ch === 't') { px(x, y, '#fff6dc'); continue; }
     let col = ch === 'd' ? pal.far : pal.base;
     if (ch !== 'd') {
       if (!filled(x, y + 1)) col = pal.shade; else if (!filled(x, y - 1)) col = pal.hi;
@@ -220,15 +221,16 @@ const CK = 1.12;   // Carno is drawn a bit bigger than the Pachys: head up near 
 const C_W = 50, C_H = 29, C_FEET = 936, C_LEFT = Math.round(164 - 25 * CK * S), C_TOP = Math.round(C_FEET - 28 * CK * S);
 function makeCarno() {
   K = CK;
-  const farLeg = [cap(19, 12, 18, 19, 1.05), cap(18, 19, 17.5, 24.5, .8), cap(17.5, 24.5, 18.5, 26.6, .7), cap(17.5, 27.1, 21.5, 27.1, .55)];
+  const farLeg = [cap(19.5, 12, 17.2, 18.4, 1.0), ell(17.2, 18.4, .95, .95), cap(17.2, 18.4, 14.2, 23.6, .75), cap(14.2, 23.6, 14.8, 26.6, .65), cap(13.8, 27.1, 17.6, 27.1, .5)];
   const legs = [cap(19.5, 11.2, 11, 11.2, 1.3), cap(11, 11.2, 5, 13.5, .9), cap(5, 13.5, 1.6, 17.5, .62), cap(1.6, 17.5, 1, 19, .45),
     ell(20.5, 11.8, 2.6, 1.7), cap(21, 12.5, 23, 17, .6), cap(22.3, 17.2, 24.2, 17.4, .5),
-    cap(21, 12, 24, 19, 1.2), cap(24, 19, 22.5, 24.5, .9), cap(22.5, 24.5, 24, 26.5, .75), cap(23, 27.1, 27.6, 27.1, .6)];
+    cap(21.5, 12, 25, 18.4, 1.15), ell(25, 18.4, 1.1, 1.1), cap(25, 18.4, 23.6, 24, .85), cap(23.6, 24, 25.2, 26.6, .7), cap(24.4, 27.1, 28.6, 27.1, .55)];
   const torso = [cap(21, 11, 32, 9, 1.3), ...spines(17, 11.4, 32, 8.6, 6), ...ribs(22, 11, 31, 9.2, 5, 5.6, .5),
     cap(24, 16.6, 30.5, 15.8, .45), cap(31, 12, 32.5, 14.4, .5), cap(32.5, 14.4, 33.3, 15, .4), cap(32, 9, 36, 6.5, 1.1)];
   const skull = [ell(40, 6, 4.6, 3.2), cap(40, 7, 46, 7.6, 1.9), cap(38, 9.2, 45, 10.2, .9),
     cap(38.5, 3.6, 37.4, 1, .75), cap(40.6, 3.3, 40.8, .8, .75)];
-  const holes = [ell(41, 5.4, .85, .85), ell(43.6, 6.9, .75, .6)];
+  const holes = [ell(41, 5.4, .85, .85), ell(43.6, 6.9, .75, .6), cap(38.6, 9.2, 46.4, 8.9, .4)];
+  const teeth = [38.9, 40.2, 41.5, 42.8, 44.1, 45.4].map((x) => cap(x, 8.75, x + .15, 9.55, .42));
   const bigHorns = [cap(38.4, 3.8, 36.2, .2, .85), cap(40.8, 3.4, 41.4, -.1, .85)];
   // Ancient attack pose: head low, jaws open, tail raised, wide stride, big horns
   const aFar = [cap(20, 11, 17, 17, 1.05), cap(17, 17, 14.5, 23, .8), cap(14.5, 23, 14, 26.6, .7), cap(13, 27.1, 17, 27.1, .55)];
@@ -240,15 +242,17 @@ function makeCarno() {
   const aHead = [ell(40, 15.5, 4.6, 3.2), cap(40, 15, 47, 14, 1.8), cap(38.5, 18, 46, 21.6, .9),
     cap(38.5, 13, 36.4, 9.4, .85), cap(41, 12.8, 41.6, 9.1, .85)];
   const aHoles = [ell(41, 14.6, .85, .85), ell(44, 15.1, .7, .55)];
+  const aTeeth = [[41, 16.9], [42.6, 16.6], [44.2, 16.3], [45.7, 16]].map(([x, y]) => cap(x, y, x + .1, y + .8, .4))
+    .concat([[40.4, 18.2], [42, 18.9], [43.6, 19.6], [45.1, 20.3]].map(([x, y]) => cap(x, y, x + .1, y - .8, .4)));
   const frame = (layers) => raster(C_W, C_H, layers);
   return {
     parts: [
       { map: frame([['d', farLeg], ['b', legs]]), opt: OPT },
       { map: frame([['b', torso]]), opt: OPT },
-      { map: frame([['b', skull], ['e', holes]]), opt: SOLID },
+      { map: frame([['b', skull], ['e', holes], ['t', teeth]]), opt: SOLID },
       { map: frame([['b', bigHorns]]), opt: SOLID },
     ],
-    ancient: [{ map: frame([['d', aFar], ['b', aBone]]), opt: OPT }, { map: frame([['b', aHead], ['e', aHoles]]), opt: SOLID }],
+    ancient: [{ map: frame([['d', aFar], ['b', aBone]]), opt: OPT }, { map: frame([['b', aHead], ['e', aHoles], ['t', aTeeth]]), opt: SOLID }],
   };
 }
 // render a map in the Carno frame and crop it to its bones; x/y = top-left on the ticket
