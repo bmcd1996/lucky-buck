@@ -337,7 +337,13 @@ function makeBrachy() {
   // front legs (longer, so the back slopes down to the hips) and back legs; the far pair is drawn darker behind
   const legsFar = [...boneLeg(42.5, 83, 108, 2.3, brachyLegs), ...boneLeg(27.5, 88.5, 108, 2.4, brachyLegs)];
   const legs = [ell(47.5, 82, 3.4, 2.4), ell(21.5, 87.5, 4.4, 2.8), ...boneLeg(50, 83, 108, 2.7, brachyLegs), ...boneLeg(18, 88.5, 108, 2.8, brachyLegs)];
-  const ribcage = [cap(23, 86.5, 47, 80.5, 1.8), ...spines(25, 86, 46, 80.6, 7), ...ribs(27, 86, 45, 81.2, 7, 12, .9)];
+  // ribcage: a row of back vertebrae, then separate curved ribs hanging from them (longest in the middle)
+  const curvedRibs = (n) => { const o = [];
+    for (let i = 0; i < n; i++) { const t = (i + .5) / n, x = 25.5 + (45.5 - 25.5) * t, y = 86.4 - 6 * t + 1.6, len = 9 + 5 * Math.sin(Math.PI * Math.min(1, t * 1.15));
+      const p1 = [x + 1.2, y + len * .3], p2 = [x + .6, y + len * .7], p3 = [x - .6, y + len];
+      o.push(cap(x, y, p1[0], p1[1], .62), cap(p1[0], p1[1], p2[0], p2[1], .56), cap(p2[0], p2[1], p3[0], p3[1], .48)); }
+    return o; };
+  const ribcage = [...vertebrae([[22.5, 87, 1.5], [47.5, 80.6, 1.6]], 8, { spine: .9, gap: 1.2 }), ...curvedRibs(7)];
   // long sweeping tail: down the left side, under the third case, along the bottom case to a whip tip
   const tail = vertebrae([[19, 87, 2.0], [11, 90, 1.8], [5, 96, 1.6], [3, 105, 1.35], [4, 114, 1.15], [8, 122, .95], [16, 128, .78], [27, 131, .62], [38, 131, .5], [46, 128.5, .42]], 20, { spine: .8, gap: 1.6 });
   // very long neck held high
@@ -346,7 +352,7 @@ function makeBrachy() {
   const holes = [ell(89.6, 10.9, .8, .8), ell(92.4, 7.6, .65, .65), cap(91.5, 14, 101, 14.3, .35)];
   return { parts: [
     { map: frame([['d', legsFar], ['b', legs]]), opt: SOLID },
-    { map: frame([['b', ribcage]]), opt: OPT },
+    { map: frame([['b', ribcage]]), opt: SOLID },
     { map: frame([['b', tail]]), opt: SOLID },
     [{ map: frame([['b', neck]]), opt: SOLID }, { map: frame([['b', skull], ['e', holes]]), opt: SOLID }],
   ] };
