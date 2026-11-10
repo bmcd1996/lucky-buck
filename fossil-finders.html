@@ -382,6 +382,8 @@ function makeBrachy() {
   ] };
 }
 let BRACHY = null, bPlaced = [];
+let brachyWin = 'sway';   // win animation: sway · stomp · nod · bellow · whip
+const BWIN_MS = 1300;
 function makeCarno() {
   K = CK; OY = 10;
   const farLeg = jointLeg([[19.5, 12, 1.0], [17.2, 18.4, .9], [14.2, 23.6, .72], [14.8, 26.6, .6]], 27.2, [-1.2, .8, 2.6], .42);
@@ -571,7 +573,7 @@ function bolt(x0, y0, x1, y1, now) { // a jagged pixel lightning bolt, as short-
 }
 function idle(now) {
   return !flying && finds.every((f) => f.left) && floaters.length === 0 && (scootDone || scootStart === null || placed.length < 3)
-    && (!morph || now - morph.t0 > morph.dur) && wins.every((w) => now - w.t0 > ({ butt: 1100, ancient: 900, brachy: 1200 }[w.kind] || 700));
+    && (!morph || now - morph.t0 > morph.dur) && wins.every((w) => now - w.t0 > ({ butt: 1100, ancient: 900, brachy: 1400 }[w.kind] || 700));
 }
 function ready(f) { return f.dino === 'P' ? f.i === placed.length : f.dino === 'B' ? f.i === bPlaced.length : f.i === cPlaced.length; }
 function storm(fx, k, now) {
@@ -639,14 +641,30 @@ function loop(now) {
     if (fx2 === 'stomp') { shake(15, now); puff(A.x + A.cv.width * .3, C_FEET - 4, 18, 120, now); puff(A.x + A.cv.width * .7, C_FEET - 4, 18, 120, now); }
     if (fx2 === 'storm') { shake(12, now); sparks(headX, headY + 20, 18, now); }
   }
-  // Brachiosaurus on the third stand; on its win the neck sways up and back
-  for (const i of [...bPlaced].sort((a, b) => a - b)) {
-    const p = BRACHY.parts[i];
-    let a = 0; const w = wins.find((w) => w.kind === 'brachy'); if (w && now > w.t0) { const e = (now - w.t0) / 1100; if (e < 1) a = -.07 * Math.sin(e * Math.PI * 2) * (1 - e); }
-    if (i === 3 && a) { octx.save(); octx.translate(B_PIVOT.x, B_PIVOT.y); octx.rotate(a); octx.drawImage(p.cv, p.x - B_PIVOT.x, p.y - B_PIVOT.y); octx.restore(); }
-    else octx.drawImage(p.cv, p.x + (w && i !== 3 ? 0 : 0), p.y);
+  // Brachiosaurus on the third stand, with its win animation (style picked by the owner)
+  const bw = wins.find((w) => w.kind === 'brachy'), be = bw && now > bw.t0 ? Math.min(1, (now - bw.t0) / BWIN_MS) : 0, bOn = bw && now > bw.t0 && be < 1;
+  const HIP = { x: B_LEFT + 19 * 4, y: B_TOP + 87 * 4 }, HEAD = { x: B_LEFT + 92 * 4, y: B_TOP + 11 * 4 }, TIP = { x: B_LEFT + 46 * 4, y: B_TOP + 128 * 4 };
+  let neckA = 0, tailA = 0, dyAll = 0;
+  if (bOn) {
+    if (brachyWin === 'sway') neckA = -.07 * Math.sin(be * Math.PI * 2) * (1 - be);
+    if (brachyWin === 'nod') neckA = .1 * Math.sin(be * Math.PI * 4) * (1 - be);
+    if (brachyWin === 'bellow') neckA = -.1 * Math.sin(Math.min(1, be * 1.6) * Math.PI);
+    if (brachyWin === 'whip') tailA = .2 * Math.sin(be * Math.PI * 3) * (1 - be);
+    if (brachyWin === 'stomp') { const h = be < .3 ? Math.sin(be / .3 * Math.PI / 2) : be < .4 ? 1 - (be - .3) / .1 : be < .6 ? .35 * Math.sin((be - .4) / .2 * Math.PI) : 0; dyAll = -Math.round(18 * h / 2) * 2; }
   }
-  for (const w of wins) if (w.kind === 'brachy' && !w.text && now > w.t0) { w.text = true; shake(8, now); money('+$10', B_LEFT + 92 * 4, B_TOP + 4, now + 380); puff(B_LEFT + 33 * 4, B_TOP + 108 * 4, 18, 80, now); }
+  for (const i of [...bPlaced].sort((a, b) => a - b)) {
+    const p = BRACHY.parts[i], pv = i === 3 ? B_PIVOT : HIP, ang = i === 3 ? neckA : i === 2 ? tailA : 0;
+    if (ang) { octx.save(); octx.translate(pv.x, pv.y + dyAll); octx.rotate(ang); octx.drawImage(p.cv, p.x - pv.x, p.y - pv.y); octx.restore(); }
+    else octx.drawImage(p.cv, p.x, p.y + dyAll);
+  }
+  if (bw && now > bw.t0) {
+    if (!bw.text) { bw.text = true; shake(8, now); money('+$10', HEAD.x, HEAD.y - 16, now + (brachyWin === 'bellow' ? 520 : 380)); if (brachyWin !== 'stomp') puff(B_LEFT + 33 * 4, B_TOP + 108 * 4, 18, 80, now); }
+    if (brachyWin === 'stomp') for (const [k, at] of [['s1', .4], ['s2', .6]]) if (be >= at && !bw[k]) { bw[k] = true; shake(k === 's1' ? 14 : 8, now);
+      puff(B_LEFT + 18 * 4, B_TOP + 108 * 4, 16, 110, now); puff(B_LEFT + 50 * 4, B_TOP + 108 * 4, 16, 110, now); }
+    if (brachyWin === 'bellow' && be >= .45 && !bw.r) { bw.r = true; for (const d of [0, 140, 280]) effects.push({ ring: true, x: HEAD.x + 40, y: HEAD.y - 20, t0: now + d, life: 600, col: d ? '#ffe9a8' : '#ffffff', size: 0 }); }
+    if (brachyWin === 'whip') for (const k of [1, 2, 3]) if (be >= k / 3 - .17 && !bw['c' + k]) { bw['c' + k] = true; shake(6, now); sparks(TIP.x + 12, TIP.y - 6, 10, now); }
+    if (brachyWin === 'nod' && be >= .12 && !bw.n) { bw.n = true; sparks(HEAD.x, HEAD.y + 10, 8, now); }
+  }
   // the fossil in flight
   if (flying) {
     const f = flying.f, pc = pieceOf(f, now), cv = pc.cv, r = cellRect(f.r, f.c);
@@ -693,6 +711,7 @@ window.FF_FOSSILS = {
     ticket.append(overlay);
     if (!running) { running = true; requestAnimationFrame(loop); }
   },
+  setBrachyWin(v) { brachyWin = v; return v; },
   setLegs(v) { brachyLegs = v; BRACHY = { parts: makeBrachy().parts.map((q) => Array.isArray(q) ? cropFrame(q, null, B_LEFT, B_TOP) : cropFrame(q.map, q.opt, B_LEFT, B_TOP)) }; return v; },
   setLook(v) { ancientLook = v; const c = makeCarno(); CARNO = { parts: c.parts.map((q) => cropFrame(q.map, q.opt)), ancient: cropFrame(c.ancient) }; return v; },
   setSkull(v) { carnoSkull = v; const c = makeCarno(); CARNO = { parts: c.parts.map((q) => cropFrame(q.map, q.opt)), ancient: cropFrame(c.ancient) }; return v; },
@@ -902,6 +921,7 @@ if (window.self !== window.top) document.documentElement.classList.add('embedded
     skull: (v) => FF_FOSSILS.setSkull(v),
     look: (v) => FF_FOSSILS.setLook(v),
     legs: (v) => FF_FOSSILS.setLegs(v),
+    brachyWin: (v) => FF_FOSSILS.setBrachyWin(v),
     simulate(n = 10000) {
       const t = {}, cat = { lose: 0, pachy1: 0, pachy2: 0, carno: 0, ancient: 0, brachy: 0, amber: 0 }; let paid = 0;
       for (let i = 0; i < n; i++) {
