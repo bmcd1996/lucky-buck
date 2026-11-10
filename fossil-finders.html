@@ -96,7 +96,7 @@ button:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
 </div>
 
 <script>
-// Fossil Finders: Pachy fossils (v3.9.0). Skeleton art is built from bone shapes and drawn as chunky pixels.
+// Fossil Finders: Pachy and Carnotaurus fossils (v3.10.0). Skeleton art is built from bone shapes and drawn as chunky pixels.
 (() => {
 'use strict';
 const COLS = [[300, 506], [521, 729], [746, 961]];
@@ -204,21 +204,77 @@ function renderPart(map, opt, withRock) {
 }
 
 
-// ---------- Pachy fossils on the ticket (owner's pick: aged tan bones, two hops) ----------
+// ---------- Fossils on the ticket (owner's pick: aged tan bones, two hops) ----------
 const OPT = { form: 'segmented', scale: 4, pal: { base: '#d8b27a', hi: '#f0d3a0', shade: '#a77c48', far: '#8e6638', line: '#1c0f08', gap: '#5a3a1c' } };
+const SOLID = { ...OPT, form: 'solid' };
+const S = OPT.scale;
 const CX = 164, FEET = 782, REVEAL_HOLD = 380, HOP_MS = 820, SCOOT = 380;
 const ORDER = [['A', 'body'], ['A', 'skull'], ['B', 'body'], ['B', 'skull']];
-let PACHY = null, sprites = null, overlay = null, octx = null, ticketEl = null, cellsEl = null;
-let finds = [], placed = [], flying = null, effects = [], floaters = [], wins = [], ghosts = [];
-let nextIndex = 0, scootStart = null, scootDone = false, shakeT = 0, shakeAmp = 0, idleWaiters = [], running = false;
+let PACHY = null, sprites = null, CARNO = null, overlay = null, octx = null, ticketEl = null, cellsEl = null;
+let finds = [], placed = [], cPlaced = [], flying = null, effects = [], floaters = [], wins = [], ghosts = [];
+let next = { P: 0, C: 0 }, scootStart = null, scootDone = false, morph = null, shakeT = 0, shakeAmp = 0, idleWaiters = [], running = false;
+
+// Carnotaurus: short deep skull with two horns over the eyes, tiny stubby arms, long legs, long tail; walks on two legs.
+// Standing pose (facing right) is split in three finds; the 4th find is a pair of big horns that turns it Ancient (attack pose).
+const CK = 1.12;   // Carno is drawn a bit bigger than the Pachys: head up near the seam between the top two cases
+const C_W = 50, C_H = 29, C_FEET = 936, C_LEFT = Math.round(164 - 25 * CK * S), C_TOP = Math.round(C_FEET - 28 * CK * S);
+function makeCarno() {
+  K = CK;
+  const farLeg = [cap(19, 12, 18, 19, 1.05), cap(18, 19, 17.5, 24.5, .8), cap(17.5, 24.5, 18.5, 26.6, .7), cap(17.5, 27.1, 21.5, 27.1, .55)];
+  const legs = [cap(19.5, 11.2, 11, 11.2, 1.3), cap(11, 11.2, 5, 13.5, .9), cap(5, 13.5, 1.6, 17.5, .62), cap(1.6, 17.5, 1, 19, .45),
+    ell(20.5, 11.8, 2.6, 1.7), cap(21, 12.5, 23, 17, .6), cap(22.3, 17.2, 24.2, 17.4, .5),
+    cap(21, 12, 24, 19, 1.2), cap(24, 19, 22.5, 24.5, .9), cap(22.5, 24.5, 24, 26.5, .75), cap(23, 27.1, 27.6, 27.1, .6)];
+  const torso = [cap(21, 11, 32, 9, 1.3), ...spines(17, 11.4, 32, 8.6, 6), ...ribs(22, 11, 31, 9.2, 5, 5.6, .5),
+    cap(24, 16.6, 30.5, 15.8, .45), cap(31, 12, 32.5, 14.4, .5), cap(32.5, 14.4, 33.3, 15, .4), cap(32, 9, 36, 6.5, 1.1)];
+  const skull = [ell(40, 6, 4.6, 3.2), cap(40, 7, 46, 7.6, 1.9), cap(38, 9.2, 45, 10.2, .9),
+    cap(38.5, 3.6, 37.4, 1, .75), cap(40.6, 3.3, 40.8, .8, .75)];
+  const holes = [ell(41, 5.4, .85, .85), ell(43.6, 6.9, .75, .6)];
+  const bigHorns = [cap(38.4, 3.8, 36.2, .2, .85), cap(40.8, 3.4, 41.4, -.1, .85)];
+  // Ancient attack pose: head low, jaws open, tail raised, wide stride, big horns
+  const aFar = [cap(20, 11, 17, 17, 1.05), cap(17, 17, 14.5, 23, .8), cap(14.5, 23, 14, 26.6, .7), cap(13, 27.1, 17, 27.1, .55)];
+  const aBone = [cap(21, 10, 13, 7, 1.3), cap(13, 7, 7, 3.5, .9), cap(7, 3.5, 3, 2.5, .62), cap(3, 2.5, 1, 3.6, .45),
+    ell(21, 10.8, 2.6, 1.7), cap(21.5, 11.5, 23.5, 16, .6), cap(22.8, 16.2, 24.6, 16.4, .5),
+    cap(22, 11, 26, 17, 1.2), cap(26, 17, 27, 23.5, .9), cap(27, 23.5, 29, 26.5, .75), cap(28.5, 27.1, 33, 27.1, .6),
+    cap(21, 10, 32, 12, 1.3), ...spines(16, 9.2, 32, 11.4, 6), ...ribs(22.5, 10.3, 31, 11.8, 5, 5, .5),
+    cap(24.5, 15.6, 30.5, 16.4, .45), cap(31, 15, 32, 17.5, .5), cap(32, 17.5, 32.8, 18, .4), cap(32, 12, 36, 15, 1.1)];
+  const aHead = [ell(40, 15.5, 4.6, 3.2), cap(40, 15, 47, 14, 1.8), cap(38.5, 18, 46, 21.6, .9),
+    cap(38.5, 13, 36.4, 9.4, .85), cap(41, 12.8, 41.6, 9.1, .85)];
+  const aHoles = [ell(41, 14.6, .85, .85), ell(44, 15.1, .7, .55)];
+  const frame = (layers) => raster(C_W, C_H, layers);
+  return {
+    parts: [
+      { map: frame([['d', farLeg], ['b', legs]]), opt: OPT },
+      { map: frame([['b', torso]]), opt: OPT },
+      { map: frame([['b', skull], ['e', holes]]), opt: SOLID },
+      { map: frame([['b', bigHorns]]), opt: SOLID },
+    ],
+    ancient: [{ map: frame([['d', aFar], ['b', aBone]]), opt: OPT }, { map: frame([['b', aHead], ['e', aHoles]]), opt: SOLID }],
+  };
+}
+// render a map in the Carno frame and crop it to its bones; x/y = top-left on the ticket
+function cropFrame(map, opt) {
+  const layers = typeof map[0] === 'object' ? map : [{ map, opt }];
+  const first = renderPart(layers[0].map, layers[0].opt, false).cv, full = document.createElement('canvas');
+  full.width = first.width; full.height = first.height; const fx = full.getContext('2d');
+  layers.forEach((l, i) => fx.drawImage(i ? renderPart(l.map, l.opt, false).cv : first, 0, 0));
+  let x0 = 1e9, y0 = 1e9, x1 = -1, y1 = -1;
+  layers.forEach(({ map }) => map.forEach((row, y) => { for (let x = 0; x < row.length; x++) if (row[x] !== '.' && row[x] !== 'e') { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); } }));
+  const cx = x0 * S, cy = y0 * S, w = (x1 - x0 + 3) * S, h = (y1 - y0 + 3) * S;
+  const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+  cv.getContext('2d').drawImage(full, cx, cy, w, h, 0, 0, w, h);
+  return { cv, x: C_LEFT - S + cx, y: C_TOP - S + cy };
+}
 
 function build() {
   PACHY = makePachy(1);
   for (const k in PACHY) PACHY[k].front = frontOf(PACHY[k].skull, PACHY[k].skullAt);
   sprites = ORDER.map(([who, part]) => ({ who, part, img: renderPart(PACHY[who][part], OPT, false) }));
+  const c = makeCarno();
+  CARNO = { parts: c.parts.map((p) => cropFrame(p.map, p.opt)), ancient: cropFrame(c.ancient) };
 }
+// ---- Pachy placement ----
 function aOffset(now) {
-  const full = Math.round(PACHY.A.front / 2) * OPT.scale;
+  const full = Math.round(PACHY.A.front / 2) * S;
   if (scootDone) return 0;
   if (scootStart === null || now < scootStart) return full;
   const k = Math.min(1, (now - scootStart) / SCOOT);
@@ -226,12 +282,17 @@ function aOffset(now) {
   return Math.round(full * Math.pow(1 - k, 3) / 2) * 2;
 }
 function target(i, now) {
-  const s = sprites[i], p = PACHY[s.who], S = OPT.scale, spr = s.img;
+  const s = sprites[i], p = PACHY[s.who], spr = s.img;
   const [ox, oy] = s.part === 'body' ? [0, 0] : p.skullAt;
   const top = FEET - p.body.length * S + (oy - spr.P) * S;
   if (s.who === 'A') return { x: CX - p.front * S + aOffset(now) + (ox - spr.P) * S, y: top, mirror: false };
   const R = ox + spr.W + spr.P;
   return { x: CX + (p.front - R) * S, y: top, mirror: true };
+}
+// a find's picture and where it lands
+function pieceOf(f, now) {
+  if (f.dino === 'P') { const t = target(f.i, now); return { cv: sprites[f.i].img.cv, x: t.x, y: t.y, mirror: t.mirror }; }
+  const p = CARNO.parts[f.i]; return { cv: p.cv, x: p.x, y: p.y, mirror: false };
 }
 function cellRect(r, c) { const [x0, x1] = COLS[c], [y0, y1] = ROWS[r]; return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 }; }
 function drawSprite(cv, x, y, mirror, ctx = octx) {
@@ -241,74 +302,109 @@ function puff(x, y, n, sp0, t0) {
   for (let k = 0; k < n; k++) { const ang = Math.PI + Math.random() * Math.PI, sp = sp0 + Math.random() * sp0;
     effects.push({ x: x + (Math.random() - .5) * 30, y, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp * .6, t0, life: 320 + Math.random() * 160, col: ['#d9c4a0', '#bfa47c', '#efe0c0'][k % 3], size: 4 }); }
 }
+function sparks(x, y, n, now) {
+  for (let k = 0; k < n; k++) { const ang = Math.random() * Math.PI * 2, sp = 80 + Math.random() * 140;
+    effects.push({ x, y, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, t0: now, life: 340, col: k % 2 ? '#fff6c8' : '#ffd34a', size: 5, nograv: true }); }
+}
+function money(text, x, y, t0, big) { floaters.push({ text, x, y, t0, big }); }
 function headTop(who, now) { const i = who === 'A' ? 1 : 3, t = target(i, now), c = sprites[i].img.cv; return { x: t.x + c.width / 2, y: t.y - 6 }; }
 function winOffset(who, now) {
   let dx = 0;
   for (const w of wins) {
     const e = now - w.t0; if (e < 0) continue;
     if (w.kind === 'shake' && who === 'A') {
-      if (!w.text) { w.text = true; const h = headTop('A', now); floaters.push({ x: h.x - 20, y: h.y, t0: now + 120 }); }
+      if (!w.text) { w.text = true; const h = headTop('A', now); money('+$1', h.x - 20, h.y, now + 120); }
       if (e < 560) dx += Math.sin(e / 32) * 4 * (1 - e / 560);
     }
-    if (w.kind === 'butt') {
+    if (w.kind === 'butt' && (who === 'A' || who === 'B')) {
       const dur = 460, n = Math.floor(e / dur), p = (e % dur) / dur;
       if (n < 2) {
         let o;
         if (p < .5) o = -12 * (1 - Math.pow(1 - p / .5, 2)); else if (p < .62) o = -12 + 16 * ((p - .5) / .12); else o = 4 * (1 - (p - .62) / .38);
         dx += who === 'A' ? o : -o;
-        if (p >= .62 && !w['hit' + n]) { w['hit' + n] = true; shake(5, now);
-          const hy = headTop('A', now).y + 40;
-          for (let k = 0; k < 10; k++) { const ang = Math.random() * Math.PI * 2, sp = 80 + Math.random() * 120;
-            effects.push({ x: CX, y: hy, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, t0: now, life: 300, col: k % 2 ? '#fff6c8' : '#ffd34a', size: 5, nograv: true }); } }
-      } else if (!w.text) { w.text = true; const h = headTop('B', now); floaters.push({ x: h.x + 20, y: h.y, t0: now }); }
+        if (p >= .62 && !w['hit' + n]) { w['hit' + n] = true; shake(5, now); sparks(CX, headTop('A', now).y + 40, 10, now); }
+      } else if (!w.text) { w.text = true; const h = headTop('B', now); money('+$1', h.x + 20, h.y, now); }
+    }
+    if ((w.kind === 'carno' || w.kind === 'ancient') && who === 'C') {
+      if (!w.text) { w.text = true; money(w.kind === 'carno' ? '+$5' : '+$25', C_LEFT + 40 * CK * S, C_TOP + 10, now + 120, w.kind === 'ancient'); }
+      const len = w.kind === 'ancient' ? 700 : 560, amp = w.kind === 'ancient' ? 6 : 4;
+      if (e < len) dx += Math.sin(e / 30) * amp * (1 - e / len);
     }
   }
   return Math.round(dx / 2) * 2;
 }
-function shake(amp, now) { shakeT = now; shakeAmp = amp; }
+function shake(amp, now) { const live = now - shakeT < 170 ? shakeAmp : 0; shakeT = now; shakeAmp = Math.max(amp, live); }
 function hop(a, b, t) {
   const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }, first = t < .5, l = first ? t / .5 : (t - .5) / .5;
   const from = first ? a : mid, to = first ? mid : b, h = first ? 130 : 95;
   return { x: from.x + (to.x - from.x) * l, y: from.y + (to.y - from.y) * l - h * 4 * l * (1 - l), second: !first };
 }
-function landed(i, now) {
-  placed.push(i); flying = null;
-  const t = target(i, now), c = sprites[i].img.cv;
+function landed(f, now) {
+  flying = null;
+  const pc = pieceOf(f, now);
   shake(6, now);
-  puff(t.x + c.width / 2, t.y + c.height - OPT.scale * 2, 14, 70, now);
-  if (i === 1) wins.push({ kind: 'shake', t0: now + 220 });
-  if (i === 2 && !scootDone) {
-    scootStart = now + 40;
-    const a = target(0, now), ac = sprites[0].img.cv;
-    for (let k = 0; k < 8; k++) effects.push({ x: a.x + ac.width * (.2 + Math.random() * .6), y: a.y + ac.height - OPT.scale * 2, vx: 40 + Math.random() * 90, vy: -20 - Math.random() * 40, t0: now + 40, life: 380, col: ['#d9c4a0', '#bfa47c', '#efe0c0'][k % 3], size: 4 });
+  puff(pc.x + pc.cv.width / 2, pc.y + pc.cv.height - S * 2, 14, 70, now);
+  if (f.dino === 'P') {
+    const i = f.i; placed.push(i);
+    if (i === 1) wins.push({ kind: 'shake', t0: now + 220 });
+    if (i === 2 && !scootDone) {
+      scootStart = now + 40;
+      const a = target(0, now), ac = sprites[0].img.cv;
+      for (let k = 0; k < 8; k++) effects.push({ x: a.x + ac.width * (.2 + Math.random() * .6), y: a.y + ac.height - S * 2, vx: 40 + Math.random() * 90, vy: -20 - Math.random() * 40, t0: now + 40, life: 380, col: ['#d9c4a0', '#bfa47c', '#efe0c0'][k % 3], size: 4 });
+    }
+    if (i === 3) wins.push({ kind: 'butt', t0: now + 260 });
+  } else {
+    cPlaced.push(f.i);
+    if (f.i === 2) wins.push({ kind: 'carno', t0: now + 220 });
+    if (f.i === 3) { morph = { t0: now + 200 }; wins.push({ kind: 'ancient', t0: now + 200 + 420 }); }
   }
-  if (i === 3) wins.push({ kind: 'butt', t0: now + 260 });
 }
+const MORPH = 360;
 function idle(now) {
   return !flying && finds.every((f) => f.left) && floaters.length === 0 && (scootDone || scootStart === null || placed.length < 3)
-    && wins.every((w) => now - w.t0 > (w.kind === 'butt' ? 1100 : 700));
+    && (!morph || now - morph.t0 > MORPH) && wins.every((w) => now - w.t0 > ({ butt: 1100, ancient: 900 }[w.kind] || 700));
 }
+function ready(f) { return f.dino === 'P' ? f.i === placed.length : f.i === cPlaced.length; }
 function loop(now) {
-  const f = finds.find((f) => !f.left && now - f.t0 > REVEAL_HOLD && f.i === placed.length);
-  if (!flying && f) { f.left = true; f.cv.getContext('2d').clearRect(0, 0, f.cv.width, f.cv.height); flying = { i: f.i, t0: now, from: f }; }
+  if (!flying) {
+    const f = finds.filter((f) => !f.left && now - f.t0 > REVEAL_HOLD && ready(f)).sort((a, b) => a.t0 - b.t0)[0];
+    if (f) { f.left = true; f.cv.getContext('2d').clearRect(0, 0, f.cv.width, f.cv.height); flying = { f, t0: now }; }
+  }
   octx.clearRect(0, 0, 1024, 1536);
   // shake the whole ticket briefly on each landing
   if (shakeAmp && now - shakeT < 170) { const k = 1 - (now - shakeT) / 170, px = ticketEl.getBoundingClientRect().width / 1024;
     ticketEl.style.transform = `translate(${((Math.random() - .5) * shakeAmp * k * 2 * px).toFixed(1)}px, ${((Math.random() - .5) * shakeAmp * k * 2 * px).toFixed(1)}px)`; }
   else if (ticketEl.style.transform) ticketEl.style.transform = '';
-  // faded fossils in Pachy spots that weren't picked
-  for (const g of ghosts) { const r = cellRect(g.r, g.c), cv = sprites[1].img.cv; octx.globalAlpha = .4; drawSprite(cv, r.x + (r.w - cv.width) / 2, r.y + (r.h - cv.height) / 2, false); octx.globalAlpha = 1; }
-  // skeletons on the stand (bodies first)
+  // faded fossils in spots that weren't picked
+  for (const g of ghosts) {
+    const r = cellRect(g.r, g.c), cv = g.letter === 'C' ? CARNO.parts[2].cv : sprites[1].img.cv;
+    octx.globalAlpha = .4; drawSprite(cv, r.x + (r.w - cv.width) / 2, r.y + (r.h - cv.height) / 2, false); octx.globalAlpha = 1;
+  }
+  // Pachy skeletons on the top stand (bodies first)
   const order = [...placed].sort((a, b) => (sprites[a].part === 'skull') - (sprites[b].part === 'skull'));
   for (const i of order) { const t = target(i, now); drawSprite(sprites[i].img.cv, t.x + winOffset(sprites[i].who, now), t.y, t.mirror); }
+  // Carnotaurus on the second stand; the Ancient pose takes over after the big horns land
+  const cdx = winOffset('C', now);
+  const mk = morph ? Math.min(1, Math.max(0, (now - morph.t0) / MORPH)) : 0;
+  if (mk < 1) {
+    const dy = morph && mk > 0 ? -Math.round(14 * Math.sin(Math.PI * mk) / 2) * 2 : 0;
+    octx.globalAlpha = 1 - mk;
+    for (const i of [...cPlaced].sort((a, b) => a - b)) { const p = CARNO.parts[i]; drawSprite(p.cv, p.x + cdx, p.y + dy, false); }
+    octx.globalAlpha = 1;
+  }
+  if (morph && mk > 0) {
+    const a = CARNO.ancient, dy = mk < 1 ? -Math.round(14 * Math.sin(Math.PI * mk) / 2) * 2 : 0;
+    octx.globalAlpha = mk; drawSprite(a.cv, a.x + cdx, a.y + dy, false); octx.globalAlpha = 1;
+    if (mk >= 1 && !morph.landed) { morph.landed = true; shake(9, now); puff(a.x + a.cv.width / 2, C_FEET - 4, 20, 90, now); sparks(C_LEFT + 38 * CK * S, C_TOP + 50, 12, now); }
+  }
   // the fossil in flight
   if (flying) {
-    const s = sprites[flying.i], cv = s.img.cv, r = cellRect(flying.from.r, flying.from.c), tg = target(flying.i, now);
+    const f = flying.f, pc = pieceOf(f, now), cv = pc.cv, r = cellRect(f.r, f.c);
     const t = Math.min(1, (now - flying.t0) / HOP_MS);
-    const q = hop({ x: r.x + r.w / 2, y: r.y + r.h / 2 }, { x: tg.x + cv.width / 2, y: tg.y + cv.height / 2 }, t);
+    const q = hop({ x: r.x + r.w / 2, y: r.y + r.h / 2 }, { x: pc.x + cv.width / 2, y: pc.y + cv.height / 2 }, t);
     if (q.second && !flying.puffed) { flying.puffed = true; puff(q.x, q.y + cv.height / 2, 6, 60, now); }
-    drawSprite(cv, q.x - cv.width / 2, q.y - cv.height / 2, s.who === 'B');
-    if (t >= 1) landed(flying.i, now);
+    drawSprite(cv, q.x - cv.width / 2, q.y - cv.height / 2, pc.mirror);
+    if (t >= 1) landed(f, now);
   }
   // dust and sparks
   effects = effects.filter((e) => now - e.t0 < e.life);
@@ -319,15 +415,16 @@ function loop(now) {
     octx.fillRect(Math.round((e.x + e.vx * dt) / 2) * 2, Math.round((e.y + e.vy * dt + (e.nograv ? 0 : 160 * dt * dt)) / 2) * 2, e.size, e.size);
   }
   octx.globalAlpha = 1;
-  // "+$1"
-  floaters = floaters.filter((f) => now - f.t0 < 1300);
+  // money pop-ups
+  floaters = floaters.filter((f) => now - f.t0 < (f.big ? 1600 : 1300));
   for (const fl of floaters) {
     if (now < fl.t0) continue;
-    const k = (now - fl.t0) / 1300, y = fl.y - 46 * (1 - Math.pow(1 - k, 2));
+    const life = fl.big ? 1600 : 1300, k = (now - fl.t0) / life, y = fl.y - (fl.big ? 60 : 46) * (1 - Math.pow(1 - k, 2));
+    const grow = fl.big ? 1 + .25 * Math.sin(Math.min(1, k * 4) * Math.PI) : 1, size = Math.round((fl.big ? 78 : 54) * grow);
     octx.globalAlpha = k < .6 ? 1 : 1 - (k - .6) / .4;
-    octx.font = '400 54px "Lilita One", "Arial Black", sans-serif'; octx.textAlign = 'center'; octx.lineJoin = 'round';
-    octx.lineWidth = 10; octx.strokeStyle = '#1c0f08'; octx.strokeText('+$1', fl.x, y);
-    octx.fillStyle = '#ffd34a'; octx.fillText('+$1', fl.x, y);
+    octx.font = `400 ${size}px "Lilita One", "Arial Black", sans-serif`; octx.textAlign = 'center'; octx.lineJoin = 'round';
+    octx.lineWidth = fl.big ? 13 : 10; octx.strokeStyle = '#1c0f08'; octx.strokeText(fl.text, fl.x, y);
+    octx.fillStyle = fl.big ? '#ffb12a' : '#ffd34a'; octx.fillText(fl.text, fl.x, y);
   }
   octx.globalAlpha = 1;
   if (idleWaiters.length && idle(now)) { const w = idleWaiters; idleWaiters = []; w.forEach((fn) => fn()); }
@@ -342,27 +439,31 @@ window.FF_FOSSILS = {
     ticket.append(overlay);
     if (!running) { running = true; requestAnimationFrame(loop); }
   },
-  reset() { nextIndex = 0; finds = []; placed = []; flying = null; effects = []; floaters = []; wins = []; ghosts = []; scootStart = null; scootDone = false; idleWaiters = []; },
-  // a cell that holds a Pachy fossil: canvas the size of the cell, drawn when uncovered
-  prepCell(cell, w, h) { const cv = document.createElement('canvas'); cv.className = 'fossil'; cv.width = w; cv.height = h; cell.insertBefore(cv, cell.querySelector('.cover')); return cv; },
-  // when a Pachy spot is first scratched it gets the next fossil (body, skull, body, skull), so scratching uncovers it
+  reset() { next = { P: 0, C: 0 }; finds = []; placed = []; cPlaced = []; flying = null; effects = []; floaters = []; wins = []; ghosts = []; scootStart = null; scootDone = false; morph = null; idleWaiters = []; },
+  // letters that are shown as fossils (other finds stay letters for now)
+  has(letter) { return letter === 'P' || letter === 'C'; },
+  // a fossil spot: canvas the size of the cell, drawn when its spot is first scratched
+  prepCell(cell, w, h, letter) { const cv = document.createElement('canvas'); cv.className = 'fossil'; cv.width = w; cv.height = h; cv.dataset.letter = letter || 'P'; cell.insertBefore(cv, cell.querySelector('.cover')); return cv; },
+  // when a fossil spot is first scratched it gets that dinosaur's next piece, so scratching uncovers it
   assign(cell) {
     const cv = cell.querySelector('canvas.fossil'); if (!cv || cv.dataset.i) return;
-    const i = nextIndex++; if (i >= 4) return;
+    const L = cv.dataset.letter, i = next[L]++; if (i >= 4) return;
     cv.dataset.i = String(i);
-    const s = sprites[i], ctx = cv.getContext('2d'); ctx.imageSmoothingEnabled = false;
-    drawSprite(s.img.cv, (cv.width - s.img.cv.width) / 2, (cv.height - s.img.cv.height) / 2, s.who === 'B', ctx);
+    const ctx = cv.getContext('2d'); ctx.imageSmoothingEnabled = false;
+    if (L === 'P') { const s = sprites[i]; drawSprite(s.img.cv, (cv.width - s.img.cv.width) / 2, (cv.height - s.img.cv.height) / 2, s.who === 'B', ctx); }
+    else { const p = CARNO.parts[i].cv, k = Math.min(1, (cv.width - 12) / p.width, (cv.height - 12) / p.height), w = Math.round(p.width * k), h = Math.round(p.height * k);
+      ctx.drawImage(p, Math.round((cv.width - w) / 2), Math.round((cv.height - h) / 2), w, h); }
   },
   onReveal(r, c, cell) {
     const cv = cell.querySelector('canvas.fossil'); if (!cv) return;
     if (!cv.dataset.i) this.assign(cell);
     const i = Number(cv.dataset.i); if (!(i >= 0 && i < 4)) return;
-    finds.push({ i, r, c, cv, t0: performance.now(), left: false });
+    finds.push({ dino: cv.dataset.letter, i, r, c, cv, t0: performance.now(), left: false });
   },
-  ghost(r, c) { ghosts.push({ r, c }); },
+  ghost(r, c, letter) { ghosts.push({ r, c, letter: letter || 'P' }); },
   whenIdle(fn) { idleWaiters.push(fn); },
   isIdle() { return idle(performance.now()); },
-  state() { return { finds: finds.length, placed: placed.length, flying: !!flying, scoot: scootDone ? 'done' : scootStart ? 'moving' : 'middle', wins: wins.map((w) => w.kind) }; },
+  state() { return { finds: finds.length, placed: placed.length, carno: cPlaced.length, ancient: !!(morph && morph.landed), flying: !!flying, scoot: scootDone ? 'done' : scootStart ? 'moving' : 'middle', wins: wins.map((w) => w.kind) }; },
 };
 })();
 </script>
@@ -432,6 +533,8 @@ if (window.self !== window.top) document.documentElement.classList.add('embedded
   // Test hook: simulate random players (not shown on the page).
   window.__fossilFinders = {
     newBoard, payout, fossils: () => FF_FOSSILS.state(), board: () => board,
+    forceBoard(b) { ticket.classList.remove('flipped'); finishWaiting = false; buildTicket(b); },
+    dig(r, c) { const el = cellsEl.children[r * 3 + c]; if (el && el.dig) el.dig(); },
     simulate(n = 10000) {
       const t = {}, cat = { lose: 0, pachy1: 0, pachy2: 0, carno: 0, ancient: 0, brachy: 0, amber: 0 }; let paid = 0;
       for (let i = 0; i < n; i++) {
@@ -475,8 +578,8 @@ if (window.self !== window.top) document.documentElement.classList.add('embedded
   let board, picks, paidFor, done, finishWaiting = false;
   FF_FOSSILS.init(ticket, cellsEl);
 
-  function buildTicket() {
-    board = newBoard(); picks = [null, null, null, null]; paidFor = false; done = false;
+  function buildTicket(forced) {
+    board = forced || newBoard(); picks = [null, null, null, null]; paidFor = false; done = false;
     FF_FOSSILS.reset();
     prizeEl.textContent = ''; prizeEl.className = 'prize';
     newBtn.disabled = true;
@@ -487,11 +590,11 @@ if (window.self !== window.top) document.documentElement.classList.add('embedded
       cell.className = 'cell';
       Object.assign(cell.style, { left: x0 / ART_W * 100 + '%', top: y0 / ART_H * 100 + '%', width: w / ART_W * 100 + '%', height: h / ART_H * 100 + '%' });
       const under = document.createElement('canvas'); under.className = 'under';
-      const letter = document.createElement('div'); letter.className = 'letter'; letter.textContent = board[r][c] === 'P' ? '' : board[r][c];
+      const letter = document.createElement('div'); letter.className = 'letter'; letter.textContent = FF_FOSSILS.has(board[r][c]) ? '' : board[r][c];
       const cover = document.createElement('canvas'); cover.className = 'cover';
       for (const cv of [under, cover]) { cv.width = w; cv.height = h; cv.getContext('2d').drawImage(art, x0, y0, w, h, 0, 0, w, h); }
       cell.append(under, letter, cover);
-      if (board[r][c] === 'P') FF_FOSSILS.prepCell(cell, w, h);
+      if (FF_FOSSILS.has(board[r][c])) FF_FOSSILS.prepCell(cell, w, h, board[r][c]);
       cellsEl.append(cell);
       attachScratch(cell, cover, r, c);
     }));
@@ -528,12 +631,13 @@ if (window.self !== window.top) document.documentElement.classList.add('embedded
       picks[r] = c;
       if (!paidFor) { paidFor = true; stats.spent += 1; saveStats(); renderStats(); }
       rowCells(r).forEach((el, i) => { if (i !== c) el.classList.add('locked'); });
-      if (board[r][c] === 'P') FF_FOSSILS.assign(cell);
+      if (FF_FOSSILS.has(board[r][c])) FF_FOSSILS.assign(cell);
     };
+    cell.dig = () => { if (done || cell.classList.contains('locked') && picks[r] !== c) return; if (picks[r] === null) choose(); ctx.clearRect(0, 0, cover.width, cover.height); reveal(); };
     const reveal = () => {
       if (cover.classList.contains('gone')) return;
       cover.classList.add('gone'); cell.classList.add('locked');
-      if (board[r][c] === 'P') FF_FOSSILS.onReveal(r, c, cell);
+      if (FF_FOSSILS.has(board[r][c])) FF_FOSSILS.onReveal(r, c, cell);
       if (picks.every((p) => p !== null) && rowsRevealed()) finish();
     };
     cover.addEventListener('pointerdown', (e) => {
@@ -566,7 +670,7 @@ if (window.self !== window.top) document.documentElement.classList.add('embedded
     [...cellsEl.children].forEach((el, i) => {
       const r = Math.floor(i / 3), c = i % 3;
       el.classList.add('locked');
-      if (picks[r] !== c) { el.classList.add('unpicked'); el.querySelector('.cover').classList.add('gone'); if (board[r][c] === 'P') FF_FOSSILS.ghost(r, c); }
+      if (picks[r] !== c) { el.classList.add('unpicked'); el.querySelector('.cover').classList.add('gone'); if (FF_FOSSILS.has(board[r][c])) FF_FOSSILS.ghost(r, c, board[r][c]); }
     });
     newBtn.disabled = false;
   }
