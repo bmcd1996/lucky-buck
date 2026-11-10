@@ -622,7 +622,7 @@ body.setup-open{overflow:hidden}.card-top .ticket-gear+h3{margin-right:auto}
 <div class="wrap">
 <header class="header">
 <div class="brand"><div class="brand-mark">$</div><div><small>QUILL PRODUCTIONS</small><h1>Cardboard to Cash</h1></div></div>
-<div class="header-right"><span class="version-badge" title="Lucky Buck simulator version">v3.7.0</span><span class="save" id="saveStatus">Loading…</span></div>
+<div class="header-right"><span class="version-badge" title="Lucky Buck simulator version">v3.8.0</span><span class="save" id="saveStatus">Loading…</span></div>
 </header>
 
 <section class="hero">
@@ -1952,5 +1952,69 @@ syncUI();stats();if(S.skillOn)requestAnimationFrame(size);
 window.__luckyBuckSkill={get:()=>S};
 })();
 
+</script>
+<style>
+/* v3.8.0 · Fossil Finders ($1, Ticket #2) in the Your Tickets menu. Lucky Buck sections step aside while it is selected. */
+body.ff-mode #skillBar,body.ff-mode nav.v3-switch,body.ff-mode #v3SimCol,body.ff-mode .v3-footer-tools{display:none!important}
+body.ff-mode #v3TicketCol>*:not(.hero):not(#ffPanel){display:none!important}
+body.ff-mode .v3-rail{overflow:visible!important;transform:none!important}
+body.ff-mode #v3TicketCol{width:100%!important;max-width:560px;margin:0 auto}
+body.ff-mode #quickEditTicket,body.ff-mode .hero .hero-price,body.ff-mode .hero [class*="price"]:not(.ticket-cost){display:none!important}
+#ffPanel{display:none;padding:0;background:none;border:0;box-shadow:none}
+body.ff-mode #ffPanel{display:block}
+#ffFrame{display:block;width:100%;height:880px;border:0;background:transparent}
+</style>
+<script>
+(()=>{'use strict';
+const FF='__fossil__',KEY='lucky-buck-fossil-selected',sel=document.getElementById('ticketSelector');
+if(!sel)return;
+const img=document.getElementById('heroTicketLogo'),title=document.getElementById('heroTicketName');
+let on=false,saved=null,frame=null;
+try{on=localStorage.getItem(KEY)==='1'}catch(e){}
+function addOption(){
+ if(!sel.querySelector('option[value="'+FF+'"]')){
+  const o=document.createElement('option');o.value=FF;o.textContent='Fossil Finders · $1';
+  const create=sel.querySelector('option[value="__create__"]');sel.insertBefore(o,create||null);
+ }
+ if(on&&sel.value!==FF)sel.value=FF;
+}
+new MutationObserver(addOption).observe(sel,{childList:true});
+function panel(){
+ let p=document.getElementById('ffPanel');
+ if(!p){
+  p=document.createElement('section');p.id='ffPanel';p.setAttribute('aria-label','Fossil Finders ticket');
+  frame=document.createElement('iframe');frame.id='ffFrame';frame.title='Fossil Finders ticket';frame.src='fossil-finders.html';
+  p.append(frame);
+ }
+ const hero=document.querySelector('.hero');
+ if(hero&&p.previousElementSibling!==hero)hero.after(p);
+ return p;
+}
+function enter(){
+ on=true;try{localStorage.setItem(KEY,'1')}catch(e){}
+ panel();
+ if(!saved)saved={src:img.getAttribute('src'),alt:img.alt,imgHidden:img.classList.contains('hidden'),titleHidden:title.classList.contains('hidden')};
+ img.src='fossil-finders-logo.png';img.alt='Fossil Finders logo';img.classList.remove('hidden');title.classList.add('hidden');
+ document.body.classList.add('ff-mode');
+ const rail=document.getElementById('v3Rail');if(rail)rail.scrollLeft=0;
+ addOption();
+}
+function exit(){
+ on=false;try{localStorage.removeItem(KEY)}catch(e){}
+ document.body.classList.remove('ff-mode');
+ if(saved){if(saved.src)img.setAttribute('src',saved.src);else img.removeAttribute('src');img.alt=saved.alt;img.classList.toggle('hidden',saved.imgHidden);title.classList.toggle('hidden',saved.titleHidden);saved=null;}
+}
+// Runs before the simulator's own handler, which only knows Lucky Buck-style tickets.
+sel.addEventListener('change',e=>{
+ if(sel.value===FF){e.stopImmediatePropagation();enter();}
+ else if(on){exit();}
+},true);
+window.addEventListener('message',e=>{
+ const h=e.data&&e.data.fossilFindersHeight;
+ if(frame&&e.source===frame.contentWindow&&Number.isFinite(h)&&h>200)frame.style.height=Math.ceil(h)+'px';
+});
+addOption();
+if(on)enter();
+})();
 </script>
 </body></html>
