@@ -300,14 +300,43 @@ function vertebrae(pts, n, opts = {}) {
   }
   return out;
 }
+
+// one leg from hip/shoulder (x, top) to the ground (bottom); w = bone thickness; style = leg design
+let brachyLegs = 1;
+function boneLeg(x, top, bottom, w, style) {
+  const H = bottom - top, knee = top + H * .47, ankle = top + H * .84, o = [];
+  const knob = (cx, cy, r) => o.push(ell(cx, cy, r, r));
+  if (style === 1) { // Classic: thigh bone, knee, shin + thin side bone, ankle, three toes
+    o.push(cap(x, top + w * .4, x + .4, knee - w * .5, w * .62)); knob(x, top + w * .2, w * .9); knob(x + .4, knee, w * .78);
+    o.push(cap(x + .7, knee + w * .5, x + .5, ankle - .6, w * .48), cap(x - w * .55, knee + w * .9, x - w * .45, ankle - .5, w * .26));
+    knob(x + .3, ankle, w * .55);
+    for (const dx of [-1.6, .2, 2]) o.push(cap(x + .3, ankle + .4, x + .3 + dx * 1.2, bottom - .2, .42));
+  } else if (style === 2) { // Pillar: huge knobby joints, kneecap, straight shin, flat foot pad with toe nubs
+    o.push(cap(x, top + w * .6, x, knee - w * .6, w * .55)); knob(x, top + w * .2, w); knob(x, knee, w * .86); o.push(ell(x + w * .85, knee, w * .3, w * .38));
+    o.push(cap(x, knee + w * .6, x, ankle - w * .4, w * .5)); knob(x, ankle, w * .62);
+    o.push(cap(x - w * .9, bottom - .4, x + w * 1.1, bottom - .4, .55));
+    for (const dx of [-.9, -.2, .5, 1.2]) knob(x + dx * w, bottom - 1.1, .42);
+  } else if (style === 3) { // Bent: knee forward, ankle back, springy stance, long foot bones
+    const kx = x + w * .9, ax = x - w * .2;
+    o.push(cap(x, top + w * .4, kx, knee - w * .4, w * .6)); knob(x, top + w * .2, w * .9); knob(kx, knee, w * .75);
+    o.push(cap(kx, knee + w * .4, ax + .3, ankle - .5, w * .45), cap(kx - w * .6, knee + w * .7, ax - w * .3, ankle - .5, w * .24));
+    knob(ax, ankle, w * .5);
+    o.push(cap(ax, ankle + .3, ax + 2.4, bottom - .3, .45), cap(ax, ankle + .3, ax + .6, bottom - .2, .45), cap(ax, ankle + .3, ax - 1.6, bottom - .3, .42));
+  } else { // Detailed: thigh with a ridge, separate kneecap, two shin bones with a gap, ankle bones, five foot bones with claws
+    o.push(cap(x, top + w * .5, x + .2, knee - w * .6, w * .55), cap(x - w * .35, top + w * .9, x - w * .3, top + H * .3, w * .22));
+    knob(x, top + w * .2, w * .9); knob(x + .2, knee, w * .7); o.push(ell(x + w * .9, knee - .2, w * .28, w * .32));
+    o.push(cap(x + w * .35, knee + w * .55, x + w * .3, ankle - .7, w * .36), cap(x - w * .45, knee + w * .6, x - w * .4, ankle - .7, w * .26));
+    o.push(ell(x - .4, ankle, w * .4, w * .35), ell(x + .6, ankle, w * .4, w * .35));
+    for (const dx of [-1.8, -.9, 0, .9, 1.8]) { o.push(cap(x + dx * .4, ankle + .6, x + dx, bottom - .7, .3)); knob(x + dx * 1.05, bottom - .3, .36); }
+  }
+  return o;
+}
 function makeBrachy() {
   K = 1; OY = 0;
   const frame = (layers) => raster(B_W, B_H, layers);
-  const legsFar = [cap(44.5, 84, 43.5, 96, 2.2), cap(43.5, 96, 43, 106, 1.8), cap(40.5, 108, 46, 108, 1.1),
-    cap(25, 90, 26, 98, 2.3), cap(26, 98, 26.5, 106, 1.9), cap(23.5, 108, 29.5, 108, 1.1)];
-  const legs = [ell(47.5, 83, 4.2, 3.2), ell(21.5, 88.5, 5.4, 3.6),
-    cap(48, 84, 50, 95.5, 2.5), cap(50, 95.5, 50, 106, 2.0), cap(47, 108, 53.5, 108, 1.25),
-    cap(20.5, 90, 19, 98, 2.7), cap(19, 98, 20, 106, 2.1), cap(16.5, 108, 23.5, 108, 1.25)];
+  // front legs (longer, so the back slopes down to the hips) and back legs; the far pair is drawn darker behind
+  const legsFar = [...boneLeg(42.5, 83, 108, 2.3, brachyLegs), ...boneLeg(27.5, 88.5, 108, 2.4, brachyLegs)];
+  const legs = [ell(47.5, 82, 3.4, 2.4), ell(21.5, 87.5, 4.4, 2.8), ...boneLeg(50, 83, 108, 2.7, brachyLegs), ...boneLeg(18, 88.5, 108, 2.8, brachyLegs)];
   const ribcage = [cap(23, 86.5, 47, 80.5, 1.8), ...spines(25, 86, 46, 80.6, 7), ...ribs(27, 86, 45, 81.2, 7, 12, .9)];
   // long sweeping tail: down the left side, under the third case, along the bottom case to a whip tip
   const tail = vertebrae([[19, 87, 2.0], [11, 90, 1.8], [5, 96, 1.6], [3, 105, 1.35], [4, 114, 1.15], [8, 122, .95], [16, 128, .78], [27, 131, .62], [38, 131, .5], [46, 128.5, .42]], 20, { spine: .8, gap: 1.6 });
@@ -316,7 +345,7 @@ function makeBrachy() {
   const skull = [ell(92, 11.5, 4.6, 3.0), ell(91.2, 8.2, 2.6, 2.2), cap(93, 12.6, 101, 13.2, 1.9), cap(90, 14.8, 100, 15.4, .9)];
   const holes = [ell(89.6, 10.9, .8, .8), ell(92.4, 7.6, .65, .65), cap(91.5, 14, 101, 14.3, .35)];
   return { parts: [
-    { map: frame([['d', legsFar], ['b', legs]]), opt: OPT },
+    { map: frame([['d', legsFar], ['b', legs]]), opt: SOLID },
     { map: frame([['b', ribcage]]), opt: OPT },
     { map: frame([['b', tail]]), opt: SOLID },
     [{ map: frame([['b', neck]]), opt: SOLID }, { map: frame([['b', skull], ['e', holes]]), opt: SOLID }],
@@ -634,6 +663,7 @@ window.FF_FOSSILS = {
     ticket.append(overlay);
     if (!running) { running = true; requestAnimationFrame(loop); }
   },
+  setLegs(v) { brachyLegs = v; BRACHY = { parts: makeBrachy().parts.map((q) => Array.isArray(q) ? cropFrame(q, null, B_LEFT, B_TOP) : cropFrame(q.map, q.opt, B_LEFT, B_TOP)) }; return v; },
   setLook(v) { ancientLook = v; const c = makeCarno(); CARNO = { parts: c.parts.map((q) => cropFrame(q.map, q.opt)), ancient: cropFrame(c.ancient) }; return v; },
   setSkull(v) { carnoSkull = v; const c = makeCarno(); CARNO = { parts: c.parts.map((q) => cropFrame(q.map, q.opt)), ancient: cropFrame(c.ancient) }; return v; },
   setAncientFx(name) { if (FX[name]) ancientFx = name; return ancientFx; },
@@ -841,6 +871,7 @@ if (window.self !== window.top) document.documentElement.classList.add('embedded
     digStyle: (name) => FF_PICK.setStyle(name),
     skull: (v) => FF_FOSSILS.setSkull(v),
     look: (v) => FF_FOSSILS.setLook(v),
+    legs: (v) => FF_FOSSILS.setLegs(v),
     simulate(n = 10000) {
       const t = {}, cat = { lose: 0, pachy1: 0, pachy2: 0, carno: 0, ancient: 0, brachy: 0, amber: 0 }; let paid = 0;
       for (let i = 0; i < n; i++) {
