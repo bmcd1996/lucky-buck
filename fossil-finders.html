@@ -192,7 +192,7 @@ function renderPart(map, opt, withRock) {
   const g = grid(map), H = g.length, W = g[0].length, P = withRock ? 3 : 1, S = opt.scale, pal = opt.pal;
   const cv = document.createElement('canvas'); cv.width = (W + 2 * P) * S; cv.height = (H + 2 * P) * S;
   const c = cv.getContext('2d');
-  const filled = (x, y) => y >= 0 && y < H && x >= 0 && x < W && 'bdntkagorf'.includes(g[y][x]);
+  const filled = (x, y) => y >= 0 && y < H && x >= 0 && x < W && 'bdntkagorfyu'.includes(g[y][x]);
   const px = (x, y, col) => { c.fillStyle = col; c.fillRect((x + P) * S, (y + P) * S, S, S); };
   if (withRock) { // rock matrix around the bones
     for (let y = -P; y < H + P; y++) for (let x = -P; x < W + P; x++) {
@@ -212,7 +212,9 @@ function renderPart(map, opt, withRock) {
   }
   // bone
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-    const ch = g[y][x]; if (!'bdntkagorf'.includes(ch)) continue;
+    const ch = g[y][x]; if (!'bdntkagorfyu'.includes(ch)) continue;
+    if (ch === 'y') { px(x, y, '#f6efdc'); continue; }   // eye white
+    if (ch === 'u') { px(x, y, '#1c0f08'); continue; }   // pupil
     if (ch === 'k') { px(x, y, !filled(x, y - 1) ? '#b3a99c' : !filled(x, y + 1) ? '#0d0b0a' : !filled(x - 1, y) || !filled(x + 1, y) ? '#5e5650' : (x + y) % 5 === 0 ? '#4d4641' : '#2e2926'); continue; }   // epic black horns with a grey sheen
     if (ch === 't') { px(x, y, opt.teeth || '#b98d55'); continue; }   // teeth: darker aged tan, not white
     const edge3 = (hi, mid, lo) => !filled(x, y - 1) ? hi : !filled(x, y + 1) ? lo : mid;
@@ -323,7 +325,7 @@ function vertebrae(pts, n, opts = {}) {
 }
 
 // one leg from hip/shoulder (x, top) to the ground (bottom); w = bone thickness; style = leg design
-let brachyLegs = 1;
+let brachyLegs = 3;   // owner's pick: Bent
 function boneLeg(x, top, bottom, w, style) {
   const H = bottom - top, knee = top + H * .47, ankle = top + H * .84, o = [];
   const knob = (cx, cy, r) => o.push(ell(cx, cy, r, r));
@@ -370,12 +372,13 @@ function makeBrachy() {
   // very long neck held high
   const neck = vertebrae([[48, 80, 3.2], [61, 73.5, 2.8], [72, 64, 2.5], [77.5, 48, 2.2], [76.5, 32, 1.95], [79, 19, 1.7], [86, 12.5, 1.5]], 12, { spine: .7, gap: 1.7 });
   const skull = [ell(92, 11.5, 4.6, 3.0), ell(91.2, 8.2, 2.6, 2.2), cap(93, 12.6, 101, 13.2, 1.9), cap(90, 14.8, 100, 15.4, .9)];
-  const holes = [ell(89.6, 10.9, .8, .8), ell(92.4, 7.6, .65, .65), cap(91.5, 14, 101, 14.3, .35)];
+  const holes = [ell(92.4, 7.6, .65, .65), cap(91.5, 14, 101, 14.3, .35), ell(91.3, 10.4, 1.7, 1.6)];
+  const eye = [ell(91.3, 10.4, 1.15, 1.05)], pupil = [ell(91.8, 10.5, .55, .6)];   // owner: give him eyes
   return { parts: [
     { map: frame([['d', legsFar], ['b', legs]]), opt: SOLID },
     { map: frame([['b', ribcage]]), opt: SOLID },
     { map: frame([['b', tail]]), opt: SOLID },
-    [{ map: frame([['b', neck]]), opt: SOLID }, { map: frame([['b', skull], ['e', holes]]), opt: SOLID }],
+    [{ map: frame([['b', neck]]), opt: SOLID }, { map: frame([['b', skull], ['e', holes], ['y', eye], ['u', pupil]]), opt: SOLID }],
   ] };
 }
 let BRACHY = null, bPlaced = [];
