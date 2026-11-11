@@ -783,6 +783,8 @@ function loop(now) {
       if (t < .25) { const u = ease(t / .25); x = a.x + (c.x - a.x) * u; y = a.y + (c.y - a.y) * u; k = k0 + (kBig - k0) * u; }
       else if (t < .55) { x = c.x; y = c.y; k = kBig; const u = (t - .25) / .3; jx = Math.round(Math.sin(u * Math.PI * 10) * 6 * (1 - u));
         if (!flying.popped) { flying.popped = true; shake(10, now); sparks(c.x, c.y, 22, now);
+          for (let n = 0; n < (f.dino === 'R' ? 70 : 50); n++) { const ang = -Math.PI / 2 + (Math.random() - .5) * 3.0, sp = 380 + Math.random() * 620;   // dollar confetti
+            effects.push({ bill: true, x: c.x + (Math.random() - .5) * 60, y: c.y - 20, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, t0: now + Math.random() * 160, life: 1500 + Math.random() * 500, ph: Math.random() * 6, col: '#3f9a4e', size: 0 }); }
           money(f.dino === 'A' ? '+$50' : '+$100', c.x, c.y - cv.height * kBig / 2 - 40, now + 80, true); } }
       else { const u = (t - .55) / .45, e2 = u * u * (3 - 2 * u); x = c.x + (z.x - c.x) * e2; y = c.y + (z.y - c.y) * e2 - 60 * Math.sin(u * Math.PI); k = kBig + (1 - kBig) * e2; }
       const w = cv.width * k, h = cv.height * k;
@@ -804,6 +806,10 @@ function loop(now) {
     if (now < e.t0) continue;
     const k = (now - e.t0) / e.life, dt = (now - e.t0) / 1000;
     octx.globalAlpha = 1 - k; octx.fillStyle = e.col;
+    if (e.bill) { const t2 = dt, dmp = (1 - Math.exp(-t2 * 1.6)) / 1.6, bx = e.x + e.vx * dmp + Math.sin(t2 * 6 + e.ph) * 16, by = e.y + e.vy * dmp + 170 * t2 * t2, fl = Math.cos(t2 * 9 + e.ph);
+      const w2 = Math.max(4, Math.round(28 * Math.abs(fl))), x2 = Math.round(bx / 2) * 2, y2 = Math.round(by / 2) * 2;
+      octx.fillStyle = '#1e4d26'; octx.fillRect(x2 - w2 / 2 - 2, y2 - 9, w2 + 4, 18); octx.fillStyle = fl > 0 ? '#6fd07c' : '#45a854'; octx.fillRect(x2 - w2 / 2, y2 - 7, w2, 14);
+      if (w2 > 14) { octx.fillStyle = '#f2ffe6'; octx.font = '700 14px monospace'; octx.textAlign = 'center'; octx.fillText('$', x2, y2 + 5); } continue; }
     if (e.coin) { const cx2 = Math.round((e.x + e.vx * dt) / 2) * 2, cy2 = Math.round((e.y + e.vy * dt + 500 * dt * dt) / 2) * 2, wv = Math.max(2, Math.round(12 * Math.abs(Math.cos((now - e.t0) / 90))));
       octx.fillStyle = '#a8761a'; octx.fillRect(cx2 - wv / 2 - 1, cy2 - 7, wv + 2, 14); octx.fillStyle = '#ffd34a'; octx.fillRect(cx2 - wv / 2, cy2 - 6, wv, 12); octx.fillStyle = '#fff0a8'; octx.fillRect(cx2 - wv / 2, cy2 - 6, Math.max(1, wv / 3), 4); continue; }
     if (e.ring) { const rr = 20 + 170 * (1 - Math.pow(1 - k, 2)); for (let a = 0; a < 48; a++) { const t = a / 48 * Math.PI * 2;
