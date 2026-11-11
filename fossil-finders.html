@@ -638,30 +638,84 @@ function sparks(x, y, n, now) {
 }
 function money(text, x, y, t0, big) { floaters.push({ text, x, y, t0, big }); }
 // ---- win lights on the case floors and exciting money pop-ups (owner picks a style) ----
-let floorFx = 'off', moneyFx = 'jackpot';   // floor: pool · spots · bulbs · off   money: classic · jackpot · count · burst
+let floorFx = 'spots', moneyFx = 'jackpot';   // floor: pool · spots · bulbs · off   money: classic · jackpot · count · burst
 let lit = {};                                // case floor -> { t0, col } once that dinosaur has won
 const CASE_FEET = { P: 782, C: 936, B: 1090 };
 function light(k, now, col) { if (!lit[k] || col !== lit[k].col) lit[k] = { t0: lit[k] ? Math.min(lit[k].t0, now) : now, col, burst: false }; }
 const MONEY_LIFE = { classic: [1300, 1600], jackpot: [1900, 2300], count: [2100, 2500], burst: [1900, 2300] };
 function moneyLife(fl) { return (MONEY_LIFE[moneyFx] || MONEY_LIFE.classic)[fl.big ? 1 : 0]; }
+// rounded pixel-art spotlight heads (owner: the old ones looked too boxy). Each points right; pivot at the yoke.
+let lampStyle = 'can';   // can · bell · cone · box (old)
+const LAMP_P = 3, LAMP_W = 15, LAMP_H = 13, LAMP_PIV = { x: 5, y: 6.5 };
+const lampCache = {};
+function lampSprite(style, lit) {
+  const key = style + lit; if (lampCache[key]) return lampCache[key];
+  const cy = 6.5, lens = lit ? ['#ffffff', '#fff6c8', '#ffe08a'] : ['#8a7a68', '#5e5048', '#463a32'];
+  const shade = (y, top, hw, ramp) => { const v = (y - (cy - hw)) / (2 * hw); return v < .28 ? ramp[0] : v < .62 ? ramp[1] : ramp[2]; };
+  const at = (x, y) => {
+    const dy = Math.abs(y - cy);
+    if (style === 'can') {                       // stage can: rounded back, cooling bands, gold rim, round lens
+      const steel = ['#9aa2ae', '#5f6672', '#3a3e46'];
+      if (x >= 12 && x < 14 && dy <= 4.2) return x >= 13 ? shade(y, 0, 4.2, lens) : shade(y, 0, 4.2, ['#fff0a8', '#d9a640', '#8a6420']);
+      if (x >= 3.5 && x < 12 && dy <= 4.4) return ((x > 6 && x < 7) || (x > 8.5 && x < 9.5)) ? '#2c2f36' : shade(y, 0, 4.4, steel);
+      if ((x - 4) ** 2 / 9 + (y - cy) ** 2 / 19.4 <= 1) return shade(y, 0, 4.4, steel);
+      return null;
+    }
+    if (style === 'bell') {                      // brass bell: round dome, neck, flared mouth
+      const brass = ['#ffe08a', '#d9a640', '#9a6418'];
+      if ((x - 3.8) ** 2 + (y - cy) ** 2 <= 3.4 ** 2) return shade(y, 0, 3.4, brass);
+      if (x >= 3.8 && x < 7 && dy <= 2.2) return shade(y, 0, 2.2, brass);
+      const hw = 2.2 + (x - 7) * .75;
+      if (x >= 7 && x < 13 && dy <= hw) return shade(y, 0, hw, brass);
+      if (x >= 13 && x < 14 && dy <= hw - .4) return shade(y, 0, hw, lens);
+      return null;
+    }
+    if (style === 'cone') {                      // chrome museum spot: ball head and a long flared hood
+      const chrome = ['#f2f5f8', '#aab3bd', '#5f6874'];
+      if ((x - 3.4) ** 2 + (y - cy) ** 2 <= 2.9 ** 2) return shade(y, 0, 2.9, chrome);
+      const hw = 1.8 + (x - 5) * .42;
+      if (x >= 5 && x < 13.2 && dy <= hw) return x > 12.2 ? shade(y, 0, hw, lens) : shade(y, 0, hw, chrome);
+      return null;
+    }
+    if (x >= 1 && x < 10 && dy <= 4) return y > cy + 2 ? '#8a6420' : '#c9a24a';   // box: the old look
+    if (x >= 10 && x < 12 && dy <= 3.4) return lit ? '#fff6c8' : '#5e5048';
+    return null;
+  };
+  const g = []; for (let j = 0; j < LAMP_H; j++) { g.push([]); for (let i = 0; i < LAMP_W; i++) g[j].push(at(i + .5, j + .5)); }
+  const c = document.createElement('canvas'); c.width = LAMP_W * LAMP_P; c.height = LAMP_H * LAMP_P; const x = c.getContext('2d');
+  for (let j = 0; j < LAMP_H; j++) for (let i = 0; i < LAMP_W; i++) {
+    let col = g[j][i];
+    if (!col && [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([a, b]) => g[j + b] && g[j + b][i + a])) col = '#1c0f08';   // dark outline
+    if (col) { x.fillStyle = col; x.fillRect(i * LAMP_P, j * LAMP_P, LAMP_P, LAMP_P); }
+  }
+  return (lampCache[key] = c);
+}
 function lampStands(cx, base, footY, el, col, tall = 190) {   // two spotlight stands pop up from the case corners and shine down
   const rise = Math.min(1, el / 320), on = Math.min(1, Math.max(0, (el - 360) / 260)), flick = .9 + .1 * Math.sin(el / 180);
-  const pop = rise < 1 ? 1 - Math.pow(1 - rise, 3) + Math.sin(rise * Math.PI) * .12 : 1;
+  const pop = rise < 1 ? 1 - Math.pow(1 - rise, 3) + Math.sin(rise * Math.PI) * .12 : 1, boxy = lampStyle === 'box';
   for (const side of [-1, 1]) {
     const fx = side < 0 ? 46 : 282, topY = footY - tall * pop, hx = fx + side * 4;
-    octx.fillStyle = '#1c0f08'; octx.fillRect(fx - 4, topY, 8, footY - topY);
-    octx.fillStyle = '#8a8f96'; octx.fillRect(fx - 2, topY, 4, footY - topY);
-    octx.fillStyle = '#1c0f08'; octx.fillRect(fx - 12, footY - 6, 24, 8); octx.fillStyle = '#5e6670'; octx.fillRect(fx - 10, footY - 5, 20, 5);
+    if (boxy) { octx.fillStyle = '#1c0f08'; octx.fillRect(fx - 4, topY, 8, footY - topY); octx.fillStyle = '#8a8f96'; octx.fillRect(fx - 2, topY, 4, footY - topY);
+      octx.fillStyle = '#1c0f08'; octx.fillRect(fx - 12, footY - 6, 24, 8); octx.fillStyle = '#5e6670'; octx.fillRect(fx - 10, footY - 5, 20, 5); }
+    else {
+      octx.fillStyle = '#1c0f08'; octx.fillRect(fx - 3, topY, 6, footY - 14 - topY); octx.fillStyle = '#9aa2ae'; octx.fillRect(fx - 1, topY, 3, footY - 14 - topY);   // slim pole
+      for (let k = 0; k < 5; k++) { const d = k * 4;                                                       // little tripod feet
+        octx.fillStyle = '#1c0f08'; octx.fillRect(fx - 4 - d, footY - 16 + k * 3, 6, 6); octx.fillRect(fx - 2 + d, footY - 16 + k * 3, 6, 6);
+        octx.fillStyle = '#6d7682'; octx.fillRect(fx - 3 - d, footY - 15 + k * 3, 4, 3); octx.fillRect(fx - 1 + d, footY - 15 + k * 3, 4, 3); }
+      octx.fillStyle = '#1c0f08'; octx.fillRect(fx - 6, footY - 20, 12, 8); octx.fillStyle = '#c9a24a'; octx.fillRect(fx - 4, footY - 19, 8, 5);   // collar
+    }
     if (rise > .6) {
-      const ang = Math.atan2(base - 30 - topY, cx - hx);
-      octx.save(); octx.translate(hx, topY); octx.rotate(ang);
-      octx.fillStyle = '#1c0f08'; octx.fillRect(-10, -14, 34, 28); octx.fillStyle = '#c9a24a'; octx.fillRect(-8, -12, 26, 24); octx.fillStyle = '#8a6420'; octx.fillRect(-8, 6, 26, 6);
-      octx.fillStyle = on > 0 ? '#fff6c8' : '#5e5048'; octx.fillRect(18, -10, 8, 20); octx.restore();
-      if (on > 0) {
-        const lx = hx + Math.cos(ang) * 24, ly = topY + Math.sin(ang) * 24;
-        octx.save(); octx.globalAlpha = .4 * on * flick; octx.fillStyle = col;
-        octx.beginPath(); octx.moveTo(lx - 6 * Math.sin(ang), ly + 6 * Math.cos(ang)); octx.lineTo(lx + 6 * Math.sin(ang), ly - 6 * Math.cos(ang));
-        octx.lineTo(cx + side * -10 + 60, base + 2); octx.lineTo(cx + side * -10 - 60, base + 2); octx.closePath(); octx.fill(); octx.restore();
+      const ang = Math.atan2(base - 30 - topY, cx - hx), lamp = lampSprite(lampStyle, on > 0);
+      if (!boxy) { octx.fillStyle = '#1c0f08'; octx.fillRect(hx - 7, topY - 7, 14, 14); octx.fillStyle = '#c9a24a'; octx.fillRect(hx - 5, topY - 5, 10, 10); octx.fillStyle = '#fff0a8'; octx.fillRect(hx - 4, topY - 4, 4, 4); }   // round-ish yoke knob
+      octx.save(); octx.translate(hx, topY); octx.rotate(ang); octx.scale(1, side < 0 ? 1 : -1);   // keep the lamp's light side up
+      octx.drawImage(lamp, -LAMP_PIV.x * LAMP_P, -LAMP_PIV.y * LAMP_P); octx.restore();
+      if (on > 0) {                                                                                         // soft two-layer beam
+        const reach = (14 - LAMP_PIV.x) * LAMP_P, lx = hx + Math.cos(ang) * reach, ly = topY + Math.sin(ang) * reach, nx = -Math.sin(ang), ny = Math.cos(ang);
+        for (const [wTop, wBot, a] of [[13, 78, .16], [7, 48, .26]]) {
+          octx.save(); octx.globalAlpha = a * on * flick; octx.fillStyle = col; octx.beginPath();
+          octx.moveTo(lx - wTop * nx, ly - wTop * ny); octx.lineTo(lx + wTop * nx, ly + wTop * ny);
+          octx.lineTo(cx + side * -10 + wBot, base + 2); octx.lineTo(cx + side * -10 - wBot, base + 2); octx.closePath(); octx.fill(); octx.restore();
+        }
       }
     }
   }
@@ -924,29 +978,9 @@ function loop(now) {
   // special find on display: a spotlight shines down on it
   if (sPlaced) {
     const sp = SPECIAL[sPlaced], w = wins.find((q) => q.kind === 'spot');
-    const cx = sp.x + sp.cv.width / 2, base = sp.y + sp.cv.height, flick = .9 + .1 * Math.sin(now / 180);
+    const cx = sp.x + sp.cv.width / 2, base = sp.y + sp.cv.height;
     // two spotlight stands pop up from the case corners, swing their lamps in, then switch on
-    const el = w ? now - w.t0 : 9999, rise = Math.min(1, el / 320), on = Math.min(1, Math.max(0, (el - 360) / 260));
-    const pop = rise < 1 ? 1 - Math.pow(1 - rise, 3) + Math.sin(rise * Math.PI) * .12 : 1;
-    for (const side of [-1, 1]) {
-      const fx = side < 0 ? 46 : 282, footY = 1294, topY = footY - 190 * pop, hx = fx + side * 4;
-      octx.fillStyle = '#1c0f08'; octx.fillRect(fx - 4, topY, 8, footY - topY);                       // pole
-      octx.fillStyle = '#8a8f96'; octx.fillRect(fx - 2, topY, 4, footY - topY);
-      octx.fillStyle = '#1c0f08'; octx.fillRect(fx - 12, footY - 6, 24, 8); octx.fillStyle = '#5e6670'; octx.fillRect(fx - 10, footY - 5, 20, 5);   // foot
-      if (rise > .6) {                                                                                   // lamp head, aimed at the find
-        const ang = Math.atan2(base - 30 - topY, cx - hx);
-        octx.save(); octx.translate(hx, topY); octx.rotate(ang);
-        octx.fillStyle = '#1c0f08'; octx.fillRect(-10, -14, 34, 28); octx.fillStyle = '#c9a24a'; octx.fillRect(-8, -12, 26, 24); octx.fillStyle = '#8a6420'; octx.fillRect(-8, 6, 26, 6);
-        octx.fillStyle = on > 0 ? '#fff6c8' : '#5e5048'; octx.fillRect(18, -10, 8, 20); octx.restore();
-        if (on > 0) {                                                                                     // beam onto the find
-          const lx = hx + Math.cos(ang) * 24, ly = topY + Math.sin(ang) * 24;
-          octx.save(); octx.globalAlpha = .26 * on * flick; octx.fillStyle = '#fff3c4';
-          octx.beginPath(); octx.moveTo(lx - 6 * Math.sin(ang), ly + 6 * Math.cos(ang)); octx.lineTo(lx + 6 * Math.sin(ang), ly - 6 * Math.cos(ang));
-          octx.lineTo(cx + side * -10 + 60, base + 2); octx.lineTo(cx + side * -10 - 60, base + 2); octx.closePath(); octx.fill(); octx.restore();
-        }
-      }
-    }
-    octx.save(); octx.globalAlpha = .45 * on; octx.fillStyle = '#fff3c4'; octx.beginPath(); octx.ellipse(cx, base + 2, 84, 12, 0, 0, Math.PI * 2); octx.fill(); octx.restore();
+    const el = w ? now - w.t0 : 9999, on = lampStands(cx, base, 1294, el, '#fff3c4');
     const fade = on;
     octx.globalAlpha = (.3 + .15 * Math.sin(now / 260)) * fade; octx.drawImage(tint(sp.cv, sPlaced === 'A' ? '#ffd27a' : '#fff1c8'), sp.x - 4, sp.y - 4, sp.cv.width + 8, sp.cv.height + 8); octx.globalAlpha = 1;
     octx.drawImage(sp.cv, sp.x, sp.y);
@@ -1016,6 +1050,7 @@ window.FF_FOSSILS = {
   },
   setAmber(v) { amberStyle = v; SPECIAL = makeSpecials(); return v; },
   setFloor(v) { floorFx = v; return v; },
+  setLamp(v) { lampStyle = v; return v; },
   setMoney(v) { moneyFx = v; return v; },
   setSpecialWin(letter, v) { if (letter === 'A') amberWin = v; else clawWin = v; return v; },
   setClaw(v) { clawStyle = v; SPECIAL = makeSpecials(); return v; },
@@ -1227,6 +1262,7 @@ if (window.self !== window.top) document.documentElement.classList.add('embedded
     dig(r, c) { const el = cellsEl.children[r * 3 + c]; if (el && el.dig) el.dig(); },
     ancientFx: (name) => FF_FOSSILS.setAncientFx(name),
     floorFx: (v) => FF_FOSSILS.setFloor(v),
+    lampStyle: (v) => FF_FOSSILS.setLamp(v),
     moneyFx: (v) => FF_FOSSILS.setMoney(v),
     digStyle: (name) => FF_PICK.setStyle(name),
     skull: (v) => FF_FOSSILS.setSkull(v),
