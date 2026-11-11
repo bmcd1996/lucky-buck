@@ -366,7 +366,9 @@ function boneLeg(x, top, bottom, w, style) {
 // ---- special finds (bottom stand) ----
 let SPECIAL = null, sPlaced = null;
 const S_FEET = 1244, S_CX = 164;
-let amberStyle = 1, clawStyle = 1;
+let amberStyle = 3, clawStyle = 5;   // owner's picks: Cut gem amber, Golden claw
+let amberWin = 'glow', clawWin = 'glow';   // win animation: glow · spin · beam · burst · coins
+const SP_MS = 1700;
 // a mosquito facing right, centred on (cx, cy), about 15 units long
 function mosquito(cx, cy) {
   // slender sprawled mosquito: long striped abdomen, humped thorax, small head, long proboscis, pale wings, six long jointed legs
@@ -663,7 +665,7 @@ function bolt(x0, y0, x1, y1, now) { // a jagged pixel lightning bolt, as short-
 }
 function idle(now) {
   return !flying && finds.every((f) => f.left) && floaters.length === 0 && (scootDone || scootStart === null || placed.length < 3)
-    && (!morph || now - morph.t0 > morph.dur) && wins.every((w) => now - w.t0 > ({ butt: 1100, ancient: 900, brachy: 2300, special: 1500 }[w.kind] || 700));
+    && (!morph || now - morph.t0 > morph.dur) && wins.every((w) => now - w.t0 > ({ butt: 1100, ancient: 900, brachy: 2300, special: 1900 }[w.kind] || 700));
 }
 function ready(f) { if (f.dino === 'A' || f.dino === 'R') return true; return f.dino === 'P' ? f.i === placed.length : f.dino === 'B' ? f.i === bPlaced.length : f.i === cPlaced.length; }
 function storm(fx, k, now) {
@@ -757,19 +759,30 @@ function loop(now) {
     if (brachyWin === 'whip') for (const k of [1, 2, 3]) if (be >= k / 3 - .17 && !bw['c' + k]) { bw['c' + k] = true; shake(6, now); sparks(TIP.x + 12, TIP.y - 6, 10, now); }
     if (brachyWin === 'nod' && be >= .12 && !bw.n) { bw.n = true; sparks(HEAD.x, HEAD.y + 10, 8, now); }
   }
-  // special find on the bottom stand: soft glow, then a pulse, sparkles and a big money pop
+  // special find on the bottom stand: soft glow while it waits, then its win animation and a big money pop
   if (sPlaced) {
-    const sp = SPECIAL[sPlaced], w = wins.find((q) => q.kind === 'special');
-    const glow = .25 + .15 * Math.sin(now / 260);
-    let pulse = 0; if (w && now > w.t0) { const e = (now - w.t0) / 1300; if (e < 1) pulse = Math.sin(e * Math.PI * 3) * (1 - e); }
-    const col = sPlaced === 'A' ? '#ffd27a' : '#fff1c8';
-    octx.globalAlpha = glow + .45 * Math.max(0, pulse); octx.drawImage(tint(sp.cv, col), sp.x - 4, sp.y - 4, sp.cv.width + 8, sp.cv.height + 8); octx.globalAlpha = 1;
-    const sc = 1 + .08 * Math.max(0, pulse), w2 = sp.cv.width * sc, h2 = sp.cv.height * sc;
-    octx.drawImage(sp.cv, sp.x + (sp.cv.width - w2) / 2, sp.y + sp.cv.height - h2, w2, h2);
+    const sp = SPECIAL[sPlaced], w = wins.find((q) => q.kind === 'special'), style = sPlaced === 'A' ? amberWin : clawWin;
+    const e = w && now > w.t0 ? Math.min(1, (now - w.t0) / SP_MS) : 0, on = w && now > w.t0 && e < 1;
+    const cx = sp.x + sp.cv.width / 2, cy = sp.y + sp.cv.height / 2, col = sPlaced === 'A' ? '#ffd27a' : '#fff1c8';
+    let sx = 1, sc = 1, dy = 0, glowA = .25 + .15 * Math.sin(now / 260);
+    if (on) {
+      if (style === 'glow') { const pl = Math.max(0, Math.sin(e * Math.PI * 3) * (1 - e)); glowA += .45 * pl; sc = 1 + .08 * pl; }
+      if (style === 'spin') { sx = Math.cos(Math.min(1, e / .7) * Math.PI * 4); if (Math.abs(sx) < .12) sx = .12 * Math.sign(sx || 1); glowA += .3 * (1 - e); }
+      if (style === 'beam') { dy = -Math.round(26 * Math.sin(Math.min(1, e / .8) * Math.PI) / 2) * 2; const a = Math.sin(e * Math.PI);
+        octx.globalAlpha = .28 * a; octx.fillStyle = '#fff3c4'; octx.fillRect(cx - 36, 0, 72, sp.y + sp.cv.height); octx.globalAlpha = .45 * a; octx.fillRect(cx - 14, 0, 28, sp.y + sp.cv.height); octx.globalAlpha = 1; glowA += .4 * a; }
+      if (style === 'burst') { const a = 1 - e, R = 60 + 160 * e; octx.save(); octx.translate(cx, cy); octx.rotate(e * 1.4); octx.fillStyle = '#ffd34a';
+        for (let i = 0; i < 12; i++) { octx.rotate(Math.PI / 6); octx.globalAlpha = .55 * a; octx.fillRect(18, -3, R, 6); } octx.restore(); octx.globalAlpha = 1; glowA += .35 * a; sc = 1 + .1 * Math.sin(Math.min(1, e * 2) * Math.PI); }
+      if (style === 'coins' && !w.coins) { w.coins = true; for (let n = 0; n < 40; n++) effects.push({ coin: true, x: 40 + Math.random() * 940, y: 600 + Math.random() * 100, vx: (Math.random() - .5) * 40, vy: 60 + Math.random() * 160, t0: now + Math.random() * 700, life: 1400, col: '#ffd34a', size: 12 }); }
+    }
+    octx.globalAlpha = glowA; octx.drawImage(tint(sp.cv, col), sp.x - 4, sp.y - 4 + dy, sp.cv.width + 8, sp.cv.height + 8); octx.globalAlpha = 1;
+    const w2 = sp.cv.width * sc, h2 = sp.cv.height * sc;
+    octx.save(); octx.translate(cx, sp.y + sp.cv.height + dy); octx.scale(sx, 1); octx.drawImage(sp.cv, -w2 / 2, -h2, w2, h2); octx.restore();
+    if (on && style === 'spin') { const band = (e * 1.6 % 1) * (sp.cv.width + 60) - 30; octx.save(); octx.beginPath(); octx.rect(sp.x + band, sp.y, 14, sp.cv.height); octx.clip(); octx.globalAlpha = .7; octx.drawImage(tint(sp.cv, '#ffffff'), sp.x, sp.y); octx.restore(); octx.globalAlpha = 1; }
     if (w && now > w.t0 && !w.text) { w.text = true; shake(sPlaced === 'R' ? 12 : 9, now);
-      sparks(sp.x + sp.cv.width / 2, sp.y + sp.cv.height / 2, 18, now);
-      for (let n = 0; n < 22; n++) effects.push({ x: sp.x + Math.random() * sp.cv.width, y: sp.y - 10 - Math.random() * 30, vx: (Math.random() - .5) * 40, vy: 40 + Math.random() * 60, t0: now + Math.random() * 400, life: 700, col: Math.random() < .5 ? '#fff6c8' : '#ffd34a', size: 4 });
-      money(sPlaced === 'A' ? '+$50' : '+$100', sp.x + sp.cv.width / 2, sp.y - 20, now + 250, true); }
+      sparks(cx, cy, 18, now);
+      if (style !== 'coins') for (let n = 0; n < 22; n++) effects.push({ x: sp.x + Math.random() * sp.cv.width, y: sp.y - 10 - Math.random() * 30, vx: (Math.random() - .5) * 40, vy: 40 + Math.random() * 60, t0: now + Math.random() * 400, life: 700, col: Math.random() < .5 ? '#fff6c8' : '#ffd34a', size: 4 });
+      if (style === 'burst') for (const d of [0, 150]) effects.push({ ring: true, x: cx, y: cy, t0: now + d, life: 600, col: d ? '#ffe9a8' : '#ffffff', size: 0 });
+      money(sPlaced === 'A' ? '+$50' : '+$100', cx, sp.y - 20, now + 250, true); }
   }
   // the fossil in flight
   if (flying) {
@@ -788,6 +801,8 @@ function loop(now) {
     if (now < e.t0) continue;
     const k = (now - e.t0) / e.life, dt = (now - e.t0) / 1000;
     octx.globalAlpha = 1 - k; octx.fillStyle = e.col;
+    if (e.coin) { const cx2 = Math.round((e.x + e.vx * dt) / 2) * 2, cy2 = Math.round((e.y + e.vy * dt + 500 * dt * dt) / 2) * 2, wv = Math.max(2, Math.round(12 * Math.abs(Math.cos((now - e.t0) / 90))));
+      octx.fillStyle = '#a8761a'; octx.fillRect(cx2 - wv / 2 - 1, cy2 - 7, wv + 2, 14); octx.fillStyle = '#ffd34a'; octx.fillRect(cx2 - wv / 2, cy2 - 6, wv, 12); octx.fillStyle = '#fff0a8'; octx.fillRect(cx2 - wv / 2, cy2 - 6, Math.max(1, wv / 3), 4); continue; }
     if (e.ring) { const rr = 20 + 170 * (1 - Math.pow(1 - k, 2)); for (let a = 0; a < 48; a++) { const t = a / 48 * Math.PI * 2;
       octx.fillRect(Math.round((e.x + Math.cos(t) * rr) / 4) * 4, Math.round((e.y + Math.sin(t) * rr * .6) / 4) * 4, 6, 6); } continue; }
     octx.fillRect(Math.round((e.x + e.vx * dt) / 2) * 2, Math.round((e.y + e.vy * dt + (e.nograv ? 0 : 160 * dt * dt)) / 2) * 2, e.size, e.size);
@@ -818,6 +833,7 @@ window.FF_FOSSILS = {
     if (!running) { running = true; requestAnimationFrame(loop); }
   },
   setAmber(v) { amberStyle = v; SPECIAL = makeSpecials(); return v; },
+  setSpecialWin(letter, v) { if (letter === 'A') amberWin = v; else clawWin = v; return v; },
   setClaw(v) { clawStyle = v; SPECIAL = makeSpecials(); return v; },
   setBrachyWin(v) { brachyWin = v; return v; },
   setLegs(v) { brachyLegs = v; BRACHY = { ...(() => { const m = makeBrachy(), c = (q) => Array.isArray(q) ? cropFrame(q, null, B_LEFT, B_TOP) : cropFrame(q.map, q.opt, B_LEFT, B_TOP); return { parts: m.parts.map(c), neck: c(m.neck), side: c(m.side), front: c(m.front) }; })() }; return v; },
@@ -1033,6 +1049,7 @@ if (window.self !== window.top) document.documentElement.classList.add('embedded
     brachyWin: (v) => FF_FOSSILS.setBrachyWin(v),
     amberStyle: (v) => FF_FOSSILS.setAmber(v),
     clawStyle: (v) => FF_FOSSILS.setClaw(v),
+    specialWin: (letter, v) => FF_FOSSILS.setSpecialWin(letter, v),
     simulate(n = 10000) {
       const t = {}, cat = { lose: 0, pachy1: 0, pachy2: 0, carno: 0, ancient: 0, brachy: 0, amber: 0 }; let paid = 0;
       for (let i = 0; i < n; i++) {
