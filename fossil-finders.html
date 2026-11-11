@@ -193,7 +193,7 @@ function renderPart(map, opt, withRock) {
   const g = grid(map), H = g.length, W = g[0].length, P = withRock ? 3 : 1, S = opt.scale, pal = opt.pal;
   const cv = document.createElement('canvas'); cv.width = (W + 2 * P) * S; cv.height = (H + 2 * P) * S;
   const c = cv.getContext('2d');
-  const filled = (x, y) => y >= 0 && y < H && x >= 0 && x < W && 'bdntkagorfyumq'.includes(g[y][x]);
+  const filled = (x, y) => y >= 0 && y < H && x >= 0 && x < W && 'bdntkagorfyumqwzjx'.includes(g[y][x]);
   const px = (x, y, col) => { c.fillStyle = col; c.fillRect((x + P) * S, (y + P) * S, S, S); };
   if (withRock) { // rock matrix around the bones
     for (let y = -P; y < H + P; y++) for (let x = -P; x < W + P; x++) {
@@ -213,9 +213,14 @@ function renderPart(map, opt, withRock) {
   }
   // bone
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-    const ch = g[y][x]; if (!'bdntkagorfyumq'.includes(ch)) continue;
-    if (ch === 'm') { const top = !filled(x, y - 1) || !filled(x - 1, y), bot = !filled(x, y + 1) || !filled(x + 1, y); px(x, y, top ? '#ffe08a' : bot ? '#a8520e' : (x * 3 + y * 2) % 7 === 0 ? '#ffc04a' : '#f0962a'); continue; }   // amber
-    if (ch === 'q') { px(x, y, '#3a1a08'); continue; }   // the mosquito inside
+    const ch = g[y][x]; if (!'bdntkagorfyumqwzjx'.includes(ch)) continue;
+    const amb = opt.amber || { hi: '#ffe08a', mid: '#f0962a', lo: '#a8520e', spot: '#ffc04a' };
+    if (ch === 'm') { const top = !filled(x, y - 1) || !filled(x - 1, y), bot = !filled(x, y + 1) || !filled(x + 1, y); px(x, y, top ? amb.hi : bot ? amb.lo : (x * 3 + y * 2) % 7 === 0 ? amb.spot : amb.mid); continue; }   // amber
+    if (ch === 'q') { px(x, y, '#2a1206'); continue; }                                   // mosquito body
+    if (ch === 'w') { px(x, y, (x + y) % 3 ? '#fff4d6' : amb.hi); continue; }              // pale see-through wings
+    if (ch === 'z') { px(x, y, '#fff3c4'); continue; }                                   // trapped air bubble
+    if (ch === 'j') { px(x, y, !filled(x, y - 1) ? '#7a6a5c' : !filled(x, y + 1) ? '#120c08' : '#2e241c'); continue; }   // dark claw sheath
+    if (ch === 'x') { px(x, y, !filled(x, y - 1) ? '#fff0a8' : !filled(x, y + 1) ? '#a8761a' : (x + y) % 4 === 0 ? '#ffe07a' : '#f1c454'); continue; } // gold
     if (ch === 'y') { px(x, y, '#f6efdc'); continue; }   // eye white
     if (ch === 'u') { px(x, y, '#1c0f08'); continue; }   // pupil
     if (ch === 'k') { px(x, y, !filled(x, y - 1) ? '#b3a99c' : !filled(x, y + 1) ? '#0d0b0a' : !filled(x - 1, y) || !filled(x + 1, y) ? '#5e5650' : (x + y) % 5 === 0 ? '#4d4641' : '#2e2926'); continue; }   // epic black horns with a grey sheen
@@ -361,21 +366,58 @@ function boneLeg(x, top, bottom, w, style) {
 // ---- special finds (bottom stand) ----
 let SPECIAL = null, sPlaced = null;
 const S_FEET = 1244, S_CX = 164;
+let amberStyle = 1, clawStyle = 1;
+// a mosquito facing right, centred on (cx, cy), about 15 units long
+function mosquito(cx, cy) {
+  // slender sprawled mosquito: long striped abdomen, humped thorax, small head, long proboscis, pale wings, six long jointed legs
+  const body = [cap(cx - 1.3, cy + .5, cx - 7.5, cy + 3.4, .95), ell(cx, cy, 1.7, 1.35), ell(cx + 2.2, cy - .7, .9, .85), cap(cx + 2.8, cy - .4, cx + 8, cy + 2, .4),
+    cap(cx + 2.4, cy - 1.4, cx + 4.4, cy - 3.6, .32), cap(cx + 2.9, cy - 1.2, cx + 5.3, cy - 2.6, .32)];
+  const legs = [[[cx + .9, cy + 1], [cx + 3.6, cy + 3.8], [cx + 6.8, cy + 6.2]], [[cx + .2, cy + 1.2], [cx + .9, cy + 4.6], [cx + 2.4, cy + 8.2]], [[cx - .4, cy + 1.2], [cx - 2.2, cy + 4.4], [cx - 3, cy + 8.4]],
+    [[cx + .6, cy + .9], [cx + 2.6, cy + 4.6], [cx + 4.4, cy + 8.6]], [[cx - .9, cy + 1], [cx - 4.4, cy + 4.6], [cx - 5.6, cy + 8.2]], [[cx - 1, cy + .8], [cx - 5.4, cy + 2.2], [cx - 9.8, cy + 4.8]]];
+  for (const [a, k, f] of legs) body.push(cap(a[0], a[1], k[0], k[1], .42), cap(k[0], k[1], f[0], f[1], .4));
+  const wings = [cap(cx - .4, cy - 1, cx - 7.8, cy - 3.2, .95), cap(cx - .1, cy - 1.2, cx - 6.2, cy - 5.6, .85)];
+  const stripes = [-6.6, -5, -3.4].map((d) => ell(cx + d, cy + 1.2 - d * .45, .38, .7));
+  return { body, wings, stripes };
+}
+const AMBERS = {
+  1: { name: 'Classic oval', pal: { hi: '#ffe08a', mid: '#f0962a', lo: '#a8520e', spot: '#ffc04a' } },
+  2: { name: 'Resin drop', pal: { hi: '#ffe9a0', mid: '#f5a530', lo: '#b05a10', spot: '#ffd060' } },
+  3: { name: 'Cut gem', pal: { hi: '#fff2b0', mid: '#f4a838', lo: '#9a4a08', spot: '#ffd870' } },
+  4: { name: 'Rough chunk', pal: { hi: '#f6c66a', mid: '#d97a1c', lo: '#7e3a08', spot: '#eaa040' } },
+  5: { name: 'Dark honey', pal: { hi: '#ffb84a', mid: '#b8540e', lo: '#5a2404', spot: '#d8781e' } },
+};
+const CLAWS = { 1: 'Sickle', 2: 'On the toe', 3: 'Black claw', 4: 'In the rock', 5: 'Golden' };
 function makeSpecials() {
   K = 1; OY = 0;
-  const amber = raster(22, 18, [
-    ['m', [ell(11, 9.5, 8.6, 6.8), ell(7, 6.5, 4.6, 3.8), ell(15, 7, 4.2, 3.6), ell(11, 13, 6.5, 3.6)]],
-    ['q', [cap(8, 9.5, 13, 9.5, .7), ell(14, 9.2, .9, .8), ell(10, 8, 1.8, .7), ell(10.5, 11, 1.6, .6),
-           cap(9, 10, 7.5, 12.5, .35), cap(11, 10, 11, 12.8, .35), cap(12.5, 10, 14, 12.4, .35), cap(14.6, 9.4, 17, 8.4, .32)]],
-  ]);
-  // raptor sickle claw: thick knuckle at the base, sweeping up and over into a sharp hooked tip
-  const arc = [[5, 16, 2.9], [6, 11, 2.6], [8.5, 7, 2.3], [12, 4.4, 1.95], [16, 3.4, 1.55], [19.4, 4.6, 1.15], [21.4, 7.4, .8], [22.2, 10.6, .45], [22.1, 12.4, .3]];
-  const clawBone = [ell(5, 16.5, 3.6, 2.9), ell(3.6, 18.6, 2.3, 1.3)];
-  const clawTip = [];
-  for (let i = 1; i < arc.length; i++) { const [ax, ay, ar] = arc[i - 1], [bx, by] = arc[i]; (i >= 6 ? clawTip : clawBone).push(cap(ax, ay, bx, by, ar)); }
-  const claw = raster(25, 21, [['b', clawBone], ['d', clawTip], ['e', [cap(6.8, 12, 11, 6.4, .35), cap(11, 6.4, 15.5, 4.8, .3)]]]);
-  const place = (map, opt) => { const r = renderPart(map, opt, false); return { cv: r.cv, x: Math.round(S_CX - r.cv.width / 2), y: S_FEET - r.cv.height + S }; };
-  return { A: place(amber, SOLID), R: place(claw, SOLID) };
+  const W = 32, H = 26, cx = 16, cy = 13;
+  const m = mosquito(cx + .5, cy - .3);
+  let shell;
+  if (amberStyle === 1) shell = [ell(cx, cy, 13, 9.6)];
+  else if (amberStyle === 2) shell = [ell(cx, cy + 2.4, 12.6, 8.4), cap(cx + 6, cy - 2, cx + 13.5, cy - 9.5, 3.4), ell(cx + 14, cy - 10.5, 2.2, 2.2)];
+  else if (amberStyle === 3) { shell = []; for (let y = 2; y < 25; y++) { const k = y < 7 ? (y - 2) / 5 : y > 19 ? (25 - y) / 6 : 1, half = 6 + 8.5 * k; shell.push(cap(cx - half, y + .5, cx + half, y + .5, .5)); } }
+  else if (amberStyle === 4) shell = [ell(cx - 2, cy + 1, 11.5, 8.6), ell(cx + 6, cy - 2.5, 7, 6.4), ell(cx + 4, cy + 6, 8, 4.6), ell(cx - 9, cy - 2.6, 4.4, 4.2)];
+  else shell = [ell(cx, cy, 13.4, 10)];
+  const facets = amberStyle === 3 ? [cap(cx - 6, 2.5, cx - 14.5, 7.5, .3), cap(cx + 6, 2.5, cx + 14.5, 7.5, .3), cap(cx - 14.5, 19.5, cx - 6, 24.5, .3), cap(cx + 14.5, 19.5, cx + 6, 24.5, .3)] : [];
+  const shine = amberStyle === 5 ? [cap(cx - 9, cy - 6, cx - 4, cy - 8.4, .7)] : [cap(cx - 9.5, cy - 4.5, cx - 6, cy - 7.5, .55), ell(cx + 9, cy + 5, .6, .6)];
+  const bubbles = amberStyle === 4 || amberStyle === 2 ? [ell(cx - 8, cy + 4, .8, .8), ell(cx + 8, cy + 3.5, .6, .6), ell(cx - 4.5, cy - 6, .55, .55)] : [ell(cx + 8.5, cy - 5, .6, .6)];
+  K = 1.45;   // amber drawn larger so the mosquito inside reads clearly
+  const amber = raster(W, H, [['m', shell], ['w', m.wings], ['q', m.body], ['m', m.stripes], ['z', [...bubbles, ...shine]], ['e', facets]]);
+
+  K = 1.2;
+  // raptor sickle claw: thick base, sweeping up and over into a sharp hooked tip
+  const arc = [[6, 18, 3.0], [7, 12.5, 2.7], [9.5, 8, 2.4], [13, 5, 2.0], [17, 3.8, 1.6], [20.5, 5, 1.2], [22.6, 8, .85], [23.4, 11.4, .5], [23.3, 13.4, .32]];
+  const sheath = [], core = [];
+  for (let i = 1; i < arc.length; i++) { const [ax, ay, ar] = arc[i - 1], [bx, by] = arc[i]; (i >= 6 ? sheath : core).push(cap(ax, ay, bx, by, ar)); }
+  const groove = [cap(8, 13, 12, 7.2, .35), cap(12, 7.2, 16.5, 5.4, .3)];
+  let claw;
+  if (clawStyle === 1) claw = raster(28, 24, [['b', [ell(6, 18.5, 3.8, 3.0), ...core]], ['d', sheath], ['e', groove]]);
+  else if (clawStyle === 2) claw = raster(28, 24, [['b', [...core, ell(6, 18.5, 3.2, 2.7), cap(5.5, 19.5, 2, 21.6, 1.3), ell(1.8, 21.8, 1.4, 1.3), cap(6.5, 20.5, 4.5, 23, 1.1)]], ['d', sheath], ['e', [...groove, cap(4.6, 19.8, 3.4, 20.6, .3)]]]);
+  else if (clawStyle === 3) claw = raster(28, 24, [['b', [ell(6, 18.5, 3.8, 3.0), cap(6, 18, 7, 12.5, 2.9)]], ['j', [...core.slice(1), ...sheath]], ['e', [cap(10, 9, 15, 5.6, .3)]]]);
+  else if (clawStyle === 4) claw = raster(28, 24, [['m', []], ['b', [ell(6, 18.5, 3.8, 3.0), ...core]], ['d', sheath], ['e', groove]]);
+  else claw = raster(28, 24, [['x', [ell(6, 18.5, 3.8, 3.0), ...core, ...sheath]], ['e', groove]]);
+  const place = (map, opt, withRock) => { const r = renderPart(map, opt, withRock); return { cv: r.cv, x: Math.round(S_CX - r.cv.width / 2), y: S_FEET - r.cv.height + S * (withRock ? 3 : 1) }; };
+  const ROCK = { ...SOLID, pal: { ...SOLID.pal, rock: '#6c6152', rockHi: '#857868', rockLo: '#4e463b' } };
+  return { A: place(amber, { ...SOLID, amber: AMBERS[amberStyle].pal }, false), R: clawStyle === 4 ? place(claw, ROCK, true) : place(claw, SOLID, false) };
 }
 function makeBrachy() {
   K = 1; OY = 0;
@@ -775,6 +817,8 @@ window.FF_FOSSILS = {
     ticket.append(overlay);
     if (!running) { running = true; requestAnimationFrame(loop); }
   },
+  setAmber(v) { amberStyle = v; SPECIAL = makeSpecials(); return v; },
+  setClaw(v) { clawStyle = v; SPECIAL = makeSpecials(); return v; },
   setBrachyWin(v) { brachyWin = v; return v; },
   setLegs(v) { brachyLegs = v; BRACHY = { ...(() => { const m = makeBrachy(), c = (q) => Array.isArray(q) ? cropFrame(q, null, B_LEFT, B_TOP) : cropFrame(q.map, q.opt, B_LEFT, B_TOP); return { parts: m.parts.map(c), neck: c(m.neck), side: c(m.side), front: c(m.front) }; })() }; return v; },
   setLook(v) { ancientLook = v; const c = makeCarno(); CARNO = { parts: c.parts.map((q) => cropFrame(q.map, q.opt)), ancient: cropFrame(c.ancient) }; return v; },
@@ -987,6 +1031,8 @@ if (window.self !== window.top) document.documentElement.classList.add('embedded
     look: (v) => FF_FOSSILS.setLook(v),
     legs: (v) => FF_FOSSILS.setLegs(v),
     brachyWin: (v) => FF_FOSSILS.setBrachyWin(v),
+    amberStyle: (v) => FF_FOSSILS.setAmber(v),
+    clawStyle: (v) => FF_FOSSILS.setClaw(v),
     simulate(n = 10000) {
       const t = {}, cat = { lose: 0, pachy1: 0, pachy2: 0, carno: 0, ancient: 0, brachy: 0, amber: 0 }; let paid = 0;
       for (let i = 0; i < n; i++) {
