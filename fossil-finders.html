@@ -665,7 +665,7 @@ function bolt(x0, y0, x1, y1, now) { // a jagged pixel lightning bolt, as short-
 }
 function idle(now) {
   return !flying && finds.every((f) => f.left) && floaters.length === 0 && (scootDone || scootStart === null || placed.length < 3)
-    && (!morph || now - morph.t0 > morph.dur) && wins.every((w) => now - w.t0 > ({ butt: 1100, ancient: 900, brachy: 2300, special: 1900, spot: 500 }[w.kind] || 700));
+    && (!morph || now - morph.t0 > morph.dur) && wins.every((w) => now - w.t0 > ({ butt: 1100, ancient: 900, brachy: 2300, special: 1900, spot: 700 }[w.kind] || 700));
 }
 function ready(f) { if (f.dino === 'A' || f.dino === 'R') return true; return f.dino === 'P' ? f.i === placed.length : f.dino === 'B' ? f.i === bPlaced.length : f.i === cPlaced.length; }
 function storm(fx, k, now) {
@@ -761,12 +761,31 @@ function loop(now) {
   }
   // special find on display: a spotlight shines down on it
   if (sPlaced) {
-    const sp = SPECIAL[sPlaced], w = wins.find((q) => q.kind === 'spot'), fade = w ? Math.min(1, Math.max(0, (now - w.t0) / 450)) : 1;
-    const cx = sp.x + sp.cv.width / 2, base = sp.y + sp.cv.height, topY = 1120, flick = .9 + .1 * Math.sin(now / 180);
-    octx.save(); octx.globalAlpha = .3 * fade * flick; octx.fillStyle = '#fff3c4';
-    octx.beginPath(); octx.moveTo(cx - 16, topY); octx.lineTo(cx + 16, topY); octx.lineTo(cx + 92, base + 4); octx.lineTo(cx - 92, base + 4); octx.closePath(); octx.fill();
-    octx.globalAlpha = .34 * fade * flick; octx.beginPath(); octx.moveTo(cx - 8, topY); octx.lineTo(cx + 8, topY); octx.lineTo(cx + 50, base + 4); octx.lineTo(cx - 50, base + 4); octx.closePath(); octx.fill();
-    octx.globalAlpha = .5 * fade; octx.beginPath(); octx.ellipse(cx, base + 2, 84, 12, 0, 0, Math.PI * 2); octx.fill(); octx.restore();
+    const sp = SPECIAL[sPlaced], w = wins.find((q) => q.kind === 'spot');
+    const cx = sp.x + sp.cv.width / 2, base = sp.y + sp.cv.height, flick = .9 + .1 * Math.sin(now / 180);
+    // two spotlight stands pop up from the case corners, swing their lamps in, then switch on
+    const el = w ? now - w.t0 : 9999, rise = Math.min(1, el / 320), on = Math.min(1, Math.max(0, (el - 360) / 260));
+    const pop = rise < 1 ? 1 - Math.pow(1 - rise, 3) + Math.sin(rise * Math.PI) * .12 : 1;
+    for (const side of [-1, 1]) {
+      const fx = side < 0 ? 46 : 282, footY = 1294, topY = footY - 190 * pop, hx = fx + side * 4;
+      octx.fillStyle = '#1c0f08'; octx.fillRect(fx - 4, topY, 8, footY - topY);                       // pole
+      octx.fillStyle = '#8a8f96'; octx.fillRect(fx - 2, topY, 4, footY - topY);
+      octx.fillStyle = '#1c0f08'; octx.fillRect(fx - 12, footY - 6, 24, 8); octx.fillStyle = '#5e6670'; octx.fillRect(fx - 10, footY - 5, 20, 5);   // foot
+      if (rise > .6) {                                                                                   // lamp head, aimed at the find
+        const ang = Math.atan2(base - 30 - topY, cx - hx);
+        octx.save(); octx.translate(hx, topY); octx.rotate(ang);
+        octx.fillStyle = '#1c0f08'; octx.fillRect(-10, -14, 34, 28); octx.fillStyle = '#c9a24a'; octx.fillRect(-8, -12, 26, 24); octx.fillStyle = '#8a6420'; octx.fillRect(-8, 6, 26, 6);
+        octx.fillStyle = on > 0 ? '#fff6c8' : '#5e5048'; octx.fillRect(18, -10, 8, 20); octx.restore();
+        if (on > 0) {                                                                                     // beam onto the find
+          const lx = hx + Math.cos(ang) * 24, ly = topY + Math.sin(ang) * 24;
+          octx.save(); octx.globalAlpha = .26 * on * flick; octx.fillStyle = '#fff3c4';
+          octx.beginPath(); octx.moveTo(lx - 6 * Math.sin(ang), ly + 6 * Math.cos(ang)); octx.lineTo(lx + 6 * Math.sin(ang), ly - 6 * Math.cos(ang));
+          octx.lineTo(cx + side * -10 + 60, base + 2); octx.lineTo(cx + side * -10 - 60, base + 2); octx.closePath(); octx.fill(); octx.restore();
+        }
+      }
+    }
+    octx.save(); octx.globalAlpha = .45 * on; octx.fillStyle = '#fff3c4'; octx.beginPath(); octx.ellipse(cx, base + 2, 84, 12, 0, 0, Math.PI * 2); octx.fill(); octx.restore();
+    const fade = on;
     octx.globalAlpha = (.3 + .15 * Math.sin(now / 260)) * fade; octx.drawImage(tint(sp.cv, sPlaced === 'A' ? '#ffd27a' : '#fff1c8'), sp.x - 4, sp.y - 4, sp.cv.width + 8, sp.cv.height + 8); octx.globalAlpha = 1;
     octx.drawImage(sp.cv, sp.x, sp.y);
     if (w && !w.sp) { w.sp = true; for (let n = 0; n < 14; n++) effects.push({ x: cx + (Math.random() - .5) * 120, y: 1160 + Math.random() * 30, vx: 0, vy: 30 + Math.random() * 40, t0: now + Math.random() * 300, life: 700, col: '#fff6c8', size: 4, nograv: true }); }
