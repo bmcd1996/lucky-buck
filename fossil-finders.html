@@ -41,6 +41,21 @@ html.embedded body { padding: 0; }
 .flipbadge { position: absolute; left: 83.789%; top: 0.781%; width: 15.137%; height: 8.203%; padding: 0; border: 0; background: url(fossil-finders-flip.png?v=382) center / 100% 100% no-repeat; cursor: pointer; z-index: 5; min-height: 0; border-radius: 12%; }
 .flipbadge:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .ticket.flipped .back { display: block; }
+.ticket .backtext { display: none; position: absolute; left: 11%; right: 10.5%; top: 32%; bottom: 11%; pointer-events: none; z-index: 3;
+  color: #3a1e10; font-family: "Inter", system-ui, sans-serif; font-size: 3.0cqw; line-height: 1.25; flex-direction: column; justify-content: center; gap: 1.7cqw; }
+.ticket.flipped .backtext { display: flex; }
+.backtext h3 { margin: 0; font-family: "Lilita One", "Arial Black", sans-serif; font-weight: 400; font-size: 5.0cqw; color: #b8521c; text-align: center; letter-spacing: .03em; }
+.backtext h4 { margin: 0; font-family: "Lilita One", "Arial Black", sans-serif; font-weight: 400; font-size: 3.7cqw; color: #b8521c; letter-spacing: .03em; border-bottom: .35cqw solid #e2b77a; padding-bottom: .6cqw; }
+.backtext ol { margin: 0; padding-left: 4.5cqw; display: grid; gap: .4cqw; }
+.backtext .prizes { display: grid; gap: .3cqw; }
+.backtext .row { display: flex; align-items: baseline; gap: 1.5cqw; }
+.backtext .row .what { flex: 0 1 auto; }
+.backtext .row .what b { font-weight: 700; }
+.backtext .row .dots { flex: 1 1 auto; border-bottom: .4cqw dotted #c79a62; transform: translateY(-.6cqw); min-width: 2cqw; }
+.backtext .row .pay { font-family: "Lilita One", "Arial Black", sans-serif; font-size: 3.7cqw; color: #2f6b2a; }
+.backtext .row.special .pay { color: #b8521c; }
+.backtext .note { margin: 0; font-size: 2.9cqw; text-align: center; color: #6a4428; }
+
 .ticket { container-type: inline-size; }
 .ticket .fronttext { position: absolute; left: 6%; right: 6%; top: 88.4%; display: grid; gap: .9cqw; text-align: center; pointer-events: none; z-index: 3;
   font-family: "Lilita One", "Arial Black", sans-serif; color: #fff0c8; line-height: 1; letter-spacing: .02em;
@@ -95,6 +110,28 @@ button:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
     <img class="back" src="fossil-finders-back.png" alt="Back of the Fossil Finders ticket">
     <img class="stands" src="fossil-finders-stands.png?v=384" alt="">
     <div class="fronttext" aria-label="My display cases are empty! You bring the bones, I'll bring the cash!"><div class="l1">My display cases are empty!</div><div class="l2">You bring the bones, I'll bring the cash!</div></div>
+    <div class="backtext" aria-label="How to play Fossil Finders">
+      <h3>HOW TO PLAY</h3>
+      <ol>
+        <li>Dig <b>one spot in each row</b> &mdash; 4 digs per ticket.</li>
+        <li>Collect bones to build dinosaurs.</li>
+        <li>Finish a dinosaur to win its prize!</li>
+      </ol>
+      <h4>DINOSAURS</h4>
+      <div class="prizes">
+        <div class="row"><span class="what"><b>2 Pachy</b> bones &middot; Pachycephalosaurus</span><span class="dots"></span><span class="pay">$1</span></div>
+        <div class="row"><span class="what"><b>4 Pachy</b> bones &middot; two Pachys</span><span class="dots"></span><span class="pay">$2</span></div>
+        <div class="row"><span class="what"><b>3 Carno</b> bones &middot; Carnotaurus</span><span class="dots"></span><span class="pay">$5</span></div>
+        <div class="row"><span class="what"><b>4 Brachy</b> bones &middot; Brachiosaurus</span><span class="dots"></span><span class="pay">$10</span></div>
+        <div class="row"><span class="what"><b>4 Carno</b> bones &middot; Ancient Carnotaurus</span><span class="dots"></span><span class="pay">$30</span></div>
+      </div>
+      <h4>RARE FINDS</h4>
+      <div class="prizes">
+        <div class="row special"><span class="what"><b>Amber</b></span><span class="dots"></span><span class="pay">$50</span></div>
+        <div class="row special"><span class="what"><b>Raptor claw</b></span><span class="dots"></span><span class="pay">$100</span></div>
+      </div>
+      <p class="note">Rare finds add to any dinosaur you complete.</p>
+    </div>
     <div class="cells" id="cells"></div>
     <button class="flipbadge" id="flipBadge" type="button" aria-label="Flip the ticket over"></button>
   </div>
