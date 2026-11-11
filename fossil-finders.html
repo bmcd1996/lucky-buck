@@ -645,7 +645,7 @@ function light(k, now, col) { if (!lit[k] || col !== lit[k].col) lit[k] = { t0: 
 const MONEY_LIFE = { classic: [1300, 1600], jackpot: [1900, 2300], count: [2100, 2500], burst: [1900, 2300] };
 function moneyLife(fl) { return (MONEY_LIFE[moneyFx] || MONEY_LIFE.classic)[fl.big ? 1 : 0]; }
 // rounded pixel-art spotlight heads (owner: the old ones looked too boxy). Each points right; pivot at the yoke.
-let lampStyle = 'can';   // can · bell · cone · box (old)
+let lampStyle = 'bell';   // owner's pick: Brass bell   // can · bell · cone · box (old)
 const LAMP_P = 3, LAMP_W = 15, LAMP_H = 13, LAMP_PIV = { x: 5, y: 6.5 };
 const lampCache = {};
 function lampSprite(style, lit) {
@@ -690,12 +690,12 @@ function lampSprite(style, lit) {
   }
   return (lampCache[key] = c);
 }
-function lampStands(cx, base, footY, el, col, tall = 190) {   // two spotlight stands pop up from the case corners and shine down
+function lampStands(cx, base, footY, el, col, tall = 190, part = 'all') {   // part: light (beams, floor) · stands (poles, lamps) · all   // two spotlight stands pop up from the case corners and shine down
   const rise = Math.min(1, el / 320), on = Math.min(1, Math.max(0, (el - 360) / 260)), flick = .9 + .1 * Math.sin(el / 180);
   const pop = rise < 1 ? 1 - Math.pow(1 - rise, 3) + Math.sin(rise * Math.PI) * .12 : 1, boxy = lampStyle === 'box';
   for (const side of [-1, 1]) {
-    const fx = side < 0 ? 46 : 282, topY = footY - tall * pop, hx = fx + side * 4;
-    if (boxy) { octx.fillStyle = '#1c0f08'; octx.fillRect(fx - 4, topY, 8, footY - topY); octx.fillStyle = '#8a8f96'; octx.fillRect(fx - 2, topY, 4, footY - topY);
+    const fx = side < 0 ? 46 : 282, topY = footY - tall * pop, hx = fx + side * 4, standsOn = part !== 'light', lightOn = part !== 'stands';
+    if (!standsOn) {} else if (boxy) { octx.fillStyle = '#1c0f08'; octx.fillRect(fx - 4, topY, 8, footY - topY); octx.fillStyle = '#8a8f96'; octx.fillRect(fx - 2, topY, 4, footY - topY);
       octx.fillStyle = '#1c0f08'; octx.fillRect(fx - 12, footY - 6, 24, 8); octx.fillStyle = '#5e6670'; octx.fillRect(fx - 10, footY - 5, 20, 5); }
     else {
       octx.fillStyle = '#1c0f08'; octx.fillRect(fx - 3, topY, 6, footY - 14 - topY); octx.fillStyle = '#9aa2ae'; octx.fillRect(fx - 1, topY, 3, footY - 14 - topY);   // slim pole
@@ -706,10 +706,10 @@ function lampStands(cx, base, footY, el, col, tall = 190) {   // two spotlight s
     }
     if (rise > .6) {
       const ang = Math.atan2(base - 30 - topY, cx - hx), lamp = lampSprite(lampStyle, on > 0);
-      if (!boxy) { octx.fillStyle = '#1c0f08'; octx.fillRect(hx - 7, topY - 7, 14, 14); octx.fillStyle = '#c9a24a'; octx.fillRect(hx - 5, topY - 5, 10, 10); octx.fillStyle = '#fff0a8'; octx.fillRect(hx - 4, topY - 4, 4, 4); }   // round-ish yoke knob
-      octx.save(); octx.translate(hx, topY); octx.rotate(ang); octx.scale(1, side < 0 ? 1 : -1);   // keep the lamp's light side up
-      octx.drawImage(lamp, -LAMP_PIV.x * LAMP_P, -LAMP_PIV.y * LAMP_P); octx.restore();
-      if (on > 0) {                                                                                         // soft two-layer beam
+      if (standsOn && !boxy) { octx.fillStyle = '#1c0f08'; octx.fillRect(hx - 7, topY - 7, 14, 14); octx.fillStyle = '#c9a24a'; octx.fillRect(hx - 5, topY - 5, 10, 10); octx.fillStyle = '#fff0a8'; octx.fillRect(hx - 4, topY - 4, 4, 4); }   // round-ish yoke knob
+      if (standsOn) { octx.save(); octx.translate(hx, topY); octx.rotate(ang); octx.scale(1, side < 0 ? 1 : -1);   // keep the lamp's light side up
+      octx.drawImage(lamp, -LAMP_PIV.x * LAMP_P, -LAMP_PIV.y * LAMP_P); octx.restore(); }
+      if (on > 0 && lightOn) {                                                                                         // soft two-layer beam
         const reach = (14 - LAMP_PIV.x) * LAMP_P, lx = hx + Math.cos(ang) * reach, ly = topY + Math.sin(ang) * reach, nx = -Math.sin(ang), ny = Math.cos(ang);
         for (const [wTop, wBot, a] of [[13, 78, .16], [7, 48, .26]]) {
           octx.save(); octx.globalAlpha = a * on * flick; octx.fillStyle = col; octx.beginPath();
@@ -719,16 +719,17 @@ function lampStands(cx, base, footY, el, col, tall = 190) {   // two spotlight s
       }
     }
   }
-  octx.save(); octx.globalAlpha = .7 * on; octx.fillStyle = col; octx.beginPath(); octx.ellipse(cx, base + 2, 90, 14, 0, 0, Math.PI * 2); octx.fill(); octx.restore();
+  if (part !== 'stands') { octx.save(); octx.globalAlpha = .7 * on; octx.fillStyle = col; octx.beginPath(); octx.ellipse(cx, base + 2, 90, 14, 0, 0, Math.PI * 2); octx.fill(); octx.restore(); }
   return on;
 }
-function floorLights(now) {
-  if (floorFx === 'off') return;
+function floorLights(now, pass = 'light') {   // light pass goes behind the dinosaurs, stands pass in front of them
+  if (floorFx === 'off' || (pass === 'stands' && floorFx !== 'spots')) return;
   for (const k in lit) {
     const L = lit[k], el = now - L.t0; if (el < 0) continue;
     const fy = CASE_FEET[k], cx = 164, on = Math.min(1, el / 300), fl = .85 + .15 * Math.sin(now / 210);
+    if (pass === 'stands') { lampStands(cx, fy, fy + 46, el, L.col, 130, 'stands'); continue; }
     if (!L.burst) { L.burst = true; for (let n = 0; n < 16; n++) effects.push({ x: cx + (Math.random() - .5) * 180, y: fy - Math.random() * 8, vx: (Math.random() - .5) * 20, vy: -40 - Math.random() * 70, t0: now + Math.random() * 400, life: 900, col: n % 2 ? '#fff6c8' : L.col, size: 4, nograv: true }); }
-    if (floorFx === 'spots') { lampStands(cx, fy, fy + 46, el, L.col, 130); continue; }
+    if (floorFx === 'spots') { lampStands(cx, fy, fy + 46, el, L.col, 130, 'light'); continue; }
     octx.save(); octx.globalCompositeOperation = 'lighter';
     if (floorFx === 'pool') {
       for (let b = 0; b < 8; b++) { octx.globalAlpha = on * fl * .17 * (1 - b / 8); octx.fillStyle = L.col; octx.fillRect(cx - 100 + b * 4, fy - 14 - b * 14, 200 - b * 8, 14); }
@@ -975,6 +976,7 @@ function loop(now) {
     if (brachyWin === 'whip') for (const k of [1, 2, 3]) if (be >= k / 3 - .17 && !bw['c' + k]) { bw['c' + k] = true; shake(6, now); sparks(TIP.x + 12, TIP.y - 6, 10, now); }
     if (brachyWin === 'nod' && be >= .12 && !bw.n) { bw.n = true; sparks(HEAD.x, HEAD.y + 10, 8, now); }
   }
+  floorLights(now, 'stands');
   // special find on display: a spotlight shines down on it
   if (sPlaced) {
     const sp = SPECIAL[sPlaced], w = wins.find((q) => q.kind === 'spot');
