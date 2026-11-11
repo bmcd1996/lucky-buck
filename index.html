@@ -622,7 +622,7 @@ body.setup-open{overflow:hidden}.card-top .ticket-gear+h3{margin-right:auto}
 <div class="wrap">
 <header class="header">
 <div class="brand"><div class="brand-mark">$</div><div><small>QUILL PRODUCTIONS</small><h1>Cardboard to Cash</h1></div></div>
-<div class="header-right"><span class="version-badge" title="Lucky Buck simulator version">v3.12.1</span><span class="save" id="saveStatus">Loading…</span></div>
+<div class="header-right"><span class="version-badge" title="Lucky Buck simulator version">v3.13.0</span><span class="save" id="saveStatus">Loading…</span></div>
 </header>
 
 <section class="hero">
@@ -1821,7 +1821,7 @@ function lbIsGold(S,c){return c.cx>=0&&c.cx<LB_GW&&c.cy>=0&&c.cy<LB_GH&&S.grid[c
 
 /* Skill switch, balloon target-zone painter, Buck's Secret settings (calculator side). */
 (()=>{'use strict';
-const TICKET_URL='ticket-1.0.0.html?v=3.12.1';
+const TICKET_URL='ticket-1.0.0.html?v=3.13.0';
 const $=id=>document.getElementById(id);
 let S=lbLoadSkill(),brush='G',brushSize=1,zoom=1,moveMode=false;
 const persist=()=>{lbSaveSkill(S)};
@@ -1999,7 +1999,7 @@ function panel(){
  let p=document.getElementById('ffPanel');
  if(!p){
   p=document.createElement('section');p.id='ffPanel';p.setAttribute('aria-label','Fossil Finders ticket');
-  frame=document.createElement('iframe');frame.id='ffFrame';frame.title='Fossil Finders ticket';frame.src='fossil-finders.html?v=3.12.1';
+  frame=document.createElement('iframe');frame.id='ffFrame';frame.title='Fossil Finders ticket';frame.src='fossil-finders.html?v=3.13.0';
   p.append(frame);
   p.append(oddsCard());
  }
