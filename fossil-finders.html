@@ -41,6 +41,14 @@ html.embedded body { padding: 0; }
 .flipbadge { position: absolute; left: 83.789%; top: 0.781%; width: 15.137%; height: 8.203%; padding: 0; border: 0; background: url(fossil-finders-flip.png?v=382) center / 100% 100% no-repeat; cursor: pointer; z-index: 5; min-height: 0; border-radius: 12%; }
 .flipbadge:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .ticket.flipped .back { display: block; }
+.ticket { container-type: inline-size; }
+.ticket .fronttext { position: absolute; left: 6%; right: 6%; top: 88.4%; display: grid; gap: .9cqw; text-align: center; pointer-events: none; z-index: 3;
+  font-family: "Lilita One", "Arial Black", sans-serif; color: #fff0c8; line-height: 1; letter-spacing: .02em;
+  text-shadow: .45cqw 0 0 #2a1406, -.45cqw 0 0 #2a1406, 0 .45cqw 0 #2a1406, 0 -.45cqw 0 #2a1406, .32cqw .32cqw 0 #2a1406, -.32cqw .32cqw 0 #2a1406, .32cqw -.32cqw 0 #2a1406, -.32cqw -.32cqw 0 #2a1406, 0 .9cqw 0 #2a1406; }
+.ticket .fronttext .l1 { font-size: 6.0cqw; color: #ffd27a; }
+.ticket .fronttext .l2 { font-size: 4.7cqw; }
+.ticket.flipped .fronttext { display: none; }
+
 
 .cells { position: absolute; inset: 0; }
 .cell { position: absolute; border-radius: 8% / 12%; overflow: hidden; container-type: size; }
@@ -86,6 +94,7 @@ button:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
     <img class="front" id="frontImg" src="fossil-finders-front.png" alt="Fossil Finders $1 ticket">
     <img class="back" src="fossil-finders-back.png" alt="Back of the Fossil Finders ticket">
     <img class="stands" src="fossil-finders-stands.png?v=384" alt="">
+    <div class="fronttext" aria-label="My display cases are empty! You bring the bones, I'll bring the cash!"><div class="l1">My display cases are empty!</div><div class="l2">You bring the bones, I'll bring the cash!</div></div>
     <div class="cells" id="cells"></div>
     <button class="flipbadge" id="flipBadge" type="button" aria-label="Flip the ticket over"></button>
   </div>
