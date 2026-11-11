@@ -2047,7 +2047,7 @@ const FF_SOLVER = (() => {
     const a = (o.amber || 0) / 100, base = { lose: 0, pachy1: 0, pachy2: 0, carno: 0, ancient: 0, brachy: 0 }; let amberExtra = 0;
     for (const [w, rows] of parts) { const d = distRows(rows); for (const k of KEYS) base[k] += w * d[k]; amberExtra += w * three(rows); }
     const out = {}; for (const k of KEYS) out[k] = (1 - a / 3) * base[k]; out.amber = a / 3;
-    let pay = 0; for (const k of KEYS) pay += out[k] * PRIZE[k]; pay += out.amber * (25 + amberExtra);
+    let pay = 0; for (const k of KEYS) pay += out[k] * PRIZE[k]; pay += out.amber * (2 / 3 * 50 + 1 / 3 * 100 + amberExtra);   // amber $50 (2 in 3) or raptor claw $100 (1 in 3)
     return { share: out, avgPaid: pay };
   }
   function solve(target, start) { // target shares {pachy1,pachy2,carno,ancient,brachy,amber} (0..1); losers = the rest
@@ -2082,7 +2082,7 @@ const FF_SOLVER = (() => {
 // Fossil odds sliders: set how often each prize happens. Raising a prize takes from the losers (and the other way round).
 // The solver turns the targets into dig-site odds for the ticket; "now" shows what the ticket will really give.
 const ODDS_KEY='fossil-finders-odds',TARGET_KEY='fossil-finders-targets';
-const PRIZES=[['pachy1','Pachy $1',60],['pachy2','Two Pachys $2',20],['carno','Carnotaurus $5',40],['ancient','Ancient Carno $30',10],['brachy','Brachiosaurus $10',20],['amber','Amber $25+',10]];
+const PRIZES=[['pachy1','Pachy $1',60],['pachy2','Two Pachys $2',20],['carno','Carnotaurus $5',40],['ancient','Ancient Carno $30',10],['brachy','Brachiosaurus $10',20],['amber','Amber $50 / Raptor claw $100',10]];
 const TARGET_DEFAULT={pachy1:35.5,pachy2:3.3,carno:7,ancient:.8,brachy:2.2,amber:1};
 let targets=null,solved=null,solveTimer=null;
 function loadTargets(){let o=null;try{o=JSON.parse(localStorage.getItem(TARGET_KEY))}catch(e){}const ok=o&&PRIZES.every(([k])=>typeof o[k]==='number'&&isFinite(o[k]));return ok?{...o}:{...TARGET_DEFAULT};}
@@ -2129,7 +2129,7 @@ function showActual(r){
  now('lose');for(const [k] of PRIZES)now(k);
  box.innerHTML='<div class="ffo-pay"><span>Average paid per $1 ticket</span><b>$'+r.avgPaid.toFixed(2)+'</b></div>';
  const o=r.odds||solved,sp=document.getElementById('ffoSpots');
- if(sp)sp.textContent='Behind the scenes: each spot '+o.P+'% Pachy, '+o.C+'% Carno, '+o.B+'% Brachy · special tickets: Pachy bed '+o.bedP+'%, Carno '+o.carno3+'%, Ancient '+o.ancient+'%, Brachy '+o.brachy+'% · amber on '+o.amber+'% of tickets.';
+ if(sp)sp.textContent='Behind the scenes: each spot '+o.P+'% Pachy, '+o.C+'% Carno, '+o.B+'% Brachy · special tickets: Pachy bed '+o.bedP+'%, Carno '+o.carno3+'%, Ancient '+o.ancient+'%, Brachy '+o.brachy+'% · amber or raptor claw on '+o.amber+'% of tickets.';
 }
 function enter(){
  on=true;try{localStorage.setItem(KEY,'1')}catch(e){}

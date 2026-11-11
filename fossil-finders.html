@@ -193,7 +193,7 @@ function renderPart(map, opt, withRock) {
   const g = grid(map), H = g.length, W = g[0].length, P = withRock ? 3 : 1, S = opt.scale, pal = opt.pal;
   const cv = document.createElement('canvas'); cv.width = (W + 2 * P) * S; cv.height = (H + 2 * P) * S;
   const c = cv.getContext('2d');
-  const filled = (x, y) => y >= 0 && y < H && x >= 0 && x < W && 'bdntkagorfyu'.includes(g[y][x]);
+  const filled = (x, y) => y >= 0 && y < H && x >= 0 && x < W && 'bdntkagorfyumq'.includes(g[y][x]);
   const px = (x, y, col) => { c.fillStyle = col; c.fillRect((x + P) * S, (y + P) * S, S, S); };
   if (withRock) { // rock matrix around the bones
     for (let y = -P; y < H + P; y++) for (let x = -P; x < W + P; x++) {
@@ -213,7 +213,9 @@ function renderPart(map, opt, withRock) {
   }
   // bone
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-    const ch = g[y][x]; if (!'bdntkagorfyu'.includes(ch)) continue;
+    const ch = g[y][x]; if (!'bdntkagorfyumq'.includes(ch)) continue;
+    if (ch === 'm') { const top = !filled(x, y - 1) || !filled(x - 1, y), bot = !filled(x, y + 1) || !filled(x + 1, y); px(x, y, top ? '#ffe08a' : bot ? '#a8520e' : (x * 3 + y * 2) % 7 === 0 ? '#ffc04a' : '#f0962a'); continue; }   // amber
+    if (ch === 'q') { px(x, y, '#3a1a08'); continue; }   // the mosquito inside
     if (ch === 'y') { px(x, y, '#f6efdc'); continue; }   // eye white
     if (ch === 'u') { px(x, y, '#1c0f08'); continue; }   // pupil
     if (ch === 'k') { px(x, y, !filled(x, y - 1) ? '#b3a99c' : !filled(x, y + 1) ? '#0d0b0a' : !filled(x - 1, y) || !filled(x + 1, y) ? '#5e5650' : (x + y) % 5 === 0 ? '#4d4641' : '#2e2926'); continue; }   // epic black horns with a grey sheen
@@ -355,6 +357,26 @@ function boneLeg(x, top, bottom, w, style) {
   }
   return o;
 }
+
+// ---- special finds (bottom stand) ----
+let SPECIAL = null, sPlaced = null;
+const S_FEET = 1244, S_CX = 164;
+function makeSpecials() {
+  K = 1; OY = 0;
+  const amber = raster(22, 18, [
+    ['m', [ell(11, 9.5, 8.6, 6.8), ell(7, 6.5, 4.6, 3.8), ell(15, 7, 4.2, 3.6), ell(11, 13, 6.5, 3.6)]],
+    ['q', [cap(8, 9.5, 13, 9.5, .7), ell(14, 9.2, .9, .8), ell(10, 8, 1.8, .7), ell(10.5, 11, 1.6, .6),
+           cap(9, 10, 7.5, 12.5, .35), cap(11, 10, 11, 12.8, .35), cap(12.5, 10, 14, 12.4, .35), cap(14.6, 9.4, 17, 8.4, .32)]],
+  ]);
+  // raptor sickle claw: thick knuckle at the base, sweeping up and over into a sharp hooked tip
+  const arc = [[5, 16, 2.9], [6, 11, 2.6], [8.5, 7, 2.3], [12, 4.4, 1.95], [16, 3.4, 1.55], [19.4, 4.6, 1.15], [21.4, 7.4, .8], [22.2, 10.6, .45], [22.1, 12.4, .3]];
+  const clawBone = [ell(5, 16.5, 3.6, 2.9), ell(3.6, 18.6, 2.3, 1.3)];
+  const clawTip = [];
+  for (let i = 1; i < arc.length; i++) { const [ax, ay, ar] = arc[i - 1], [bx, by] = arc[i]; (i >= 6 ? clawTip : clawBone).push(cap(ax, ay, bx, by, ar)); }
+  const claw = raster(25, 21, [['b', clawBone], ['d', clawTip], ['e', [cap(6.8, 12, 11, 6.4, .35), cap(11, 6.4, 15.5, 4.8, .3)]]]);
+  const place = (map, opt) => { const r = renderPart(map, opt, false); return { cv: r.cv, x: Math.round(S_CX - r.cv.width / 2), y: S_FEET - r.cv.height + S }; };
+  return { A: place(amber, SOLID), R: place(claw, SOLID) };
+}
 function makeBrachy() {
   K = 1; OY = 0;
   const frame = (layers) => raster(B_W, B_H, layers);
@@ -485,6 +507,7 @@ function build() {
   for (const k in PACHY) PACHY[k].front = frontOf(PACHY[k].skull, PACHY[k].skullAt);
   sprites = ORDER.map(([who, part]) => ({ who, part, img: renderPart(PACHY[who][part], part === 'body' ? SOLID : OPT, false) }));
   BRACHY = { ...(() => { const m = makeBrachy(), c = (q) => Array.isArray(q) ? cropFrame(q, null, B_LEFT, B_TOP) : cropFrame(q.map, q.opt, B_LEFT, B_TOP); return { parts: m.parts.map(c), neck: c(m.neck), side: c(m.side), front: c(m.front) }; })() };
+  SPECIAL = makeSpecials();
   const c = makeCarno();
   CARNO = { parts: c.parts.map((p) => cropFrame(p.map, p.opt)), ancient: cropFrame(c.ancient) };
 }
@@ -508,7 +531,7 @@ function target(i, now) {
 // a find's picture and where it lands
 function pieceOf(f, now) {
   if (f.dino === 'P') { const t = target(f.i, now); return { cv: sprites[f.i].img.cv, x: t.x, y: t.y, mirror: t.mirror }; }
-  const p = (f.dino === 'B' ? BRACHY : CARNO).parts[f.i]; return { cv: p.cv, x: p.x, y: p.y, mirror: false };
+  const p = f.dino === 'A' || f.dino === 'R' ? SPECIAL[f.dino] : (f.dino === 'B' ? BRACHY : CARNO).parts[f.i]; return { cv: p.cv, x: p.x, y: p.y, mirror: false };
 }
 function cellRect(r, c) { const [x0, x1] = COLS[c], [y0, y1] = ROWS[r]; return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 }; }
 function drawSprite(cv, x, y, mirror, ctx = octx) {
@@ -569,6 +592,8 @@ function landed(f, now) {
       for (let k = 0; k < 8; k++) effects.push({ x: a.x + ac.width * (.2 + Math.random() * .6), y: a.y + ac.height - S * 2, vx: 40 + Math.random() * 90, vy: -20 - Math.random() * 40, t0: now + 40, life: 380, col: ['#d9c4a0', '#bfa47c', '#efe0c0'][k % 3], size: 4 });
     }
     if (i === 3) wins.push({ kind: 'butt', t0: now + 260 });
+  } else if (f.dino === 'A' || f.dino === 'R') {
+    sPlaced = f.dino; wins.push({ kind: 'special', letter: f.dino, t0: now + 300 });
   } else if (f.dino === 'B') {
     bPlaced.push(f.i);
     if (bPlaced.length === 4) wins.push({ kind: 'brachy', t0: now + 260 });
@@ -596,9 +621,9 @@ function bolt(x0, y0, x1, y1, now) { // a jagged pixel lightning bolt, as short-
 }
 function idle(now) {
   return !flying && finds.every((f) => f.left) && floaters.length === 0 && (scootDone || scootStart === null || placed.length < 3)
-    && (!morph || now - morph.t0 > morph.dur) && wins.every((w) => now - w.t0 > ({ butt: 1100, ancient: 900, brachy: 2300 }[w.kind] || 700));
+    && (!morph || now - morph.t0 > morph.dur) && wins.every((w) => now - w.t0 > ({ butt: 1100, ancient: 900, brachy: 2300, special: 1500 }[w.kind] || 700));
 }
-function ready(f) { return f.dino === 'P' ? f.i === placed.length : f.dino === 'B' ? f.i === bPlaced.length : f.i === cPlaced.length; }
+function ready(f) { if (f.dino === 'A' || f.dino === 'R') return true; return f.dino === 'P' ? f.i === placed.length : f.dino === 'B' ? f.i === bPlaced.length : f.i === cPlaced.length; }
 function storm(fx, k, now) {
   if (fx !== 'storm' || !morph || now < morph.t0 || k >= 1) return false;
   const dim = k < .1 ? k / .1 : k > .85 ? (1 - k) / .15 : 1;
@@ -618,7 +643,7 @@ function loop(now) {
   else if (ticketEl.style.transform) ticketEl.style.transform = '';
   // faded fossils in spots that weren't picked
   for (const g of ghosts) {
-    const r = cellRect(g.r, g.c), cv = g.letter === 'C' ? CARNO.parts[2].cv : g.letter === 'B' ? BRACHY.parts[3].cv : sprites[1].img.cv;
+    const r = cellRect(g.r, g.c), cv = g.letter === 'A' || g.letter === 'R' ? SPECIAL[g.letter].cv : g.letter === 'C' ? CARNO.parts[2].cv : g.letter === 'B' ? BRACHY.parts[3].cv : sprites[1].img.cv;
     const k = Math.min(1, (r.w - 16) / cv.width, (r.h - 16) / cv.height), w = cv.width * k, h = cv.height * k;
     octx.globalAlpha = .4; octx.drawImage(cv, r.x + (r.w - w) / 2, r.y + (r.h - h) / 2, w, h); octx.globalAlpha = 1;
   }
@@ -690,6 +715,20 @@ function loop(now) {
     if (brachyWin === 'whip') for (const k of [1, 2, 3]) if (be >= k / 3 - .17 && !bw['c' + k]) { bw['c' + k] = true; shake(6, now); sparks(TIP.x + 12, TIP.y - 6, 10, now); }
     if (brachyWin === 'nod' && be >= .12 && !bw.n) { bw.n = true; sparks(HEAD.x, HEAD.y + 10, 8, now); }
   }
+  // special find on the bottom stand: soft glow, then a pulse, sparkles and a big money pop
+  if (sPlaced) {
+    const sp = SPECIAL[sPlaced], w = wins.find((q) => q.kind === 'special');
+    const glow = .25 + .15 * Math.sin(now / 260);
+    let pulse = 0; if (w && now > w.t0) { const e = (now - w.t0) / 1300; if (e < 1) pulse = Math.sin(e * Math.PI * 3) * (1 - e); }
+    const col = sPlaced === 'A' ? '#ffd27a' : '#fff1c8';
+    octx.globalAlpha = glow + .45 * Math.max(0, pulse); octx.drawImage(tint(sp.cv, col), sp.x - 4, sp.y - 4, sp.cv.width + 8, sp.cv.height + 8); octx.globalAlpha = 1;
+    const sc = 1 + .08 * Math.max(0, pulse), w2 = sp.cv.width * sc, h2 = sp.cv.height * sc;
+    octx.drawImage(sp.cv, sp.x + (sp.cv.width - w2) / 2, sp.y + sp.cv.height - h2, w2, h2);
+    if (w && now > w.t0 && !w.text) { w.text = true; shake(sPlaced === 'R' ? 12 : 9, now);
+      sparks(sp.x + sp.cv.width / 2, sp.y + sp.cv.height / 2, 18, now);
+      for (let n = 0; n < 22; n++) effects.push({ x: sp.x + Math.random() * sp.cv.width, y: sp.y - 10 - Math.random() * 30, vx: (Math.random() - .5) * 40, vy: 40 + Math.random() * 60, t0: now + Math.random() * 400, life: 700, col: Math.random() < .5 ? '#fff6c8' : '#ffd34a', size: 4 });
+      money(sPlaced === 'A' ? '+$50' : '+$100', sp.x + sp.cv.width / 2, sp.y - 20, now + 250, true); }
+  }
   // the fossil in flight
   if (flying) {
     const f = flying.f, pc = pieceOf(f, now), cv = pc.cv, r = cellRect(f.r, f.c);
@@ -741,19 +780,19 @@ window.FF_FOSSILS = {
   setLook(v) { ancientLook = v; const c = makeCarno(); CARNO = { parts: c.parts.map((q) => cropFrame(q.map, q.opt)), ancient: cropFrame(c.ancient) }; return v; },
   setSkull(v) { carnoSkull = v; const c = makeCarno(); CARNO = { parts: c.parts.map((q) => cropFrame(q.map, q.opt)), ancient: cropFrame(c.ancient) }; return v; },
   setAncientFx(name) { if (FX[name]) ancientFx = name; return ancientFx; },
-  reset() { next = { P: 0, C: 0, B: 0 }; finds = []; placed = []; cPlaced = []; bPlaced = []; flying = null; effects = []; floaters = []; wins = []; ghosts = []; scootStart = null; scootDone = false; morph = null; idleWaiters = []; },
+  reset() { next = { P: 0, C: 0, B: 0 }; sPlaced = null; finds = []; placed = []; cPlaced = []; bPlaced = []; flying = null; effects = []; floaters = []; wins = []; ghosts = []; scootStart = null; scootDone = false; morph = null; idleWaiters = []; },
   // letters that are shown as fossils (other finds stay letters for now)
-  has(letter) { return letter === 'P' || letter === 'C' || letter === 'B'; },
+  has(letter) { return 'PCBAR'.includes(letter); },
   // a fossil spot: canvas the size of the cell, drawn when its spot is first scratched
   prepCell(cell, w, h, letter) { const cv = document.createElement('canvas'); cv.className = 'fossil'; cv.width = w; cv.height = h; cv.dataset.letter = letter || 'P'; cell.insertBefore(cv, cell.querySelector('.cover')); return cv; },
   // when a fossil spot is first scratched it gets that dinosaur's next piece, so scratching uncovers it
   assign(cell) {
     const cv = cell.querySelector('canvas.fossil'); if (!cv || cv.dataset.i) return;
-    const L = cv.dataset.letter, i = next[L]++; if (i >= 4) return;
+    const L = cv.dataset.letter, i = L === 'A' || L === 'R' ? 0 : next[L]++; if (i >= 4) return;
     cv.dataset.i = String(i);
     const ctx = cv.getContext('2d'); ctx.imageSmoothingEnabled = false;
     if (L === 'P') { const s = sprites[i]; drawSprite(s.img.cv, (cv.width - s.img.cv.width) / 2, (cv.height - s.img.cv.height) / 2, s.who === 'B', ctx); }
-    else { const p = (L === 'B' ? BRACHY : CARNO).parts[i].cv, k = Math.min(1, (cv.width - 12) / p.width, (cv.height - 12) / p.height), w = Math.round(p.width * k), h = Math.round(p.height * k);
+    else { const p = (L === 'A' || L === 'R' ? { cv: SPECIAL[L].cv } : (L === 'B' ? BRACHY : CARNO).parts[i]).cv, k = Math.min(1, (cv.width - 12) / p.width, (cv.height - 12) / p.height), w = Math.round(p.width * k), h = Math.round(p.height * k);
       ctx.drawImage(p, Math.round((cv.width - w) / 2), Math.round((cv.height - h) / 2), w, h); }
   },
   onReveal(r, c, cell) {
@@ -765,7 +804,7 @@ window.FF_FOSSILS = {
   ghost(r, c, letter) { ghosts.push({ r, c, letter: letter || 'P' }); },
   whenIdle(fn) { idleWaiters.push(fn); },
   isIdle() { return idle(performance.now()); },
-  state() { return { finds: finds.length, placed: placed.length, carno: cPlaced.length, brachy: bPlaced.length, ancient: !!(morph && morph.landed), flying: !!flying, scoot: scootDone ? 'done' : scootStart ? 'moving' : 'middle', wins: wins.map((w) => w.kind) }; },
+  state() { return { special: sPlaced, finds: finds.length, placed: placed.length, carno: cPlaced.length, brachy: bPlaced.length, ancient: !!(morph && morph.landed), flying: !!flying, scoot: scootDone ? 'done' : scootStart ? 'moving' : 'middle', wins: wins.map((w) => w.kind) }; },
 };
 })();
 </script>
@@ -918,21 +957,22 @@ if (window.self !== window.top) document.documentElement.classList.add('embedded
       if ((r -= ODDS[k]) < 0) { const st = SITES[k]; rows = [st.all, st.all, st.all, st.all]; if (st.odd) rows[Math.floor(rnd() * 4)] = st.odd; break; }
     }
     const b = rows.map((m) => COLS.map(() => draw(m)));
-    if (rnd() < ODDS.amber / 100) b[Math.floor(rnd() * 4)][Math.floor(rnd() * 3)] = 'A';
+    if (rnd() < ODDS.amber / 100) b[Math.floor(rnd() * 4)][Math.floor(rnd() * 3)] = rnd() < 2 / 3 ? 'A' : 'R';   // special find: amber 2 in 3, raptor claw 1 in 3
     return b;
   }
 
   // Prize for the four picked finds. X in the owner's notes = "any other find".
   function payout(finds) {
     const n = (s) => finds.filter((f) => f === s).length;
-    const P = n('P'), C = n('C'), B = n('B'), A = n('A');
+    const P = n('P'), C = n('C'), B = n('B'), A = n('A'), R = n('R');
     let d = 0;
     if (P === 4) d = 2;            // two Pachys
     else if (P >= 2) d = 1;        // one Pachy
     else if (C === 4) d = 30;      // Ancient Carnotaurus
     else if (C === 3) d = 5;       // Carnotaurus
     else if (B === 4) d = 10;      // Brachiosaurus
-    if (A) d += 25;                // amber stacks; at most one per ticket
+    if (A) d += 50;                // amber stacks; at most one special find per ticket
+    if (R) d += 100;               // raptor claw stacks
     return d;
   }
 
@@ -953,7 +993,7 @@ if (window.self !== window.top) document.documentElement.classList.add('embedded
         const b = newBoard(); const f = b.map((r) => r[Math.floor(rnd() * 3)]);
         const d = payout(f); paid += d; t[d] = (t[d] || 0) + 1;
         const k = (s) => f.filter((x) => x === s).length;
-        if (k('A')) cat.amber++;
+        if (k('A') || k('R')) cat.amber++;
         else if (k('P') === 4) cat.pachy2++; else if (k('P') >= 2) cat.pachy1++;
         else if (k('C') === 4) cat.ancient++; else if (k('C') === 3) cat.carno++;
         else if (k('B') === 4) cat.brachy++; else cat.lose++;
