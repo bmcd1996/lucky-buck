@@ -44,12 +44,12 @@ html.embedded body { padding: 0; }
 .ticket { container-type: inline-size; }
 .ticket > img.curator { position: absolute; inset: auto; left: 0; bottom: 0; width: 21.9%; height: auto; image-rendering: pixelated; pointer-events: none; z-index: 3; }
 .ticket.flipped .curator { display: none; }
-.ticket .fronttext { position: absolute; left: 21%; right: 2.5%; top: 88.4%; display: grid; gap: .9cqw; text-align: center; pointer-events: none; z-index: 3;
+.ticket .fronttext { position: absolute; left: 0; right: 0; top: 87.2%; display: grid; gap: .5cqw; text-align: center; pointer-events: none; z-index: 3;
   font-family: "Lilita One", "Arial Black", sans-serif; color: #fff0c8; line-height: 1; letter-spacing: .02em;
   text-shadow: .45cqw 0 0 #2a1406, -.45cqw 0 0 #2a1406, 0 .45cqw 0 #2a1406, 0 -.45cqw 0 #2a1406, .32cqw .32cqw 0 #2a1406, -.32cqw .32cqw 0 #2a1406, .32cqw -.32cqw 0 #2a1406, -.32cqw -.32cqw 0 #2a1406, 0 .9cqw 0 #2a1406; }
-.ticket .fronttext .l1 { font-size: 5.2cqw; color: #ffd27a; }
-.ticket .fronttext .l2 { font-size: 4.0cqw; }
-.ticket .fronttext .sig { font-size: 3.4cqw; color: #ffd27a; }
+.ticket .fronttext .l1 { font-size: 4.8cqw; color: #ffd27a; }
+.ticket .fronttext .l2 { font-size: 4.2cqw; }
+.ticket .fronttext .sig { font-size: 3.0cqw; color: #ffd27a; }
 .ticket.flipped .fronttext { display: none; }
 
 
@@ -97,7 +97,7 @@ button:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
     <img class="front" id="frontImg" src="fossil-finders-front.png" alt="Fossil Finders $1 ticket">
     <img class="back" src="fossil-finders-back.png" alt="Back of the Fossil Finders ticket">
     <img class="stands" src="fossil-finders-stands.png?v=384" alt="">
-    <div class="fronttext" aria-label="My display cases are empty! You bring the bones, I'll bring the cash! — The Curator"><div class="l1">My display cases are empty!</div><div class="l2">You bring the bones, I'll bring the cash!</div><div class="sig">— The Curator</div></div>
+    <div class="fronttext" aria-label="My display cases are empty! You bring the bones, I'll bring the cash! — The Curator"><div class="l1">My display cases are empty!</div><div class="l2">You bring the bones,<br>I'll bring the cash!</div><div class="sig">— The Curator</div></div>
     <img class="curator" src="fossil-finders-curator.png?v=1" alt="The museum curator">
     <div class="cells" id="cells"></div>
     <button class="flipbadge" id="flipBadge" type="button" aria-label="Flip the ticket over"></button>
