@@ -384,7 +384,7 @@ function renderPart(map, opt, withRock) {
 const OPT = { form: 'segmented', scale: 4, pal: { base: '#d8b27a', hi: '#f0d3a0', shade: '#a77c48', far: '#8e6638', line: '#1c0f08', gap: '#5a3a1c' } };
 const SOLID = { ...OPT, form: 'solid' };
 const S = OPT.scale;
-const CX = 164, FEET = 782, REVEAL_HOLD = 380, HOP_MS = 820, SCOOT = 380;
+const CX = 164, FEET = 782, REVEAL_HOLD = 150, HOP_MS = 500, SCOOT = 380;
 const ORDER = [['A', 'body'], ['A', 'skull'], ['B', 'body'], ['B', 'skull']];
 let PACHY = null, sprites = null, CARNO = null, overlay = null, octx = null, ticketEl = null, cellsEl = null;
 let finds = [], placed = [], cPlaced = [], flying = null, effects = [], floaters = [], wins = [], ghosts = [];
