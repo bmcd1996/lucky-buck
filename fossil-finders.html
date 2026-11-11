@@ -638,7 +638,7 @@ function sparks(x, y, n, now) {
 }
 function money(text, x, y, t0, big) { floaters.push({ text, x, y, t0, big }); }
 // ---- win lights on the case floors and exciting money pop-ups (owner picks a style) ----
-let floorFx = 'pool', moneyFx = 'jackpot';   // floor: pool · spots · bulbs · off   money: classic · jackpot · count · burst
+let floorFx = 'off', moneyFx = 'jackpot';   // floor: pool · spots · bulbs · off   money: classic · jackpot · count · burst
 let lit = {};                                // case floor -> { t0, col } once that dinosaur has won
 const CASE_FEET = { P: 782, C: 936, B: 1090 };
 function light(k, now, col) { if (!lit[k] || col !== lit[k].col) lit[k] = { t0: lit[k] ? Math.min(lit[k].t0, now) : now, col, burst: false }; }
