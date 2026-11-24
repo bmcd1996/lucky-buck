@@ -622,7 +622,7 @@ body.setup-open{overflow:hidden}.card-top .ticket-gear+h3{margin-right:auto}
 <div class="wrap">
 <header class="header">
 <div class="brand"><div class="brand-mark">$</div><div><small>QUILL PRODUCTIONS</small><h1>Cardboard to Cash</h1></div></div>
-<div class="header-right"><span class="version-badge" title="Lucky Buck simulator version">v3.14.1</span><span class="save" id="saveStatus">Loading…</span></div>
+<div class="header-right"><span class="version-badge" title="Lucky Buck simulator version">v3.15.0</span><span class="save" id="saveStatus">Loading…</span></div>
 </header>
 
 <section class="hero">
@@ -2132,6 +2132,7 @@ function showActual(r){
  if(sp)sp.textContent='Behind the scenes: each spot '+o.P+'% Pachy, '+o.C+'% Carno, '+o.B+'% Brachy · special tickets: Pachy bed '+o.bedP+'%, Carno '+o.carno3+'%, Ancient '+o.ancient+'%, Brachy '+o.brachy+'% · amber or raptor claw on '+o.amber+'% of tickets.';
 }
 function enter(){
+ window.__secretSquirrelsExitForTicket?.();
  on=true;try{localStorage.setItem(KEY,'1')}catch(e){}
  panel();
  if(!saved)saved={src:img.getAttribute('src'),alt:img.alt,imgHidden:img.classList.contains('hidden'),titleHidden:title.classList.contains('hidden')};
@@ -2145,6 +2146,7 @@ function exit(){
  document.body.classList.remove('ff-mode');
  if(saved){if(saved.src)img.setAttribute('src',saved.src);else img.removeAttribute('src');img.alt=saved.alt;img.classList.toggle('hidden',saved.imgHidden);title.classList.toggle('hidden',saved.titleHidden);saved=null;}
 }
+window.__fossilFindersExitForTicket=exit;
 // Runs before the simulator's own handler, which only knows Lucky Buck-style tickets.
 sel.addEventListener('change',e=>{
  if(sel.value===FF){e.stopImmediatePropagation();enter();}
@@ -2153,6 +2155,84 @@ sel.addEventListener('change',e=>{
 window.addEventListener('message',e=>{
  const h=e.data&&e.data.fossilFindersHeight;
  if(frame&&e.source===frame.contentWindow&&Number.isFinite(h)&&h>200)frame.style.height=Math.ceil(h)+'px';
+});
+addOption();
+if(on)enter();
+})();
+</script>
+
+<style>
+/* v3.15.0 — Secret Squirrels art preview; no gameplay/odds are configured. */
+body.ss-mode #skillBar,body.ss-mode nav.v3-switch,body.ss-mode #v3SimCol,body.ss-mode .v3-footer-tools{display:none!important}
+body.ss-mode #v3TicketCol>*:not(.hero):not(#ssPanel){display:none!important}
+body.ss-mode .v3-rail{overflow:visible!important;transform:none!important}
+body.ss-mode #v3TicketCol{width:100%!important;max-width:560px;margin:0 auto}
+body.ss-mode #quickEditTicket,body.ss-mode .hero .hero-price{display:none!important}
+body.ss-mode .hero .ticket-logo-heading h2{font-size:clamp(20px,4vw,30px);color:#f1d3a3}
+#ssPanel{display:none;padding:0;background:none;border:0;box-shadow:none}
+body.ss-mode #ssPanel{display:block}
+#ssFrame{display:block;width:100%;height:760px;border:0;background:transparent}
+</style>
+<script>
+(function(){
+'use strict';
+const SS='__secret_squirrels__',KEY='lucky-buck-secret-squirrels-selected';
+const sel=document.getElementById('ticketSelector'),img=document.getElementById('heroTicketLogo'),title=document.getElementById('heroTicketName');
+if(!sel||!img||!title)return;
+let on=false,saved=null,frame=null;
+try{on=localStorage.getItem(KEY)==='1'}catch(err){}
+function addOption(){
+ let o=sel.querySelector('option[value="'+SS+'"]');
+ if(!o){o=document.createElement('option');o.value=SS;o.textContent='Secret Squirrels · $2';
+  const fossil=sel.querySelector('option[value="__fossil__"]');
+  const create=sel.querySelector('option[value="__create__"]');
+  if(fossil)fossil.after(o);else sel.insertBefore(o,create||null);
+ }
+ if(on&&sel.value!==SS)sel.value=SS;
+}
+new MutationObserver(addOption).observe(sel,{childList:true});
+function panel(){
+ let p=document.getElementById('ssPanel');
+ if(!p){
+  p=document.createElement('section');p.id='ssPanel';p.setAttribute('aria-label','Secret Squirrels art preview');
+  frame=document.createElement('iframe');frame.id='ssFrame';frame.title='Secret Squirrels ticket front and back artwork';
+  frame.src='secret-squirrels.html?v=3.15.0';p.append(frame);
+ }
+ const hero=document.querySelector('.hero');
+ if(hero&&p.previousElementSibling!==hero)hero.after(p);
+ return p;
+}
+function enter(){
+ window.__fossilFindersExitForTicket?.();
+ on=true;try{localStorage.setItem(KEY,'1')}catch(err){}
+ panel();
+ if(!saved)saved={src:img.getAttribute('src'),alt:img.alt,imgHidden:img.classList.contains('hidden'),
+  titleText:title.textContent,titleHidden:title.classList.contains('hidden')};
+ img.removeAttribute('src');img.classList.add('hidden');
+ title.textContent='Secret Squirrels';title.classList.remove('hidden');
+ document.body.classList.add('ss-mode');
+ const rail=document.getElementById('v3Rail');if(rail)rail.scrollLeft=0;
+ addOption();
+}
+function exit(){
+ on=false;try{localStorage.removeItem(KEY)}catch(err){}
+ document.body.classList.remove('ss-mode');
+ if(saved){
+  if(saved.src)img.setAttribute('src',saved.src);else img.removeAttribute('src');
+  img.alt=saved.alt;img.classList.toggle('hidden',saved.imgHidden);
+  title.textContent=saved.titleText;title.classList.toggle('hidden',saved.titleHidden);
+  saved=null;
+ }
+}
+window.__secretSquirrelsExitForTicket=exit;
+sel.addEventListener('change',function(e){
+ if(sel.value===SS){e.stopImmediatePropagation();enter();}
+ else if(on){exit();}
+},true);
+window.addEventListener('message',function(e){
+ if(!frame||e.source!==frame.contentWindow||e.origin!==window.location.origin)return;
+ const h=e.data&&e.data.secretSquirrelsHeight;
+ if(Number.isFinite(h)&&h>200&&h<1800)frame.style.height=Math.ceil(h)+'px';
 });
 addOption();
 if(on)enter();
