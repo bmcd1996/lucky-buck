@@ -1245,12 +1245,13 @@ function loop(now) {
   ctx.clearRect(0, 0, 1024, 1536);
   // pickaxe swings: raise (60%), strike (25%), rebound (15%)
   swings = swings.filter((s) => {
-    const k = (now - s.t0) / HIT_MS; if (k >= 1) return false;
+    const k = (now - s.t0) / HIT_MS;   // a late frame can jump past the hit moment: the hit below still counts before the swing ends (freeze fix, v3.17.4)
     const aHit = -.35, aUp = aHit - 1.25;
     let a = k < .55 ? aUp + (aHit - aUp) * .15 * (k / .55) : k < .8 ? aUp + (aHit - aUp) * (.15 + .85 * Math.pow((k - .55) / .25, 2)) : aHit - .18 * Math.sin((k - .8) / .2 * Math.PI);
     if (k >= .8 && !s.hit) { s.hit = true; const j = s.job; window.FF_SFX && FF_SFX.play('hit', 0, j.hitsDone); crack(j.cover, s.tx - j.rect.x, s.ty - j.rect.y); chips(s.tx, s.ty, j.cover, 8);
       j.cover.style.transform = `translate(${(Math.random() - .5) * 4}px, ${(Math.random() - .5) * 3}px)`; setTimeout(() => (j.cover.style.transform = ''), 70);
       j.hitsDone++; if (j.hitsDone >= j.total) { setTimeout(() => { crumble(j); window.FF_SFX && FF_SFX.play('crumble'); j.busy = false; j.onBroken(); }, 90); } else if (j.auto) setTimeout(() => strike(j), 40); else j.busy = false; }
+    if (k >= 1) return false;
     const tip = rot(PICK.tip, aHit), pivot = { x: s.tx - tip.x, y: s.ty - tip.y };
     ctx.save(); ctx.translate(pivot.x, pivot.y); ctx.rotate(a); ctx.drawImage(PICK.cv, -PICK.pivot.x, -PICK.pivot.y); ctx.restore();
     return true;
