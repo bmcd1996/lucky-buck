@@ -813,9 +813,10 @@ function floorLights(now, pass = 'light') {   // light pass goes behind the dino
   for (const k in lit) {
     const L = lit[k], el = now - L.t0; if (el < 0) continue;
     const fy = CASE_FEET[k], cx = 164, on = Math.min(1, el / 300), fl = .85 + .15 * Math.sin(now / 210);
-    if (pass === 'stands') { lampStands(cx, fy, fy + 46, el, L.col, 130, 'stands'); continue; }
+    // Carnotaurus: its head reaches the right lamp, so its stands go behind the dinosaur (owner, Nov 25); the others stay in front
+    if (pass === 'stands') { if (k !== 'C') lampStands(cx, fy, fy + 46, el, L.col, 130, 'stands'); continue; }
     if (!L.burst) { L.burst = true; for (let n = 0; n < 16; n++) effects.push({ x: cx + (Math.random() - .5) * 180, y: fy - Math.random() * 8, vx: (Math.random() - .5) * 20, vy: -40 - Math.random() * 70, t0: now + Math.random() * 400, life: 900, col: n % 2 ? '#fff6c8' : L.col, size: 4, nograv: true }); }
-    if (floorFx === 'spots') { lampStands(cx, fy, fy + 46, el, L.col, 130, 'light'); continue; }
+    if (floorFx === 'spots') { if (k === 'C') lampStands(cx, fy, fy + 46, el, L.col, 130, 'stands'); lampStands(cx, fy, fy + 46, el, L.col, 130, 'light'); continue; }
     octx.save(); octx.globalCompositeOperation = 'lighter';
     if (floorFx === 'pool') {
       for (let b = 0; b < 8; b++) { octx.globalAlpha = on * fl * .17 * (1 - b / 8); octx.fillStyle = L.col; octx.fillRect(cx - 100 + b * 4, fy - 14 - b * 14, 200 - b * 8, 14); }
