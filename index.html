@@ -622,7 +622,7 @@ body.setup-open{overflow:hidden}.card-top .ticket-gear+h3{margin-right:auto}
 <div class="wrap">
 <header class="header">
 <div class="brand"><div class="brand-mark">$</div><div><small>QUILL PRODUCTIONS</small><h1>Cardboard to Cash</h1></div></div>
-<div class="header-right"><span class="version-badge" title="Lucky Buck simulator version">v3.17.0</span><span class="save" id="saveStatus">Loading…</span></div>
+<div class="header-right"><span class="version-badge" title="Lucky Buck simulator version">v3.17.1</span><span class="save" id="saveStatus">Loading…</span></div>
 </header>
 
 <section class="hero">
@@ -2162,7 +2162,7 @@ if(on)enter();
 </script>
 
 <style>
-/* v3.15.0–v3.17.0 — Secret Squirrels (v3.17.0: real odds and payouts from secret-squirrels-odds.js, win sounds, fireworks, $200 SUPER JACKPOT). */
+/* v3.15.0–v3.17.0 — Secret Squirrels (v3.17.0: real odds and payouts from secret-squirrels-odds.js, win sounds, fireworks, $200 SUPER JACKPOT; v3.17.1 ticket text front and back). */
 body.ss-mode #skillBar,body.ss-mode nav.v3-switch,body.ss-mode #v3SimCol,body.ss-mode .v3-footer-tools{display:none!important}
 body.ss-mode #v3TicketCol>*:not(.hero):not(#ssPanel){display:none!important}
 body.ss-mode .v3-rail{overflow:visible!important;transform:none!important}
@@ -2196,7 +2196,7 @@ function panel(){
  if(!p){
   p=document.createElement('section');p.id='ssPanel';p.setAttribute('aria-label','Secret Squirrels art preview');
   frame=document.createElement('iframe');frame.id='ssFrame';frame.title='Secret Squirrels ticket front and back artwork';
-  frame.src='secret-squirrels.html?v=3.17.0';p.append(frame);
+  frame.src='secret-squirrels.html?v=3.17.1';p.append(frame);
  }
  const hero=document.querySelector('.hero');
  if(hero&&p.previousElementSibling!==hero)hero.after(p);
