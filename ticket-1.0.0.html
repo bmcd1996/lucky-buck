@@ -243,11 +243,22 @@ flip.addEventListener('click',e=>{e.stopPropagation();setFlip(true)});
 $('flipBack').addEventListener('click',()=>setFlip(false));
 btn.addEventListener('click',()=>{stopAim();resetForTicket()});
 function locate(e){const r=front.getBoundingClientRect(),lift=Number($('lift').value)||0;/* crosshair sits `lift` px above the finger */return{x:clamp((e.clientX-r.left)/r.width,.02,.98),y:clamp((e.clientY-r.top-lift)/r.height,.17,.87)}}
-function stopAim(){hold=false;pointer=null;holdId=null;cross.classList.remove('show')}
-front.addEventListener('pointerdown',e=>{if(e.target.closest('button')||flipState)return;if(!purchased||completed){updateLabel('Buy a test ticket first!');return;}if(e.pointerType==='mouse'&&e.button!==0)return;hold=true;pointer=locate(e);aim=pointer;shotStart=performance.now();playSound(shotsFired>0?'pump2':'pump');holdId=e.pointerId;front.setPointerCapture?.(e.pointerId);cross.classList.add('show');e.preventDefault();});
+// The simulator lives in a parent page. Ask it to freeze scroll only during a touch aim.
+let parentAimLocked=false;
+function lockParentAim(on){
+ if(window.parent===window||parentAimLocked===on)return;
+ parentAimLocked=on;
+ try{window.parent.postMessage({luckyBuckAimLock:on},window.location.origin)}catch(e){}
+}
+function stopAim(){lockParentAim(false);hold=false;pointer=null;holdId=null;cross.classList.remove('show')}
+front.addEventListener('pointerdown',e=>{if(e.target.closest('button')||flipState)return;if(!purchased||completed){updateLabel('Buy a test ticket first!');return;}if(e.pointerType==='mouse'&&e.button!==0)return;hold=true;if(e.pointerType==='touch')lockParentAim(true);pointer=locate(e);aim=pointer;shotStart=performance.now();playSound(shotsFired>0?'pump2':'pump');holdId=e.pointerId;front.setPointerCapture?.(e.pointerId);cross.classList.add('show');e.preventDefault();});
 front.addEventListener('pointermove',e=>{if(!hold||e.pointerId!==holdId)return;pointer=locate(e);aim=pointer;e.preventDefault()});
-// iOS Safari fallback: never let an active aiming swipe turn into page panning.
-front.addEventListener('touchmove',e=>{if(hold&&e.cancelable)e.preventDefault()},{passive:false});
+// iOS Safari: cancel native panning from the FIRST touch, not only after moving.
+function blockAimTouchScroll(e){
+ if(purchased&&!completed&&!flipState&&!e.target.closest('button')&&e.cancelable)e.preventDefault();
+}
+front.addEventListener('touchstart',blockAimTouchScroll,{passive:false});
+front.addEventListener('touchmove',blockAimTouchScroll,{passive:false});
 front.addEventListener('pointercancel',e=>{if(e.pointerId===holdId)stopAim()});
 front.addEventListener('pointerup',e=>{if(!hold||e.pointerId!==holdId)return;const released={...reticle};stopAim();shoot(released);e.preventDefault()});
 /* Gold zone hit: a gold +$1 pop-up in the arcade pixel font (picked by the owner, option A). */
