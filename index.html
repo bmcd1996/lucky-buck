@@ -1821,7 +1821,7 @@ function lbIsGold(S,c){return c.cx>=0&&c.cx<LB_GW&&c.cy>=0&&c.cy<LB_GH&&S.grid[c
 
 /* Skill switch, balloon target-zone painter, Buck's Secret settings (calculator side). */
 (()=>{'use strict';
-const TICKET_URL='ticket-1.0.0.html?v=3.14.2';
+const TICKET_URL='ticket-1.0.0.html?v=3.14.3';
 const $=id=>document.getElementById(id);
 let S=lbLoadSkill(),brush='G',brushSize=1,zoom=1,moveMode=false;
 const persist=()=>{lbSaveSkill(S)};
@@ -1871,13 +1871,38 @@ const scratchCard=document.querySelector('.showcase-center > .card');
 /* Ticket goes first in Skill mode so it is easy to play; the zone grid follows. */card.insertAdjacentElement('beforebegin',play);scratchCard?.classList.add('skill-hide');
 document.getElementById('shotCalculator')?.classList.add('skill-hide');
 const frame=$('skFrame');
+// iPhone Safari can pan the OUTER simulator even when the embedded ticket blocks
+// its own touch gestures. Freeze the outer viewport only while a finger is aiming.
+let aimPageLocked=false,aimScrollY=0,aimSavedBodyStyle=null;
+function setAimPageLock(on){
+ if(on===aimPageLocked)return;
+ const body=document.body;
+ if(on){
+  aimScrollY=window.scrollY||document.documentElement.scrollTop||0;
+  aimSavedBodyStyle={position:body.style.position,top:body.style.top,left:body.style.left,right:body.style.right,width:body.style.width};
+  body.style.position='fixed';
+  body.style.top=(-aimScrollY)+'px';
+  body.style.left='0';body.style.right='0';body.style.width='100%';
+  aimPageLocked=true;
+ }else{
+  if(aimSavedBodyStyle)Object.assign(body.style,aimSavedBodyStyle);
+  aimSavedBodyStyle=null;aimPageLocked=false;
+  window.scrollTo(0,aimScrollY);
+ }
+}
+window.addEventListener('message',e=>{
+ if(e.origin!==window.location.origin||e.source!==frame.contentWindow)return;
+ if(e.data&&typeof e.data.luckyBuckAimLock==='boolean')setAimPageLock(e.data.luckyBuckAimLock);
+});
+document.addEventListener('touchmove',e=>{if(aimPageLocked&&e.cancelable)e.preventDefault()},{passive:false});
+window.addEventListener('pagehide',()=>setAimPageLock(false));
 /* Hide/Show ticket: folds the ticket away so it is quick to scroll to the grid (remembered on this phone). */
 let ticketHidden=false;try{ticketHidden=localStorage.getItem('lucky-buck-hide-ticket')==='1'}catch(e){}
-function showHideTicket(){frame.style.display=ticketHidden?'none':'block';$('skHideTicket').textContent=ticketHidden?'Show ticket ▾':'Hide ticket ▴';$('skHideTicket').setAttribute('aria-expanded',String(!ticketHidden));}
+function showHideTicket(){if(ticketHidden)setAimPageLock(false);frame.style.display=ticketHidden?'none':'block';$('skHideTicket').textContent=ticketHidden?'Show ticket ▾':'Hide ticket ▴';$('skHideTicket').setAttribute('aria-expanded',String(!ticketHidden));}
 $('skHideTicket').addEventListener('click',()=>{ticketHidden=!ticketHidden;try{localStorage.setItem('lucky-buck-hide-ticket',ticketHidden?'1':'0')}catch(e){}showHideTicket();if(!ticketHidden)requestAnimationFrame(fitFrame);});
 showHideTicket();
 function fitFrame(){try{const d=frame.contentDocument,pg=d&&d.querySelector('.page');if(pg)frame.style.height=Math.ceil(pg.getBoundingClientRect().height)+2+'px';}catch(e){}}
-frame.addEventListener('load',()=>{fitFrame();try{const W=frame.contentWindow;new W.ResizeObserver(fitFrame).observe(frame.contentDocument.querySelector('.page'));}catch(e){}});
+frame.addEventListener('load',()=>{setAimPageLock(false);fitFrame();try{const W=frame.contentWindow;new W.ResizeObserver(fitFrame).observe(frame.contentDocument.querySelector('.page'));}catch(e){}});
 function loadFrame(){if(!frame.getAttribute('src'))frame.src=TICKET_URL+(TICKET_URL.includes('?')?'&':'?')+'embed=1';}
 function syncPlay(){for(const [k,,,,,f] of SL){const i=$('skP_'+k);if(document.activeElement!==i)i.value=S.play[k];$('skPO_'+k).textContent=f(i.value);}$('skP_sound').checked=S.play.sound;}
 for(const [k,,,,,f] of SL)$('skP_'+k).addEventListener('input',e=>{S.play[k]=Number(e.target.value);$('skPO_'+k).textContent=f(e.target.value);persist();});
