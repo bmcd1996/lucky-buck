@@ -610,7 +610,7 @@ body.setup-open{overflow:hidden}.card-top .ticket-gear+h3{margin-right:auto}
 .skill-play-card{padding-left:2px!important;padding-right:2px!important}
 .skill-play-card .card-top{padding:0 6px}
 .sk-open{color:var(--gold);font-weight:800;text-decoration:none}.sk-top-actions{display:flex;align-items:center;gap:10px}.sk-hide{min-height:40px;padding:6px 12px;border-radius:10px;border:1px solid #618776;background:#1c4331;color:#fff;font-weight:800;font-size:13px;white-space:nowrap}
-#skFrame{display:block;width:100%;height:640px;border:0;background:transparent;margin:6px 0 4px}
+#skFrame{display:block;width:100%;height:640px;border:0;background:transparent;margin:6px 0 4px;touch-action:none}
 .sk-playset{margin:8px 4px 0;border:1px solid var(--border);border-radius:12px;padding:8px 10px}
 .sk-playset summary{font-weight:800;min-height:38px;display:flex;align-items:center;cursor:pointer}
 .sk-slider{display:grid;grid-template-columns:1fr auto;gap:4px 8px;align-items:center;margin:10px 0;font-size:13px;font-weight:700}
@@ -1821,7 +1821,7 @@ function lbIsGold(S,c){return c.cx>=0&&c.cx<LB_GW&&c.cy>=0&&c.cy<LB_GH&&S.grid[c
 
 /* Skill switch, balloon target-zone painter, Buck's Secret settings (calculator side). */
 (()=>{'use strict';
-const TICKET_URL='ticket-1.0.0.html?v=3.14.1';
+const TICKET_URL='ticket-1.0.0.html?v=3.14.2';
 const $=id=>document.getElementById(id);
 let S=lbLoadSkill(),brush='G',brushSize=1,zoom=1,moveMode=false;
 const persist=()=>{lbSaveSkill(S)};
